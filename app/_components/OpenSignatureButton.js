@@ -1,6 +1,6 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
-function OpenSignaturePadButton({ onClick }) {
+function OpenSignatureButton({ onClick }) {
   return (
     <div className=" flex gap-4">
       <p className="text-sm font-medium">
@@ -18,4 +18,4 @@ function OpenSignaturePadButton({ onClick }) {
   );
 }
 
-export default OpenSignaturePadButton;
+export default OpenSignatureButton;

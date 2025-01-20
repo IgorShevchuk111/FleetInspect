@@ -1,6 +1,7 @@
 import Question from './Question';
 import { inspectionAction } from '../_lib/actions';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
+import Signature from './Signature';
 
 export default function InspectionForm({ questions, vehicle, user, trip }) {
   const formattedTrip = trip
@@ -48,12 +49,7 @@ export default function InspectionForm({ questions, vehicle, user, trip }) {
               name="roadworthy"
             />
           </label>
-
-          <div className="flex justify-center mt-4">
-            <button className="bg-blue-500 text-white py-2 px-4 rounded-md shadow max-w-80">
-              Submit
-            </button>
-          </div>
+          <Signature />
         </div>
       </div>
 
@@ -61,6 +57,7 @@ export default function InspectionForm({ questions, vehicle, user, trip }) {
       <input type="hidden" name="type" value={vehicle.type} />
       <input type="hidden" name="user_id" value={user?.userId} />
       <input type="hidden" name="regNumber" value={vehicle.regNumber} />
+      <input type="hidden" name="fullName" value={user?.name} />
       <input type="hidden" name="vehicleType" value={vehicle.type} />
       <input type="hidden" name="trip" value={trip} />
     </form>

@@ -28,7 +28,7 @@ function InputSearch() {
           </label>
 
           <button>
-            <MagnifyingGlassIcon className="w-5 h-5 absolute right-6  transform -translate-y-1/2 text-gray-400 top-24" />
+            <MagnifyingGlassIcon className="w-5 h-5 absolute right-6  transform -translate-y-1/2 text-gray-400 top-[85px]" />
           </button>
         </div>
       </form>
