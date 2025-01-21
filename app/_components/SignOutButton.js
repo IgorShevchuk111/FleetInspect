@@ -1,4 +1,4 @@
-import { signOutAction } from '../_lib/actions';
+import { signOutAction } from '@/app/_lib/actions.js';
 
 function SignOutButton() {
   return (

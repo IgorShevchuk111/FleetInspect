@@ -21,6 +21,7 @@ const authConfig = {
           await createUser({
             email: user.email,
             full_name: user.name,
+            role: 'user',
           });
 
         return true;
