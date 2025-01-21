@@ -19,7 +19,12 @@ async function Header() {
       {session?.user ? (
         <div className=" flex items-center gap-4  relative">
           <DropDown items={items} session={session}>
-            <Avatar avatar={session?.user?.image} alt={session?.user?.name} />
+            <Avatar
+              avatar={session?.user?.image}
+              alt={session?.user?.name}
+              height="24"
+              width="24"
+            />
           </DropDown>
           <DropDown items={menu} signOut={true}>
             <Bars4Icon />
