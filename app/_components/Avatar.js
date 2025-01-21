@@ -1,18 +1,15 @@
-'use client';
 import Image from 'next/image';
 
-function Avatar({ avatar, alt }) {
+function Avatar({ avatar, alt, height, width }) {
   return (
-    <div className=" relative h-6 w-6">
-      <Image
-        src={avatar}
-        alt={alt}
-        referrerPolicy="no-referrer"
-        className="rounded-full"
-        fill
-        sizes="(max-width: 768px) 24px, (max-width: 1200px) 32px, 48px"
-      />
-    </div>
+    <Image
+      src={avatar}
+      alt={alt}
+      referrerPolicy="no-referrer"
+      className="rounded-full"
+      height={height}
+      width={width}
+    />
   );
 }
 
