@@ -46,3 +46,13 @@ export async function getInspectionForm(vehicleId, trip) {
 
   return { inspectionForm, vehicle };
 }
+
+export async function getUserInspections(userId) {
+  let { data: inspections, error } = await supabase
+    .from('inspections')
+    .select('regNumber, vehicleType, created_at, status, trip,id')
+    .eq('user_id', userId);
+  if (error) throw new Error('Failed to fetch inspections');
+
+  return inspections;
+}

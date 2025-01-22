@@ -7,7 +7,7 @@ import { Bars4Icon } from '@heroicons/react/24/outline';
 
 const items = [
   { name: 'Profile', href: '/profile', id: 1 },
-  { name: 'My Inspections', href: '/my_inspections', id: 2 },
+  { name: 'My Inspections', href: '/inspections', id: 2 },
 ];
 const menu = [{ name: 'Inspections', href: '/inspection', id: 1 }];
 
