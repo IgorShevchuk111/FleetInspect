@@ -12,14 +12,14 @@ export default function DropDown({ items, children, signOut }) {
             <MenuItem key={item.id}>
               <Link
                 href={item.href}
-                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 "
+                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md "
               >
                 {item.name}
               </Link>
             </MenuItem>
           ))}
           {signOut && (
-            <div className=" px-4 py-2 text-gray-600 hover:bg-gray-50 ">
+            <div className=" px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md">
               <SignOutButton />
             </div>
           )}

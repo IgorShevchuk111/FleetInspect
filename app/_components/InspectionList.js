@@ -1,12 +1,28 @@
+import Link from 'next/link';
 import { auth } from '../_lib/auth';
 import { getUserInspections } from '../_lib/data_servis';
+import InspectionOperations from './InspectionOperations';
 import VehicleInspectionCard from './VehicleInspectionCard';
 
 async function InspectionList({ filter, sortBy }) {
   const session = await auth();
   const inspections = await getUserInspections(session.user.userId);
 
-  if (inspections.length === 0) return null;
+  if (inspections.length === 0) {
+    return (
+      <div className="flex flex-col items-center mt-8">
+        <h1 className="text-gray-500 text-xl mb-4">
+          You don’t have any inspections yet.
+        </h1>
+        <Link
+          href="/inspection"
+          className="bg-blue-500 text-gray-50 px-4 py-2 rounded hover:bg-blue-500"
+        >
+          Add Inspection
+        </Link>
+      </div>
+    );
+  }
 
   let filteredInspections;
   if (filter === 'all') filteredInspections = inspections;
@@ -32,11 +48,15 @@ async function InspectionList({ filter, sortBy }) {
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {sortedInspections.map((inspection) => (
-        <VehicleInspectionCard key={inspection.id} inspection={inspection} />
-      ))}
-    </div>
+    <>
+      <h1 className="text-2xl font-bold mb-2">Your Inspections</h1>
+      <InspectionOperations />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedInspections.map((inspection) => (
+          <VehicleInspectionCard key={inspection.id} inspection={inspection} />
+        ))}
+      </div>
+    </>
   );
 }
 

@@ -56,3 +56,15 @@ export async function getUserInspections(userId) {
 
   return inspections;
 }
+
+export async function getInspection(inspectionId) {
+  let { data: inspection, error } = await supabase
+    .from('inspections')
+    .select('*, user_id(full_name,id)')
+    .eq('id', inspectionId)
+    .single();
+
+  if (error) throw new Error('Failed to fetch inspection');
+
+  return inspection;
+}

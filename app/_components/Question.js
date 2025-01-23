@@ -30,6 +30,7 @@ const Question = ({ field, defaultValue }) => {
                     type="radio"
                     name={name}
                     value={option.value}
+                    defaultChecked={option.value === defaultValue}
                     className="mr-2"
                     required={required}
                     disabled={disabled}

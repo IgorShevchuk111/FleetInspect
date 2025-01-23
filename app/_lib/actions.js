@@ -13,7 +13,7 @@ export async function findVehicle(formData) {
   const { data: vehicle, error } = await supabase
     .from('vehicles')
     .select('*')
-    .eq('regNumber', regNumber)
+    .ilike('regNumber', regNumber)
     .single();
 
   if (error) throw new Error('Error fetching vehicle.');
@@ -25,19 +25,35 @@ export async function findVehicle(formData) {
   redirect(`/inspection/${vehicle.id}?${queryParams}`);
 }
 
-export async function inspectionAction(formData) {
+export async function insertInspection(formData) {
   const inspectionData = {};
+
   formData.forEach((value, key) => {
-    if (key !== 'type') {
-      inspectionData[key] = value;
-    }
+    inspectionData[key] = value;
   });
 
   const { error } = await supabase.from('inspections').insert([inspectionData]);
 
   if (error) {
-    throw new Error(error.message || 'Error submiting  form  .');
+    throw new Error('Error submiting form.');
   }
+
+  redirect('/inspection/thankyou');
+}
+
+export async function updateInspection(formData) {
+  const inspectionData = {};
+
+  formData.forEach((value, key) => {
+    inspectionData[key] = value;
+  });
+
+  const { error } = await supabase
+    .from('inspections')
+    .update(inspectionData)
+    .eq('id', inspectionData.id);
+
+  if (error) throw new Error('Error submiting  form.');
 
   redirect('/inspection/thankyou');
 }

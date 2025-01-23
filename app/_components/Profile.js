@@ -7,10 +7,10 @@ async function Profile() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="flex items-center gap-6">
-        <Avatar avatar={user.image} alt="Profile" height="60" width="60" />
+        <Avatar avatar={user?.image} alt="Profile" height="60" width="60" />
         <div>
-          <h1 className="text-3xl font-bold">{user.name}</h1>
-          <p className=" text-lg">{user.email}</p>
+          <h1 className="text-3xl font-bold">{user?.name}</h1>
+          <p className=" text-lg">{user?.email}</p>
         </div>
       </div>
       <div className="mt-8">
@@ -21,9 +21,10 @@ async function Profile() {
             id="fullName"
             type="text"
             name="fullname"
-            defaultValue={user.name}
+            defaultValue={user?.name}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
+            autoComplete="off"
           />
 
           <label className="block " htmlFor="email">
@@ -33,9 +34,10 @@ async function Profile() {
             id="email"
             type="email"
             name="email"
-            defaultValue={user.email}
+            defaultValue={user?.email}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
+            autoComplete="off"
           />
 
           <div className="flex items-center gap-4">

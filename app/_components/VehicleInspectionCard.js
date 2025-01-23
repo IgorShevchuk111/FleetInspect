@@ -5,7 +5,7 @@ import _ from 'lodash';
 export default function VehicleInspectionCard({ inspection }) {
   return (
     <Link
-      href={`/inspection/${inspection.id}`}
+      href={`/inspections/edit/${inspection.id}`}
       className="block border rounded-lg p-4 shadow hover:shadow-lg transition hover:bg-gray-50"
     >
       <h2 className="text-xl font-bold mb-1 ">{inspection.regNumber}</h2>

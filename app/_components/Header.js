@@ -9,7 +9,7 @@ const items = [
   { name: 'Profile', href: '/profile', id: 1 },
   { name: 'My Inspections', href: '/inspections', id: 2 },
 ];
-const menu = [{ name: 'Inspections', href: '/inspection', id: 1 }];
+const menu = [{ name: 'Inspection', href: '/inspection', id: 1 }];
 
 async function Header() {
   const session = await auth();
