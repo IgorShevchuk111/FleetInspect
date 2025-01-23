@@ -9,18 +9,14 @@ async function Profile() {
       <div className="flex items-center gap-6">
         <Avatar avatar={user.image} alt="Profile" height="60" width="60" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{user.name}</h1>
-          <p className="text-gray-500 text-lg">{user.email}</p>
+          <h1 className="text-3xl font-bold">{user.name}</h1>
+          <p className=" text-lg">{user.email}</p>
         </div>
       </div>
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-700">
-          Update Your Details
-        </h2>
+        <h2 className="text-xl font-semibold ">Update Your Details</h2>
         <form className="mt-4 space-y-4">
-          <label className=" text-gray-700" htmlFor="fullName">
-            Name
-          </label>
+          <label htmlFor="fullName">Name</label>
           <input
             id="fullName"
             type="text"
@@ -30,7 +26,7 @@ async function Profile() {
             required
           />
 
-          <label className="block text-gray-700" htmlFor="email">
+          <label className="block " htmlFor="email">
             Email
           </label>
           <input

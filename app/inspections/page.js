@@ -9,9 +9,7 @@ export default function Page({ searchParams }) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2 text-gray-700">
-        Your Inspections
-      </h1>
+      <h1 className="text-2xl font-bold mb-2">Your Inspections</h1>
       <InspectionOperations />
 
       <Suspense fallback={<Spinner />} key={filter}>

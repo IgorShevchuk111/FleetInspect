@@ -2,7 +2,7 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
-export default function AvatarMenu({ items, children, signOut }) {
+export default function DropDown({ items, children, signOut }) {
   return (
     <div>
       <Menu>
@@ -12,14 +12,14 @@ export default function AvatarMenu({ items, children, signOut }) {
             <MenuItem key={item.id}>
               <Link
                 href={item.href}
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-200 "
+                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 "
               >
                 {item.name}
               </Link>
             </MenuItem>
           ))}
           {signOut && (
-            <div className=" px-4 py-2 text-gray-700 hover:bg-gray-200 ">
+            <div className=" px-4 py-2 text-gray-600 hover:bg-gray-50 ">
               <SignOutButton />
             </div>
           )}

@@ -40,8 +40,8 @@ function Button({ filter, handleFilter, activeFilter, children }) {
     <button
       onClick={() => handleFilter(filter)}
       className={`
-      ${activeFilter === filter ? 'border rounded-md border-gray-500' : ''} 
-      px-2 py-1 text-gray-700`}
+      ${activeFilter === filter ? 'border rounded-md' : ''} 
+      px-2 py-1 hover:bg-gray-50 hover:border rounded-md`}
     >
       {children}
     </button>

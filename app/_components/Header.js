@@ -14,7 +14,7 @@ const menu = [{ name: 'Inspections', href: '/inspection', id: 1 }];
 async function Header() {
   const session = await auth();
   return (
-    <header className="bg-primary-500 text-gray-100 py-2 flex items-center justify-between px-4">
+    <header className="bg-primary-500 text-gray-50 py-2 flex items-center justify-between px-4">
       <Logo />
       {session?.user ? (
         <div className=" flex items-center gap-4  relative">

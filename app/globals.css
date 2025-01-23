@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply text-gray-600 font-sans text-base;
+  }
+}
+
 @layer components {
   .spinner {
     margin: 3.2rem auto 1.6rem;
