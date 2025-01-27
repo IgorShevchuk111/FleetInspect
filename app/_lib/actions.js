@@ -8,7 +8,7 @@ export async function findVehicle(formData) {
   const regNumber = formData.get('regNumber');
   const trip = formData.get('trip');
 
-  if (!regNumber) return;
+  if (!regNumber || !trip) return;
 
   const { data: vehicle, error } = await supabase
     .from('vehicles')

@@ -7,7 +7,7 @@ function SignInButton() {
       action={signInAction}
       className="max-w-md mx-auto space-y-6 flex flex-col items-center"
     >
-      <button className="flex items-center gap-4 text-lg border border-primary-300 px-6 py-3 font-medium rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-300 transition duration-200 justify-center w-72 ">
+      <button className="flex items-center gap-4 text-lg border border-primary-300 px-6 py-3 font-medium rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-300 transition duration-200 justify-center w-72 mt-6">
         <Image
           src="https://authjs.dev/img/providers/google.svg"
           alt="Google logo"

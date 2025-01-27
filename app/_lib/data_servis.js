@@ -64,7 +64,7 @@ export async function getInspection(inspectionId) {
     .eq('id', inspectionId)
     .single();
 
-  if (error) throw new Error('Failed to fetch inspection');
+  if (error) throw new Error('Failed to edit');
 
   return inspection;
 }
