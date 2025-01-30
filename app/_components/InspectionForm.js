@@ -2,6 +2,7 @@ import Question from './Question';
 import { insertInspection, updateInspection } from '../_lib/actions';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import Signature from './Signature';
+import VehicleImageUpload from './VehicleImageUpload';
 
 export default function InspectionForm({
   questions,
@@ -62,6 +63,7 @@ export default function InspectionForm({
               name="roadworthy"
             />
           </label>
+          <VehicleImageUpload />
           <Signature pendingLabel="Submiting..." />
         </div>
       </div>
