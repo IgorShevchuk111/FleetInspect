@@ -19,7 +19,7 @@ function OpenSignatureButton({ onClick, signature }) {
         onClick={onClick}
         className="flex items-center text-blue-500 hover:underline  "
       >
-        <PencilSquareIcon className="h-5 w-5 text-blue-500" />
+        <PencilSquareIcon className="h-9 w-9 text-blue-500" />
       </button>
     </div>
   );
