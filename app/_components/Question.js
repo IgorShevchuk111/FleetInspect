@@ -18,10 +18,10 @@ const Question = ({ field, defaultValue }) => {
       <span className=" text-blue-500 cursor-pointer">
         <InformationCircleIcon className="h-6 w-6" />
       </span>
-      <div className="border rounded-md px-4 py-4 border-gray-300 bg-white shadow-md w-full flex flex-col gap-2">
+      <div className="border rounded-md px-3 py-3 border-gray-300 bg-white shadow-md w-full flex flex-col gap-2">
         {type === 'radio' ? (
           <fieldset>
-            <legend className="text-sm font-medium mb-2">{label}</legend>
+            <legend className="  mb-2">{label}</legend>
             <div className="flex gap-4">
               {options?.map((option) => (
                 <label key={option.value} htmlFor={`${name}-${option.value}`}>
@@ -42,9 +42,7 @@ const Question = ({ field, defaultValue }) => {
           </fieldset>
         ) : (
           <>
-            <label htmlFor={id} className="text-sm font-medium">
-              {label}
-            </label>
+            <label htmlFor={id}>{label}</label>
             <input
               type={type}
               id={id}

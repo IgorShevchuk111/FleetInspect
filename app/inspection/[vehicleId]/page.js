@@ -7,10 +7,7 @@ async function Page({ params, searchParams }) {
   const { trip } = await searchParams;
 
   const session = await auth();
-  const { inspectionForm, vehicle } = await getInspectionForm(
-    params.vehicleId,
-    trip
-  );
+  const { inspectionForm, vehicle } = await getInspectionForm(vehicleId, trip);
 
   return (
     <InspectionForm

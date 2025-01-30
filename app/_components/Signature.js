@@ -4,11 +4,13 @@ import SignatureCanvas from 'react-signature-canvas';
 import React, { useRef, useState } from 'react';
 import OpenSignatureButton from './OpenSignatureButton';
 import Image from 'next/image';
+import { useFormStatus } from 'react-dom';
 
-function Signature() {
+function Signature({ pendingLabel }) {
   const [signature, setSignature] = useState('');
   const [showSignature, setShowSignature] = useState(false);
   const sigPad = useRef(null);
+  const { pending } = useFormStatus();
 
   function handleClear() {
     sigPad.current.clear();
@@ -30,7 +32,10 @@ function Signature() {
   }
   return (
     <>
-      <OpenSignatureButton onClick={handleOpenSignature} />
+      <OpenSignatureButton
+        onClick={handleOpenSignature}
+        signature={signature}
+      />
       {signature && (
         <div className="relative w-20 h-20 m-auto">
           <Image
@@ -42,12 +47,12 @@ function Signature() {
         </div>
       )}
       {showSignature && (
-        <div className="border border-gray-300 rounded-md p-2 ">
+        <div className="border border-gray-300 rounded-md p-2 max-w-[325px] m-auto">
           <SignatureCanvas
             ref={sigPad}
             penColor="black"
             canvasProps={{
-              width: 300,
+              width: 325,
               height: 150,
               className: 'sigCanvas',
             }}
@@ -78,7 +83,7 @@ function Signature() {
             !signature ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
-          Submit
+          {pending ? pendingLabel : 'Submit'}
         </button>
       </div>
 

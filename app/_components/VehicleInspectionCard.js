@@ -15,7 +15,7 @@ export default function VehicleInspectionCard({ inspection }) {
         Trip: <span>{_.startCase(inspection.trip)}</span>
       </p>
       <p
-        className={`text-sm font-semibold mt-2 ${
+        className={`font-semibold mt-2 ${
           inspection.status === 'Passed' ? 'text-green-600' : 'text-red-600'
         }`}
       >

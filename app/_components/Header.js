@@ -8,25 +8,23 @@ import { Bars4Icon } from '@heroicons/react/24/outline';
 const items = [
   { name: 'Profile', href: '/profile', id: 1 },
   { name: 'My Inspections', href: '/inspections', id: 2 },
+  { name: 'Inspection', href: '/inspection', id: 3 },
 ];
-const menu = [{ name: 'Inspection', href: '/inspection', id: 1 }];
 
 async function Header() {
   const session = await auth();
   return (
-    <header className="bg-primary-500 text-gray-50 py-2 flex items-center justify-between px-4">
+    <header className="bg-primary-500 text-white flex items-center justify-between p-4">
       <Logo />
       {session?.user ? (
-        <div className=" flex items-center gap-4  relative">
-          <DropDown items={items} session={session}>
-            <Avatar
-              avatar={session?.user?.image}
-              alt={session?.user?.name}
-              height="24"
-              width="24"
-            />
-          </DropDown>
-          <DropDown items={menu} signOut={true}>
+        <div className=" flex items-center gap-4  relative justify-center">
+          <Avatar
+            avatar={session?.user?.image}
+            alt={session?.user?.name}
+            height="34"
+            width="34"
+          />
+          <DropDown items={items}>
             <Bars4Icon />
           </DropDown>
         </div>

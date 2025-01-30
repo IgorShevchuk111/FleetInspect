@@ -14,7 +14,6 @@ async function Profile() {
         </div>
       </div>
       <div className="mt-8">
-        <h2 className="text-xl font-semibold ">Update Your Details</h2>
         <form className="mt-4 space-y-4">
           <label htmlFor="fullName">Name</label>
           <input
@@ -24,6 +23,7 @@ async function Profile() {
             defaultValue={user?.name}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
+            disabled
             autoComplete="off"
           />
 
@@ -37,14 +37,9 @@ async function Profile() {
             defaultValue={user?.email}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
+            disabled
             autoComplete="off"
           />
-
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Save
-            </button>
-          </div>
         </form>
       </div>
     </div>

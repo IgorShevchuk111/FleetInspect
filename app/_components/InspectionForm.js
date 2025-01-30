@@ -23,9 +23,9 @@ export default function InspectionForm({
   return (
     <form action={inspection ? updateInspection : insertInspection}>
       <div className=" bg-gray-100 min-h-screen">
-        <div className="bg-white shadow-lg rounded-lg  max-w-lg mx-auto flex flex-col gap-4 p-4 ">
-          <h1 className="text-xl font-bold  text-center">
-            {formattedTrip} Vehicle Walk Around Inspection
+        <div className="bg-white shadow-lg  max-w-3xl mx-auto flex flex-col gap-4 p-4 ">
+          <h1 className="text-2xl font-bold  text-center">
+            {formattedTrip} Vehicle Inspection
           </h1>
 
           <div className="flex gap-4 items-center">
@@ -62,7 +62,7 @@ export default function InspectionForm({
               name="roadworthy"
             />
           </label>
-          <Signature />
+          <Signature pendingLabel="Submiting..." />
         </div>
       </div>
 

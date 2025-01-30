@@ -7,7 +7,7 @@ export default function Page({ searchParams }) {
   const sortBy = searchParams?.sortBy ?? 'created_at-desc';
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto p-4">
       <Suspense fallback={<Spinner />} key={filter}>
         <InspectionList filter={filter} sortBy={sortBy} />
       </Suspense>

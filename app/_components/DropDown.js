@@ -2,27 +2,28 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
-export default function DropDown({ items, children, signOut }) {
+export default function DropDown({ items, children }) {
   return (
     <div>
       <Menu>
-        <MenuButton className=" relative w-6 h-6">{children}</MenuButton>
-        <MenuItems className="absolute right-[-10px] top-[30px] mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+        <MenuButton className=" relative w-10 h-10 flex items-center justify-center">
+          {children}
+        </MenuButton>
+        <MenuItems className="absolute right-[-10px] top-[40px] mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
           {items?.map((item) => (
             <MenuItem key={item.id}>
               <Link
                 href={item.href}
-                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md "
+                className="block px-4 py-2 text-gray-500 hover:bg-gray-50 rounded-md "
               >
                 {item.name}
               </Link>
             </MenuItem>
           ))}
-          {signOut && (
-            <div className=" px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md">
-              <SignOutButton />
-            </div>
-          )}
+
+          <div className=" px-4 py-2 text-gray-500 hover:bg-gray-50 rounded-md">
+            <SignOutButton />
+          </div>
         </MenuItems>
       </Menu>
     </div>

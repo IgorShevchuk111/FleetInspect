@@ -1,11 +1,18 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
-function OpenSignatureButton({ onClick }) {
+function OpenSignatureButton({ onClick, signature }) {
   return (
     <div className=" flex gap-4">
-      <p className="text-sm font-medium">
-        Sign - This vehicle is roadworthy and any defects found have been
-        reported and repaired as nessesary. *
+      <p
+        className={`${
+          !signature
+            ? 'text-danger-500 text-sm font-medium'
+            : 'text-sm font-medium'
+        }`}
+      >
+        Sign: Before submitting, you must confirm that this vehicle is
+        roadworthy and that any defects found have been reported and repaired as
+        necessary. *
       </p>
       <button
         type="button"

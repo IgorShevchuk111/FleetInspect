@@ -11,7 +11,7 @@ async function InspectionList({ filter, sortBy }) {
   if (inspections.length === 0) {
     return (
       <div className="flex flex-col items-center mt-8">
-        <h1 className="text-gray-500 text-xl mb-4">
+        <h1 className="text-gray-500 text-3xl mb-4">
           You don’t have any inspections yet.
         </h1>
         <Link
@@ -49,7 +49,7 @@ async function InspectionList({ filter, sortBy }) {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">Your Inspections</h1>
+      <h1 className="text-3xl font-bold mb-2">Your Inspections</h1>
       <InspectionOperations />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sortedInspections.map((inspection) => (
