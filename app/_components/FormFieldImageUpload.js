@@ -62,6 +62,7 @@ const FormFieldImageUpload = ({
             </div>
           )}
         </div>
+
         {defaultValue && (
           <input type="hidden" name={name} value={defaultValue} />
         )}
