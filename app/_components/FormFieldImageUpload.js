@@ -68,9 +68,7 @@ const FormFieldImageUpload = ({
         <input
           type="hidden"
           name={name}
-          value={
-            defaultValue ? defaultValue : file ? URL.createObjectURL(file) : ''
-          }
+          value={defaultValue ? defaultValue : file}
         />
       </div>
     </div>
