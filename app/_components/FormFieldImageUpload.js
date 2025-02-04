@@ -13,6 +13,7 @@ const FormFieldImageUpload = ({
   defaultValue,
 }) => {
   const [preview, setPreview] = useState('');
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     if (defaultValue) {
@@ -23,6 +24,7 @@ const FormFieldImageUpload = ({
   const handleCaptureChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
+      setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
     }
   };
@@ -63,9 +65,13 @@ const FormFieldImageUpload = ({
           )}
         </div>
 
-        {defaultValue && (
-          <input type="hidden" name={name} value={defaultValue} />
-        )}
+        <input
+          type="hidden"
+          name={name}
+          value={
+            defaultValue ? defaultValue : file ? URL.createObjectURL(file) : ''
+          }
+        />
       </div>
     </div>
   );
