@@ -50,6 +50,7 @@ function Signature({ pendingLabel }) {
         <div className="border border-gray-300 rounded-md p-2 max-w-[325px] m-auto">
           <SignatureCanvas
             ref={sigPad}
+            required={true}
             penColor="black"
             canvasProps={{
               width: 325,

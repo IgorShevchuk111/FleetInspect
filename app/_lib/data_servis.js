@@ -39,6 +39,7 @@ export async function getInspectionForm(vehicleId, trip) {
     )
   `
     )
+    .eq('hidden', false)
     .or(`vehicleType.eq.${vehicle.type},vehicleType.is.null`)
     .or(`trip.eq.${trip},trip.is.null`)
     .order('position', { ascending: true });
