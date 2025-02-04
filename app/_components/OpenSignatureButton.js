@@ -2,7 +2,7 @@ import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
 function OpenSignatureButton({ onClick, signature }) {
   return (
-    <div className=" flex gap-4">
+    <div className=" flex gap-4 items-center">
       <p
         className={`${
           !signature
@@ -10,10 +10,10 @@ function OpenSignatureButton({ onClick, signature }) {
             : 'text-sm font-medium'
         }`}
       >
-        Sign: Before submitting, you must confirm that this vehicle is
-        roadworthy and that any defects found have been reported and repaired as
-        necessary. *
+        By signing, you confirm that all identified defects have been reported
+        and repaired as necessary. *
       </p>
+
       <button
         type="button"
         onClick={onClick}
