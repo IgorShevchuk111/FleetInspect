@@ -15,11 +15,29 @@ const FormFieldImageUpload = ({
   const [preview, setPreview] = useState(defaultValue || '');
   const [file, setFile] = useState(null);
 
-  const handleCaptureChange = (event) => {
+  const handleCaptureChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
+      if (
+        selectedFile.type === 'image/heic' ||
+        selectedFile.type === 'image/heif' ||
+        selectedFile.name.endsWith('.heic') ||
+        selectedFile.name.endsWith('.heif')
+      ) {
+        try {
+          const convertedFile = await heic2any({
+            blob: selectedFile,
+            toType: 'image/jpeg',
+          });
+          setFile(convertedFile);
+          setPreview(URL.createObjectURL(convertedFile));
+        } catch (error) {
+          console.error('Error converting HEIC/HEIF file', error);
+        }
+      } else {
+        setFile(selectedFile);
+        setPreview(URL.createObjectURL(selectedFile));
+      }
     }
   };
 

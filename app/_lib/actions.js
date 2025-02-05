@@ -6,7 +6,7 @@ import { signIn, signOut } from './auth';
 import { convertBase64ToFile } from '../_utils/helpers';
 
 export async function findVehicle(formData) {
-  const regNumber = formData.get('regNumber');
+  const regNumber = formData.get('regNumber').trim();
   const trip = formData.get('trip');
 
   if (!regNumber || !trip) return;
@@ -92,7 +92,10 @@ export async function insertInspection(formData) {
 
   const { error } = await supabase.from('inspections').insert([inspectionData]);
 
-  if (error) throw error;
+  if (error) {
+    console.error(error, 'insertInspection error');
+    throw new Error('Error fetching vehicle.');
+  }
 
   redirect('/inspection/thankyou');
 }
