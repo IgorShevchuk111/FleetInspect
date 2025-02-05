@@ -25,7 +25,7 @@ async function Header() {
             width="34"
           />
           <DropDown items={items}>
-            <Bars4Icon />
+            <Bars4Icon className="w-10 h-10 text-white fill-current" />
           </DropDown>
         </div>
       ) : (
