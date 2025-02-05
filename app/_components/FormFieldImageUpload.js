@@ -2,7 +2,7 @@
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { CameraIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const FormFieldImageUpload = ({
   label,
@@ -12,14 +12,8 @@ const FormFieldImageUpload = ({
   required,
   defaultValue,
 }) => {
-  const [preview, setPreview] = useState('');
+  const [preview, setPreview] = useState(defaultValue || '');
   const [file, setFile] = useState(null);
-
-  useEffect(() => {
-    if (defaultValue) {
-      setPreview(defaultValue);
-    }
-  }, [defaultValue]);
 
   const handleCaptureChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -68,7 +62,7 @@ const FormFieldImageUpload = ({
         <input
           type="hidden"
           name={name}
-          value={defaultValue ? defaultValue : file}
+          value={defaultValue ? defaultValue : file || ''}
         />
       </div>
     </div>
