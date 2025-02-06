@@ -77,7 +77,7 @@ function Signature({ pendingLabel }) {
         </div>
       )}
 
-      <div className="flex justify-center mt-4">
+      {/* <div className="flex justify-center mt-4">
         <button
           disabled={!signature}
           className={`bg-blue-500 text-white py-2 px-4 rounded-md shadow max-w-80 ${
@@ -86,7 +86,7 @@ function Signature({ pendingLabel }) {
         >
           {pending ? pendingLabel : 'Submit'}
         </button>
-      </div>
+      </div> */}
 
       <input type="hidden" name="signature" value={signature} />
     </>

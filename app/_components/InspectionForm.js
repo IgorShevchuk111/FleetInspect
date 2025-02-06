@@ -1,3 +1,4 @@
+'use client';
 import FormRow from './FormRow';
 import { insertInspection, updateInspection } from '../_lib/actions';
 import Signature from './Signature';
@@ -46,6 +47,8 @@ export default function InspectionForm({
       ))}
 
       <Signature pendingLabel="Submiting..." />
+
+      <button>Sent</button>
 
       <input type="hidden" name="vehicleId" value={vehicle?.id} />
       <input type="hidden" name="user_id" value={user?.userId} />
