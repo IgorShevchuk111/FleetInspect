@@ -2,6 +2,7 @@
 import FormRow from './FormRow';
 import { insertInspection, updateInspection } from '../_lib/actions';
 import Signature from './Signature';
+import { useState } from 'react';
 
 export default function InspectionForm({
   questions,
@@ -11,6 +12,7 @@ export default function InspectionForm({
   inspection,
 }) {
   const isEdit = Boolean(inspection);
+  const [error, setError] = useState();
 
   const formattedTrip = trip
     ? trip
@@ -41,7 +43,7 @@ export default function InspectionForm({
     console.log(response);
 
     if (response?.message) {
-      alert(response.message || 'hhhhhhh');
+      setError(response.message);
       return;
     }
   }
@@ -65,6 +67,7 @@ export default function InspectionForm({
       ))}
 
       <Signature pendingLabel="Submiting..." />
+      <p>{error}</p>
 
       <input type="hidden" name="vehicleId" value={vehicle?.id} />
       <input type="hidden" name="user_id" value={user?.userId} />
