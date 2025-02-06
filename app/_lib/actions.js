@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation';
 import { supabase } from './supabase';
-import { signIn, signOut } from './auth';
-import { convertBase64ToFile } from '../_utils/helpers';
+import { auth, signIn, signOut } from './auth';
+import sharp from 'sharp';
 
 export async function findVehicle(formData) {
   const regNumber = formData.get('regNumber').trim();
@@ -37,13 +37,18 @@ export async function signOutAction() {
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  const imageName = `${Date.now()}-${file.name}`.replace(/\//g, '');
+  const timestamp = Date.now();
+  const randomNumber = Math.floor(Math.random() * 1e6);
+  const imageName = `${timestamp}-${randomNumber}-${file.name.replace(
+    /\//g,
+    ''
+  )}`;
 
   const { data, error: uploadError } = await supabase.storage
     .from('inspections-images')
     .upload(imageName, file, { cacheControl: '3600', upsert: false });
 
-  if (uploadError) throw uploadError;
+  if (uploadError) throw new Error('Failed to upload image');
 
   const { publicUrl } = supabase.storage
     .from('inspections-images')
@@ -52,56 +57,102 @@ const uploadImage = async (file) => {
   return publicUrl;
 };
 
-const processInspectionData = async (formData) => {
-  const inspectionData = Object.fromEntries(formData);
+const processInspectionData = async (compressedFiles) => {
+  const inspectionData = {};
 
-  const imageFields = [
-    'offsideFront',
-    'nearsideFront',
-    'nearsideRear',
-    'offsideRear',
-    'signature',
-  ];
+  const handleFileUpload = async (field, value) => {
+    const file = value instanceof File ? value : null;
+    const existingUrl = typeof value === 'string' ? value : null;
+    const signature =
+      typeof value === 'string' && value.startsWith('data:image')
+        ? value
+        : null;
+
+    if (signature) {
+      const fileToUpload = convertBase64ToFile(signature, `${field}.png`);
+      return await uploadImage(fileToUpload);
+    }
+
+    if (file?.size > 0) {
+      return await uploadImage(file);
+    }
+
+    if (existingUrl) {
+      return existingUrl;
+    }
+
+    return null;
+  };
 
   await Promise.all(
-    imageFields.map(async (field) => {
-      const value = formData.getAll(field);
-
-      const file = value.find((v) => v instanceof File);
-      const existingUrl = value.find((v) => typeof v === 'string');
-      const signature = value.find(
-        (v) => typeof v === 'string' && v.startsWith('data:image')
-      );
-
-      if (signature) {
-        const fileToUpload = convertBase64ToFile(signature, 'signature.png');
-        inspectionData[field] = await uploadImage(fileToUpload);
-      } else if (file?.size > 0) {
-        inspectionData[field] = await uploadImage(file);
-      } else if (existingUrl) {
-        inspectionData[field] = existingUrl;
-      }
+    Object.keys(compressedFiles).map(async (field) => {
+      const value = compressedFiles[field];
+      inspectionData[field] = await handleFileUpload(field, value);
     })
   );
 
   return inspectionData;
 };
 
+const compressFiles = async (formData) => {
+  const compressedFiles = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      if (value.size === 0) {
+        continue;
+      }
+      const buffer = await value.arrayBuffer();
+      const compressedBuffer = await sharp(Buffer.from(buffer))
+        .resize({ width: 1024 })
+        .jpeg({ quality: 70 })
+        .toBuffer();
+
+      compressedFiles[key] = new File([compressedBuffer], value.name, {
+        type: 'image/jpeg',
+        lastModified: Date.now(),
+      });
+    } else {
+      compressedFiles[key] = value;
+    }
+  }
+
+  return compressedFiles;
+};
+
+const convertBase64ToFile = (base64String, filename) => {
+  const base64Data = base64String.split(',')[1];
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+  for (let offset = 0; offset < byteCharacters.length; offset++) {
+    byteArrays.push(byteCharacters.charCodeAt(offset));
+  }
+  const byteArray = new Uint8Array(byteArrays);
+  return new File([byteArray], filename, { type: 'image/png' });
+};
+
 export async function insertInspection(formData) {
-  const inspectionData = await processInspectionData(formData);
+  const session = await auth();
+  if (!session) throw new Error('You must be logged in');
+
+  const compressedFiles = await compressFiles(formData);
+
+  const inspectionData = await processInspectionData(compressedFiles);
 
   const { error } = await supabase.from('inspections').insert([inspectionData]);
 
-  if (error) {
-    console.error(error, 'insertInspection error');
-    throw new Error('Error fetching vehicle.');
-  }
+  if (error) throw new Error('Error inspection vehicle.');
 
   redirect('/inspection/thankyou');
 }
 
 export async function updateInspection(formData) {
-  const inspectionData = await processInspectionData(formData);
+  const session = await auth();
+  if (!session) throw new Error('You must be logged in');
+
+  const compressedFiles = await compressFiles(formData);
+
+  const inspectionData = await processInspectionData(compressedFiles);
 
   const { error } = await supabase
     .from('inspections')

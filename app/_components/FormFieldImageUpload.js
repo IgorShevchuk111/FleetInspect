@@ -13,32 +13,11 @@ const FormFieldImageUpload = ({
   defaultValue,
 }) => {
   const [preview, setPreview] = useState(defaultValue || '');
-  const [file, setFile] = useState(null);
 
   const handleCaptureChange = async (event) => {
     const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      if (
-        selectedFile.type === 'image/heic' ||
-        selectedFile.type === 'image/heif' ||
-        selectedFile.name.endsWith('.heic') ||
-        selectedFile.name.endsWith('.heif')
-      ) {
-        try {
-          const convertedFile = await heic2any({
-            blob: selectedFile,
-            toType: 'image/jpeg',
-          });
-          setFile(convertedFile);
-          setPreview(URL.createObjectURL(convertedFile));
-        } catch (error) {
-          console.error('Error converting HEIC/HEIF file', error);
-        }
-      } else {
-        setFile(selectedFile);
-        setPreview(URL.createObjectURL(selectedFile));
-      }
-    }
+    if (!selectedFile) return;
+    setPreview(URL.createObjectURL(selectedFile));
   };
 
   return (
@@ -55,8 +34,8 @@ const FormFieldImageUpload = ({
             <input
               type={type}
               id={id}
-              required={!preview && required}
               name={name}
+              required={!preview && required}
               accept="image/*"
               capture="environment"
               className="sr-only"
@@ -64,24 +43,20 @@ const FormFieldImageUpload = ({
             />
           </label>
 
-          {(preview || defaultValue) && (
+          {preview && (
             <div className="relative w-[28px] h-[28px]">
               <Image
-                src={preview || defaultValue}
+                src={preview}
                 alt="Captured Photo"
                 fill
                 sizes="(max-width: 768px) 100vw, 112px"
                 className="rounded-md shadow-md object-contain"
+                quality={80}
+                loading="lazy"
               />
             </div>
           )}
         </div>
-
-        <input
-          type="hidden"
-          name={name}
-          value={defaultValue ? defaultValue : file || ''}
-        />
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ export default function InspectionForm({
   }, {});
   return (
     <form
-      action={inspection ? updateInspection : insertInspection}
+      action={isEdit ? updateInspection : insertInspection}
       className="bg-white shadow-lg  max-w-3xl mx-auto flex flex-col gap-4 p-4 min-h-screen"
     >
       <h1 className="text-2xl font-bold  text-center">

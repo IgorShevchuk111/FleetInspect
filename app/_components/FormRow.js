@@ -14,7 +14,9 @@ export default function FormRow({ field, defaultValue }) {
     is_required: required,
     option_sets,
   } = field;
+
   const options = option_sets?.options || [];
+
   switch (type) {
     case 'radio':
       return (
@@ -32,9 +34,8 @@ export default function FormRow({ field, defaultValue }) {
         <FormFieldCheckbox
           label={label}
           name={name}
-          required={required}
-          error="You must accept"
           defaultValue={defaultValue}
+          required={required}
         />
       );
     case 'file':
@@ -44,11 +45,10 @@ export default function FormRow({ field, defaultValue }) {
           name={name}
           id={id}
           type={type}
-          required={required}
           defaultValue={defaultValue}
+          required={required}
         />
       );
-
     default:
       return (
         <FormFieldInput
