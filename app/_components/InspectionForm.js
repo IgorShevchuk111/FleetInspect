@@ -29,9 +29,27 @@ export default function InspectionForm({
 
     return values;
   }, {});
+
+  async function send(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+
+    const response = await (isEdit
+      ? updateInspection(formData)
+      : insertInspection(formData));
+    console.log(response);
+
+    if (response?.message) {
+      alert(response.message || 'hhhhhhh');
+      return;
+    }
+  }
+
   return (
     <form
-      action={isEdit ? updateInspection : insertInspection}
+      onSubmit={send}
+      // action={isEdit ? updateInspection : insertInspection}
       className="bg-white shadow-lg  max-w-3xl mx-auto flex flex-col gap-4 p-4 min-h-screen"
     >
       <h1 className="text-2xl font-bold  text-center">
@@ -47,8 +65,6 @@ export default function InspectionForm({
       ))}
 
       <Signature pendingLabel="Submiting..." />
-
-      <button>Sent</button>
 
       <input type="hidden" name="vehicleId" value={vehicle?.id} />
       <input type="hidden" name="user_id" value={user?.userId} />

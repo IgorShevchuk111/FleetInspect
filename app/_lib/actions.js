@@ -141,7 +141,12 @@ export async function insertInspection(formData) {
 
   const { error } = await supabase.from('inspections').insert([inspectionData]);
 
-  if (error) throw new Error('Error inspection vehicle.');
+  if (error) {
+    console.log(error.message);
+    return error;
+  }
+
+  // if (error) throw new Error('Error inspection vehicle.');
 
   redirect('/inspection/thankyou');
 }
@@ -154,12 +159,15 @@ export async function updateInspection(formData) {
 
   const inspectionData = await processInspectionData(compressedFiles);
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('inspections')
     .update(inspectionData)
     .eq('id', inspectionData.id);
 
-  if (error) throw new Error('Error updating form.');
+  if (error) {
+    console.log(error.message);
+    return error;
+  }
 
   redirect('/inspection/thankyou');
 }
