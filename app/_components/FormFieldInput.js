@@ -6,9 +6,8 @@ function FormFieldInput({
   name,
   type = 'text',
   placeholder,
-  required,
   disabled,
-  defaultValue,
+  register,
 }) {
   return (
     <div className="flex gap-4 items-center w-full">
@@ -25,9 +24,8 @@ function FormFieldInput({
           name={name}
           className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder={placeholder}
-          required={required}
           disabled={disabled}
-          defaultValue={defaultValue}
+          {...register(name, { required: 'This  field is required' })}
         />
       </div>
     </div>

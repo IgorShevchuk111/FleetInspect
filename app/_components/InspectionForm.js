@@ -2,7 +2,8 @@
 import FormRow from './FormRow';
 import { insertInspection, updateInspection } from '../_lib/actions';
 import Signature from './Signature';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { compressImage } from '../_utils/helper';
 
 export default function InspectionForm({
   questions,
@@ -12,7 +13,6 @@ export default function InspectionForm({
   inspection,
 }) {
   const isEdit = Boolean(inspection);
-  const [error, setError] = useState();
 
   const formattedTrip = trip
     ? trip
@@ -32,26 +32,35 @@ export default function InspectionForm({
     return values;
   }, {});
 
-  async function send(event) {
-    event.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    getValues,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({ defaultValues });
 
-    const formData = new FormData(event.target);
-    console.log(formData, 'new form data');
-    const response = await (isEdit
-      ? updateInspection(formData)
-      : insertInspection(formData));
-    console.log(response);
+  async function onSubmit(data) {
+    const formData = new FormData();
 
-    if (response?.message) {
-      setError(response.message);
-      return;
-    }
+    await Promise.all(
+      Object.entries(data).map(async ([key, value]) => {
+        if (value instanceof FileList && value.length > 0) {
+          const compressedFile = await compressImage(value[0]);
+          formData.append(key, compressedFile);
+        } else {
+          formData.append(key, value);
+        }
+      })
+    );
+
+    isEdit ? updateInspection(formData) : insertInspection(formData);
   }
 
   return (
     <form
-      onSubmit={send}
-      // action={isEdit ? updateInspection : insertInspection}
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-white shadow-lg  max-w-3xl mx-auto flex flex-col gap-4 p-4 min-h-screen"
     >
       <h1 className="text-2xl font-bold  text-center">
@@ -62,12 +71,12 @@ export default function InspectionForm({
         <FormRow
           key={field.id}
           field={field}
-          defaultValue={defaultValues[field.name] || ''}
+          register={register}
+          isEdit={isEdit}
         />
       ))}
 
       <Signature pendingLabel="Submiting..." />
-      <p>{error}</p>
 
       <input type="hidden" name="vehicleId" value={vehicle?.id} />
       <input type="hidden" name="user_id" value={user?.userId} />

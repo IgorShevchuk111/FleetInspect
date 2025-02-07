@@ -3,7 +3,7 @@ import FormFieldCheckbox from './FormFieldCheckbox';
 import FormFieldRadio from './FormFieldRadio';
 import FormFieldInput from './FormFieldInput';
 import FormFieldImageUpload from './FormFieldImageUpload';
-export default function FormRow({ field, defaultValue }) {
+export default function FormRow({ field, register, isEdit }) {
   const {
     label,
     id,
@@ -24,19 +24,13 @@ export default function FormRow({ field, defaultValue }) {
           label={label}
           name={name}
           options={options}
-          defaultValue={defaultValue}
-          required={required}
+          register={register}
           disabled={disabled}
         />
       );
     case 'checkbox':
       return (
-        <FormFieldCheckbox
-          label={label}
-          name={name}
-          defaultValue={defaultValue}
-          required={required}
-        />
+        <FormFieldCheckbox label={label} name={name} register={register} />
       );
     case 'file':
       return (
@@ -45,8 +39,8 @@ export default function FormRow({ field, defaultValue }) {
           name={name}
           id={id}
           type={type}
-          defaultValue={defaultValue}
-          required={required}
+          register={register}
+          isEdit={isEdit}
         />
       );
     default:
@@ -57,8 +51,7 @@ export default function FormRow({ field, defaultValue }) {
           name={name}
           type={type}
           placeholder={placeholder}
-          required={required}
-          defaultValue={defaultValue}
+          register={register}
           disabled={disabled}
         />
       );

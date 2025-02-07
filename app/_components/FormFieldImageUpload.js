@@ -4,15 +4,8 @@ import { CameraIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
-const FormFieldImageUpload = ({
-  label,
-  name,
-  id,
-  type,
-  required,
-  defaultValue,
-}) => {
-  const [preview, setPreview] = useState(defaultValue || '');
+const FormFieldImageUpload = ({ label, name, id, type, register, isEdit }) => {
+  const [preview, setPreview] = useState('');
 
   const handleCaptureChange = async (event) => {
     const selectedFile = event.target.files[0];
@@ -35,7 +28,9 @@ const FormFieldImageUpload = ({
               type={type}
               id={id}
               name={name}
-              required={!preview && required}
+              {...register(name, {
+                required: isEdit ? false : 'This  field is required',
+              })}
               accept="image/*"
               capture="environment"
               className="sr-only"

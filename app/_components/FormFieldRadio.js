@@ -4,9 +4,8 @@ export default function FormFieldRadio({
   label,
   name,
   options,
-  defaultValue,
-  required,
   disabled,
+  register,
 }) {
   return (
     <div className=" flex items-center gap-4  w-full">
@@ -26,9 +25,8 @@ export default function FormFieldRadio({
                 type="radio"
                 name={name}
                 value={option.value}
-                defaultChecked={option.value === defaultValue}
+                {...register(name, { required: 'This  field is required' })}
                 className="mr-2"
-                required={required}
                 disabled={disabled}
               />
               {option.label}

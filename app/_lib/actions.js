@@ -146,7 +146,7 @@ export async function insertInspection(formData) {
     return error;
   }
 
-  // if (error) throw new Error('Error inspection vehicle.');
+  if (error) throw new Error('Error inspection vehicle.');
 
   redirect('/inspection/thankyou');
 }

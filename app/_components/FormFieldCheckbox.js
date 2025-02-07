@@ -1,6 +1,6 @@
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
-function FormFieldCheckbox({ label, name, required, defaultValue }) {
+function FormFieldCheckbox({ label, name, register }) {
   return (
     <div className="flex gap-4 items-center">
       {name !== 'roadworthy' && (
@@ -13,8 +13,7 @@ function FormFieldCheckbox({ label, name, required, defaultValue }) {
           type="checkbox"
           id={name}
           name={name}
-          required={required}
-          defaultChecked={defaultValue}
+          {...register(name, { required: 'This  field is required' })}
         />
       </div>
     </div>
