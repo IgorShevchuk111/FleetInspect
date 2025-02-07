@@ -162,7 +162,7 @@ export async function updateInspection(formData) {
   const { data, error } = await supabase
     .from('inspections')
     .update(inspectionData)
-    .eq('id', inspectionData.idd);
+    .eq('id', inspectionData.id);
 
   if (error) {
     console.log(error.message);
