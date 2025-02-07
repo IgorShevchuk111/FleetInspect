@@ -36,7 +36,7 @@ export default function InspectionForm({
     event.preventDefault();
 
     const formData = new FormData(event.target);
-
+    console.log(formData, 'new form data');
     const response = await (isEdit
       ? updateInspection(formData)
       : insertInspection(formData));
