@@ -125,6 +125,7 @@ export default function InspectionForm({
                   setCompressedImages={setCompressedImages}
                   error={errors[name]}
                   clearErrors={clearErrors}
+                  setValue={setValue}
                 />
               </FormRow>
             );
