@@ -5,24 +5,36 @@ import React, { useRef, useState } from 'react';
 import OpenSignatureButton from './OpenSignatureButton';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
+import { compressImage, convertBase64ToFile } from '../_utils/helper';
 
-function Signature({ pendingLabel }) {
-  const [signature, setSignature] = useState('');
+function Signature({ setSignature, signature }) {
   const [showSignature, setShowSignature] = useState(false);
+  const [previewSignature, setPreviewSignature] = useState(false);
   const sigPad = useRef(null);
-  const { pending } = useFormStatus();
 
   function handleClear() {
     sigPad.current.clear();
     setSignature('');
   }
 
-  function handleSave() {
+  async function handleSave() {
     const dataURL = sigPad.current.toDataURL();
 
     const isEmpty = sigPad.current.isEmpty();
     if (!isEmpty) {
-      setSignature(dataURL);
+      setPreviewSignature(dataURL);
+      const convertedSignature = convertBase64ToFile(dataURL, 'signature.png');
+
+      const compressedSignatureBlob = await compressImage(convertedSignature);
+      const compressedSignatureFile = new File(
+        [compressedSignatureBlob],
+        compressedSignatureBlob.name,
+        {
+          type: compressedSignatureBlob.type,
+          lastModified: Date.now(),
+        }
+      );
+      setSignature(compressedSignatureFile);
       setShowSignature((prev) => !prev);
     }
   }
@@ -39,7 +51,7 @@ function Signature({ pendingLabel }) {
       {signature && (
         <div className="relative w-20 h-20 m-auto">
           <Image
-            src={signature}
+            src={previewSignature}
             alt="Signature"
             fill
             sizes="(max-width: 768px) 24px, (max-width: 1200px) 32px, 48px"
@@ -77,18 +89,7 @@ function Signature({ pendingLabel }) {
         </div>
       )}
 
-      <div className="flex justify-center mt-4">
-        <button
-          disabled={!signature}
-          className={`bg-blue-500 text-white py-2 px-4 rounded-md shadow max-w-80 ${
-            !signature ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {pending ? pendingLabel : 'Submit'}
-        </button>
-      </div>
-
-      <input type="hidden" name="signature" value={signature} />
+      {/* <input type="hidden" name="signature" value={signature} /> */}
     </>
   );
 }

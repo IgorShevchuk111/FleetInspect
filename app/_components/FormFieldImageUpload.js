@@ -3,14 +3,35 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { CameraIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import React, { useState } from 'react';
+import { compressImage } from '../_utils/helper';
 
-const FormFieldImageUpload = ({ label, name, id, type, register, isEdit }) => {
+const FormFieldImageUpload = ({
+  label,
+  name,
+  id,
+  type,
+  register,
+  editId,
+  setCompressedImages,
+}) => {
   const [preview, setPreview] = useState('');
 
   const handleCaptureChange = async (event) => {
     const selectedFile = event.target.files[0];
+
     if (!selectedFile) return;
-    setPreview(URL.createObjectURL(selectedFile));
+    const compressedBlob = await compressImage(selectedFile);
+
+    const compressedFile = new File([compressedBlob], compressedBlob.name, {
+      type: compressedBlob.type,
+      lastModified: Date.now(),
+    });
+
+    setPreview(URL.createObjectURL(compressedFile));
+    setCompressedImages((prevImages) => ({
+      ...prevImages,
+      [name]: compressedFile,
+    }));
   };
 
   return (
@@ -29,7 +50,7 @@ const FormFieldImageUpload = ({ label, name, id, type, register, isEdit }) => {
               id={id}
               name={name}
               {...register(name, {
-                required: isEdit ? false : 'This  field is required',
+                required: editId ? false : 'This  field is required',
               })}
               accept="image/*"
               capture="environment"

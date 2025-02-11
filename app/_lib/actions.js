@@ -57,117 +57,34 @@ const uploadImage = async (file) => {
   return publicUrl;
 };
 
-const processInspectionData = async (compressedFiles) => {
-  const inspectionData = {};
+export async function createUpdateInspection(formData, id) {
+  const session = await auth();
+  if (!session) throw new Error('You must be logged in');
 
-  const handleFileUpload = async (field, value) => {
-    const file = value instanceof File ? value : null;
-    const existingUrl = typeof value === 'string' ? value : null;
-    const signature =
-      typeof value === 'string' && value.startsWith('data:image')
-        ? value
-        : null;
+  const inspectionData = Object.fromEntries(formData.entries());
 
-    if (signature) {
-      const fileToUpload = convertBase64ToFile(signature, `${field}.png`);
-      return await uploadImage(fileToUpload);
-    }
-
-    if (file?.size > 0) {
-      return await uploadImage(file);
-    }
-
-    if (existingUrl) {
-      return existingUrl;
-    }
-
-    return null;
-  };
-
-  await Promise.all(
-    Object.keys(compressedFiles).map(async (field) => {
-      const value = compressedFiles[field];
-      inspectionData[field] = await handleFileUpload(field, value);
+  const processedData = await Promise.all(
+    Object.entries(inspectionData).map(async ([field, value]) => {
+      if (value instanceof File && value.size > 0) {
+        return [field, await uploadImage(value)];
+      }
+      return [field, value];
     })
   );
 
-  return inspectionData;
-};
+  const finalData = Object.fromEntries(processedData);
 
-const compressFiles = async (formData) => {
-  const compressedFiles = {};
+  let query = supabase.from('inspections');
 
-  for (const [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      if (value.size === 0) {
-        continue;
-      }
-      const buffer = await value.arrayBuffer();
-      const compressedBuffer = await sharp(Buffer.from(buffer))
-        .resize({ width: 1024 })
-        .jpeg({ quality: 70 })
-        .toBuffer();
-
-      compressedFiles[key] = new File([compressedBuffer], value.name, {
-        type: 'image/jpeg',
-        lastModified: Date.now(),
-      });
-    } else {
-      compressedFiles[key] = value;
-    }
+  if (id) {
+    query = query.update(finalData).eq('id', id);
+  } else {
+    query = query.insert([finalData]);
   }
 
-  return compressedFiles;
-};
+  const { error } = await query.select().single();
 
-const convertBase64ToFile = (base64String, filename) => {
-  const base64Data = base64String.split(',')[1];
-  const byteCharacters = atob(base64Data);
-  const byteArrays = [];
-  for (let offset = 0; offset < byteCharacters.length; offset++) {
-    byteArrays.push(byteCharacters.charCodeAt(offset));
-  }
-  const byteArray = new Uint8Array(byteArrays);
-  return new File([byteArray], filename, { type: 'image/png' });
-};
-
-export async function insertInspection(formData) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
-
-  const compressedFiles = await compressFiles(formData);
-
-  const inspectionData = await processInspectionData(compressedFiles);
-
-  const { error } = await supabase.from('inspections').insert([inspectionData]);
-
-  if (error) {
-    console.log(error.message);
-    return error;
-  }
-
-  if (error) throw new Error('Error inspection vehicle.');
-
-  redirect('/inspection/thankyou');
-}
-
-export async function updateInspection(formData) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
-
-  const compressedFiles = await compressFiles(formData);
-
-  const inspectionData = await processInspectionData(compressedFiles);
-
-  const { data, error } = await supabase
-    .from('inspections')
-    .update(inspectionData)
-    .eq('id', inspectionData.id);
-
-  if (error) {
-    console.log(error.message);
-    return error;
-  }
+  if (error) throw new Error('Error updating inspection vehicle.');
 
   redirect('/inspection/thankyou');
 }

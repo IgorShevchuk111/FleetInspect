@@ -1,18 +1,25 @@
 'use client';
 import FormRow from './FormRow';
-import { insertInspection, updateInspection } from '../_lib/actions';
+import { createUpdateInspection } from '../_lib/actions';
 import Signature from './Signature';
 import { useForm } from 'react-hook-form';
-import { compressImage } from '../_utils/helper';
+import { useState } from 'react';
+import FormFieldRadio from './FormFieldRadio';
+import FormFieldCheckbox from './FormFieldCheckbox';
+import FormFieldImageUpload from './FormFieldImageUpload';
+import FormFieldInput from './FormFieldInput';
 
 export default function InspectionForm({
   questions,
   vehicle,
   user,
   trip,
-  inspection,
+  inspection = {},
 }) {
-  const isEdit = Boolean(inspection);
+  const [compressedImages, setCompressedImages] = useState({});
+  const [signature, setSignature] = useState('');
+
+  const { id: editId, ...editValues } = inspection;
 
   const formattedTrip = trip
     ? trip
@@ -21,8 +28,8 @@ export default function InspectionForm({
     : '';
 
   const defaultValues = questions.reduce((values, field) => {
-    values[field.name] = isEdit
-      ? inspection?.[field.name]
+    values[field.name] = editId
+      ? editValues?.[field.name]
       : field.type === 'file'
       ? ''
       : field.name === 'fullName'
@@ -42,20 +49,25 @@ export default function InspectionForm({
   } = useForm({ defaultValues });
 
   async function onSubmit(data) {
-    const formData = new FormData();
+    const formDataToSubmit = new FormData();
+
+    formDataToSubmit.append('vehicleId', vehicle?.id);
+    formDataToSubmit.append('user_id', user?.userId);
+    formDataToSubmit.append('trip', trip);
+    formDataToSubmit.append('signature', signature);
 
     await Promise.all(
       Object.entries(data).map(async ([key, value]) => {
         if (value instanceof FileList && value.length > 0) {
-          const compressedFile = await compressImage(value[0]);
-          formData.append(key, compressedFile);
+          const compressedFile = compressedImages[key];
+          formDataToSubmit.append(key, compressedFile || value[0]);
         } else {
-          formData.append(key, value);
+          formDataToSubmit.append(key, value);
         }
       })
     );
 
-    isEdit ? updateInspection(formData) : insertInspection(formData);
+    await createUpdateInspection(formDataToSubmit, editId ? editId : null);
   }
 
   return (
@@ -67,24 +79,78 @@ export default function InspectionForm({
         {formattedTrip} Vehicle Inspection
       </h1>
 
-      {questions.map((field) => (
-        <FormRow
-          key={field.id}
-          field={field}
-          register={register}
-          isEdit={isEdit}
-        />
-      ))}
+      {questions.map((field) => {
+        const { label, name, option_sets, disabled, id, type } = field;
+        const options = option_sets?.options || [];
 
-      <Signature pendingLabel="Submiting..." />
+        switch (type) {
+          case 'radio':
+            return (
+              <FormRow key={id}>
+                <FormFieldRadio
+                  label={label}
+                  name={name}
+                  options={options}
+                  register={register}
+                  disabled={disabled}
+                />
+              </FormRow>
+            );
+          case 'checkbox':
+            return (
+              <FormRow key={id}>
+                <FormFieldCheckbox
+                  label={label}
+                  name={name}
+                  options={options}
+                  register={register}
+                  disabled={disabled}
+                />
+              </FormRow>
+            );
+          case 'file':
+            return (
+              <FormRow key={id}>
+                <FormFieldImageUpload
+                  type={type}
+                  id={id}
+                  label={label}
+                  name={name}
+                  register={register}
+                  disabled={disabled}
+                  editId={editId}
+                  setCompressedImages={setCompressedImages}
+                />
+              </FormRow>
+            );
+          default:
+            return (
+              <FormRow key={id}>
+                <FormFieldInput
+                  label={label}
+                  name={name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  register={register}
+                  disabled={disabled}
+                />
+              </FormRow>
+            );
+        }
+      })}
 
-      <input type="hidden" name="vehicleId" value={vehicle?.id} />
-      <input type="hidden" name="user_id" value={user?.userId} />
-      <input type="hidden" name="regNumber" value={vehicle?.regNumber} />
-      <input type="hidden" name="fullName" value={user?.name} />
-      <input type="hidden" name="vehicleType" value={vehicle?.type} />
-      <input type="hidden" name="trip" value={trip} />
-      {inspection && <input type="hidden" name="id" value={inspection?.id} />}
+      <Signature setSignature={setSignature} signature={signature} />
+
+      <div className="flex justify-center mt-4">
+        <button
+          disabled={!signature || isSubmitting}
+          className={`bg-blue-500 text-white py-2 px-4 rounded-md shadow max-w-80 ${
+            !signature || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit'}
+        </button>
+      </div>
     </form>
   );
 }

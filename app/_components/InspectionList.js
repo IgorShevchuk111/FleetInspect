@@ -28,11 +28,11 @@ async function InspectionList({ filter, sortBy }) {
   if (filter === 'all') filteredInspections = inspections;
   if (filter === 'truck')
     filteredInspections = inspections.filter(
-      (inspection) => inspection.vehicleType === 'truck'
+      (inspection) => inspection.vehicle.type === 'truck'
     );
   if (filter === 'trailer')
     filteredInspections = inspections.filter(
-      (inspection) => inspection.vehicleType === 'trailer'
+      (inspection) => inspection.vehicle.type === 'trailer'
     );
 
   const [field, direction] = sortBy.split('-');
