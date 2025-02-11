@@ -15,6 +15,7 @@ const FormFieldImageUpload = ({
   setCompressedImages,
   error,
   clearErrors,
+  setValue,
 }) => {
   const [preview, setPreview] = useState('');
 
@@ -32,6 +33,7 @@ const FormFieldImageUpload = ({
       lastModified: Date.now(),
     });
 
+    setValue(name, compressedFile);
     setPreview(URL.createObjectURL(compressedFile));
     setCompressedImages((prevImages) => ({
       ...prevImages,
