@@ -81,7 +81,8 @@ export default function InspectionForm({
       </h1>
 
       {questions.map((field) => {
-        const { label, name, option_sets, disabled, id, type } = field;
+        console.log(field, 'field');
+        const { label, name, option_sets, is_disabled, id, type } = field;
         const options = option_sets?.options || [];
 
         switch (type) {
@@ -93,7 +94,7 @@ export default function InspectionForm({
                   name={name}
                   options={options}
                   register={register}
-                  disabled={disabled}
+                  disabled={is_disabled}
                   error={errors[name]}
                 />
               </FormRow>
@@ -106,7 +107,7 @@ export default function InspectionForm({
                   name={name}
                   options={options}
                   register={register}
-                  disabled={disabled}
+                  disabled={is_disabled}
                   error={errors[name]}
                 />
               </FormRow>
@@ -120,7 +121,7 @@ export default function InspectionForm({
                   label={label}
                   name={name}
                   register={register}
-                  disabled={disabled}
+                  disabled={is_disabled}
                   editId={editId}
                   setCompressedImages={setCompressedImages}
                   error={errors[name]}
@@ -139,7 +140,7 @@ export default function InspectionForm({
                   type={field.type}
                   placeholder={field.placeholder}
                   register={register}
-                  disabled={disabled}
+                  disabled={is_disabled}
                 />
               </FormRow>
             );
