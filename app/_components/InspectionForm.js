@@ -81,7 +81,6 @@ export default function InspectionForm({
       </h1>
 
       {questions.map((field) => {
-        console.log(field, 'field');
         const { label, name, option_sets, is_disabled, id, type } = field;
         const options = option_sets?.options || [];
 

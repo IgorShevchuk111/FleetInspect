@@ -18,6 +18,7 @@ const FormFieldImageUpload = ({
   setValue,
 }) => {
   const [preview, setPreview] = useState('');
+  const [isFileSelected, setIsFileSelected] = useState(false);
 
   const handleCaptureChange = async (event) => {
     const selectedFile = event.target.files[0];
@@ -34,11 +35,13 @@ const FormFieldImageUpload = ({
     });
 
     setValue(name, compressedFile);
+
     setPreview(URL.createObjectURL(compressedFile));
     setCompressedImages((prevImages) => ({
       ...prevImages,
       [name]: compressedFile,
     }));
+    setIsFileSelected(true);
   };
 
   return (
@@ -60,7 +63,8 @@ const FormFieldImageUpload = ({
               id={id}
               name={name}
               {...register(name, {
-                required: editId ? false : 'This  field is required',
+                required:
+                  !isFileSelected && !editId ? 'This field is required' : false,
               })}
               accept="image/*"
               capture="environment"
