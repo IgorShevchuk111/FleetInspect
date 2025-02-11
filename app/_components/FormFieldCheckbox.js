@@ -1,6 +1,6 @@
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
-function FormFieldCheckbox({ label, name, register }) {
+function FormFieldCheckbox({ label, name, register, error }) {
   return (
     <div className="flex gap-4 items-center">
       {name !== 'roadworthy' && (
@@ -8,7 +8,11 @@ function FormFieldCheckbox({ label, name, register }) {
       )}
 
       <div className="flex  gap-2 text-lg  font-medium">
-        {label && <label htmlFor={name}>{label}</label>}
+        {label && (
+          <label htmlFor={name} className={error ? 'text-red-500' : ''}>
+            {label}
+          </label>
+        )}
         <input
           type="checkbox"
           id={name}

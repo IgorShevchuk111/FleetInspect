@@ -6,13 +6,14 @@ export default function FormFieldRadio({
   options,
   disabled,
   register,
+  error,
 }) {
   return (
     <div className=" flex items-center gap-4  w-full">
       <InformationCircleIcon className="h-6 w-6 text-blue-500 cursor-pointer" />
 
       <div className="border rounded-md px-3 py-3 border-gray-300 bg-white shadow-md w-full flex flex-col gap-2  text-lg  font-medium">
-        <h3>{label}</h3>
+        <h3 className={error ? 'text-red-500' : ''}>{label}</h3>
         <div className="flex gap-4">
           {options?.map((option) => (
             <label

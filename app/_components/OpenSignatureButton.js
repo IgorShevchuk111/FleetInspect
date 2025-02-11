@@ -1,13 +1,11 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
-function OpenSignatureButton({ onClick, signature }) {
+function OpenSignatureButton({ onClick, error }) {
   return (
     <div className=" flex gap-4 items-center">
       <p
         className={`${
-          !signature
-            ? 'text-danger-500 text-sm font-medium'
-            : 'text-sm font-medium'
+          error ? 'text-danger-500 text-sm font-medium' : 'text-sm font-medium'
         }`}
       >
         By signing, you confirm that all identified defects have been reported

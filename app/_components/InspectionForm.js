@@ -45,6 +45,7 @@ export default function InspectionForm({
     reset,
     getValues,
     setValue,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues });
 
@@ -93,6 +94,7 @@ export default function InspectionForm({
                   options={options}
                   register={register}
                   disabled={disabled}
+                  error={errors[name]}
                 />
               </FormRow>
             );
@@ -105,6 +107,7 @@ export default function InspectionForm({
                   options={options}
                   register={register}
                   disabled={disabled}
+                  error={errors[name]}
                 />
               </FormRow>
             );
@@ -120,6 +123,8 @@ export default function InspectionForm({
                   disabled={disabled}
                   editId={editId}
                   setCompressedImages={setCompressedImages}
+                  error={errors[name]}
+                  clearErrors={clearErrors}
                 />
               </FormRow>
             );
@@ -128,6 +133,7 @@ export default function InspectionForm({
               <FormRow key={id}>
                 <FormFieldInput
                   label={label}
+                  id={id}
                   name={name}
                   type={field.type}
                   placeholder={field.placeholder}
@@ -139,13 +145,20 @@ export default function InspectionForm({
         }
       })}
 
-      <Signature setSignature={setSignature} signature={signature} />
+      <Signature
+        setSignature={setSignature}
+        signature={signature}
+        register={register}
+        error={errors.signature}
+        clearErrors={clearErrors}
+        setValue={setValue}
+      />
 
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center m-6">
         <button
-          disabled={!signature || isSubmitting}
+          disabled={isSubmitting}
           className={`bg-blue-500 text-white py-2 px-4 rounded-md shadow max-w-80 ${
-            !signature || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}

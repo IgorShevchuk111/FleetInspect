@@ -7,14 +7,23 @@ import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { compressImage, convertBase64ToFile } from '../_utils/helper';
 
-function Signature({ setSignature, signature }) {
+function Signature({
+  setSignature,
+  signature,
+  register,
+  error,
+  clearErrors,
+  setValue,
+}) {
   const [showSignature, setShowSignature] = useState(false);
-  const [previewSignature, setPreviewSignature] = useState(false);
+  const [previewSignature, setPreviewSignature] = useState('');
   const sigPad = useRef(null);
 
   function handleClear() {
     sigPad.current.clear();
     setSignature('');
+    setPreviewSignature('');
+    setValue('signature', '');
   }
 
   async function handleSave() {
@@ -35,7 +44,9 @@ function Signature({ setSignature, signature }) {
         }
       );
       setSignature(compressedSignatureFile);
-      setShowSignature((prev) => !prev);
+      setValue('signature', compressedSignatureFile);
+      clearErrors('signature');
+      setShowSignature(false);
     }
   }
 
@@ -44,10 +55,7 @@ function Signature({ setSignature, signature }) {
   }
   return (
     <>
-      <OpenSignatureButton
-        onClick={handleOpenSignature}
-        signature={signature}
-      />
+      <OpenSignatureButton onClick={handleOpenSignature} error={error} />
       {signature && (
         <div className="relative w-20 h-20 m-auto">
           <Image
@@ -88,8 +96,12 @@ function Signature({ setSignature, signature }) {
           </div>
         </div>
       )}
-
-      {/* <input type="hidden" name="signature" value={signature} /> */}
+      <input
+        type="hidden"
+        {...register('signature', {
+          required: 'Signature is required',
+        })}
+      />
     </>
   );
 }
