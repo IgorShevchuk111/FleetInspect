@@ -140,6 +140,7 @@ export default function InspectionForm({
                   placeholder={field.placeholder}
                   register={register}
                   disabled={is_disabled}
+                  error={errors[name]}
                 />
               </FormRow>
             );
