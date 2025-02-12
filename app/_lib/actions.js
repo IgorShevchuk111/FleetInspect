@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { supabase } from './supabase';
 import { auth, signIn, signOut } from './auth';
-import sharp from 'sharp';
+import { getVehicles } from './data_servis';
 
 export async function findVehicle(formData) {
   const regNumber = formData.get('regNumber').trim();
@@ -87,4 +87,13 @@ export async function createUpdateInspection(formData, id) {
   if (error) throw new Error('Error updating inspection vehicle.');
 
   redirect('/inspection/thankyou');
+}
+
+export async function searchVehicles(searchQuery) {
+  const vehicles = await getVehicles();
+  if (!searchQuery) return vehicles;
+
+  return vehicles.filter((vehicle) =>
+    vehicle.regNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 }

@@ -32,6 +32,7 @@ const authConfig = {
     async session({ session }) {
       const user = await getUser(session.user.email);
       session.user.userId = user.id;
+      session.user.role = user.role;
       return session;
     },
   },

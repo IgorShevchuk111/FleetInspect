@@ -9,6 +9,7 @@ const items = [
   { name: 'Profile', href: '/profile', id: 1 },
   { name: 'My Inspections', href: '/inspections', id: 2 },
   { name: 'Inspection', href: '/inspection', id: 3 },
+  { name: 'Vehicles', href: '/vehicles', id: 4 },
 ];
 
 async function Header() {
@@ -24,7 +25,7 @@ async function Header() {
             height="34"
             width="34"
           />
-          <DropDown items={items}>
+          <DropDown items={items} user={session.user}>
             <Bars4Icon className="w-10 h-10 text-white fill-current" />
           </DropDown>
         </div>

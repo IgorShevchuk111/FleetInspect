@@ -70,3 +70,11 @@ export async function getInspection(inspectionId) {
 
   return inspection;
 }
+
+export async function getVehicles() {
+  const { data: vehicles, error } = await supabase.from('vehicles').select('*');
+
+  if (error) throw new Error('Failed to fetch vehicles');
+
+  return vehicles;
+}
