@@ -8,6 +8,8 @@ import FormFieldRadio from './FormFieldRadio';
 import FormFieldCheckbox from './FormFieldCheckbox';
 import FormFieldImageUpload from './FormFieldImageUpload';
 import FormFieldInput from './FormFieldInput';
+import ErrorModal from './ErrorModal';
+import ErrorMessages from './ErrorMessages';
 
 export default function InspectionForm({
   questions,
@@ -18,6 +20,7 @@ export default function InspectionForm({
 }) {
   const [compressedImages, setCompressedImages] = useState({});
   const [signature, setSignature] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { id: editId, ...editValues } = inspection;
 
@@ -71,9 +74,13 @@ export default function InspectionForm({
     await createUpdateInspection(formDataToSubmit, editId ? editId : null);
   }
 
+  function onError(errors) {
+    setIsModalOpen(true);
+  }
+
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onError)}
       className="bg-white shadow-lg  max-w-3xl mx-auto flex flex-col gap-4 p-4 min-h-screen"
     >
       <h1 className="text-2xl font-bold  text-center">
@@ -166,6 +173,12 @@ export default function InspectionForm({
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
+
+      {isModalOpen && (
+        <ErrorModal onClose={() => setIsModalOpen(false)}>
+          <ErrorMessages />
+        </ErrorModal>
+      )}
     </form>
   );
 }
