@@ -291,8 +291,8 @@ export default function InspectionDetailsPage() {
 
           // Initialize all checkbox fields from the form
           inspectionForm.forEach((formField) => {
-            if (formField.type === 'checkbox') {
-              initialItems[formField.name] = inspection[formField.name];
+            if ((formField as any).type === 'checkbox') {
+              initialItems[(formField as any).name] = inspection[(formField as any).name];
             }
           });
           setCheckedItems(initialItems);
@@ -300,10 +300,10 @@ export default function InspectionDetailsPage() {
           const initialNotes: Record<string, string> = {};
           // Initialize all notes fields dynamically
           inspectionForm.forEach((formField) => {
-            if (formField.type === 'checkbox') {
-              const noteField = `${formField.name}_notes`;
+            if ((formField as any).type === 'checkbox') {
+              const noteField = `${(formField as any).name}_notes`;
               if (inspection[noteField]) {
-                initialNotes[formField.name] = inspection[noteField];
+                initialNotes[(formField as any).name] = inspection[noteField];
               }
             }
           });
@@ -312,10 +312,10 @@ export default function InspectionDetailsPage() {
           const initialTimeValues: Record<string, string> = {};
           // Initialize time fields dynamically
           inspectionForm.forEach((formField) => {
-            if (formField.type === 'time') {
-              const timeField = `${formField.name}_value`;
+            if ((formField as any).type === 'time') {
+              const timeField = `${(formField as any).name}_value`;
               if (inspection[timeField]) {
-                initialTimeValues[formField.name] = inspection[timeField];
+                initialTimeValues[(formField as any).name] = inspection[timeField];
               }
             }
           });
@@ -324,10 +324,10 @@ export default function InspectionDetailsPage() {
           const initialNumberValues: Record<string, string> = {};
           // Initialize number fields dynamically
           inspectionForm.forEach((formField) => {
-            if (formField.type === 'number') {
-              const numberField = `${formField.name}_value`;
+            if ((formField as any).type === 'number') {
+              const numberField = `${(formField as any).name}_value`;
               if (inspection[numberField]) {
-                initialNumberValues[formField.name] = inspection[numberField];
+                initialNumberValues[(formField as any).name] = inspection[numberField];
               }
             }
           });
@@ -336,10 +336,10 @@ export default function InspectionDetailsPage() {
           const initialImages: Record<string, ImagePreview[]> = {};
           // Initialize photos for all checkbox fields dynamically
           inspectionForm.forEach((formField) => {
-            if (formField.type === 'checkbox') {
-              const photoField = `${formField.name}_photos`;
+            if ((formField as any).type === 'checkbox') {
+              const photoField = `${(formField as any).name}_photos`;
               if (inspection[photoField] && inspection[photoField].length > 0) {
-                initialImages[formField.name] = inspection[photoField].map(
+                initialImages[(formField as any).name] = inspection[photoField].map(
                   (url: string) => ({
                     id: Math.random().toString(36).substr(2, 9),
                     url,
@@ -373,8 +373,8 @@ export default function InspectionDetailsPage() {
           const initialTimeValues: Record<string, string> = {};
           const currentTime = new Date().toTimeString().slice(0, 5); // HH:MM format
           inspectionForm.forEach((item) => {
-            if (item.type === 'time') {
-              initialTimeValues[item.name] = currentTime;
+            if ((item as any).type === 'time') {
+              initialTimeValues[(item as any).name] = currentTime;
             }
           });
           setTimeValues(initialTimeValues);
