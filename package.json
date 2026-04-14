@@ -1,0 +1,53 @@
+{
+  "name": "fleet-inspect",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "generate-types": "npx supabase gen types typescript --project-id \"your-project-id\" > types/supabase.ts"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@supabase/supabase-js": "^2.47.16",
+    "@types/react-signature-canvas": "^1.0.7",
+    "browser-image-compression": "^2.0.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.15.0",
+    "heic2any": "^0.0.4",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.503.0",
+    "next": "^15.5.15",
+    "next-auth": "^5.0.0-beta.25",
+    "next-pwa": "^5.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.56.1",
+    "react-signature-canvas": "^1.0.7",
+    "sharp": "^0.33.5",
+    "sonner": "^2.0.4",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss-animate": "^1.0.7",
+    "use-debounce": "^10.0.4",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.20",
+    "postcss": "^8",
+    "supabase": "^2.23.4",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.8.3",
+    "webpack": "^5.97.1"
+  }
+}
