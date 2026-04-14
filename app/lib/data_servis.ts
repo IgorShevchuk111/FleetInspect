@@ -53,7 +53,7 @@ export async function createUser(userData: {
       role: userData.role || 'user'
     };
 
-    const { data, error } = await client
+    const { data, error } = await (client as any)
       .from('users')
       .insert([newUser])
       .select()
@@ -139,11 +139,11 @@ export async function getInspectionForm(vehicleId: string, trip: string) {
   }
 
   // Return all form fields, sorted by position
-  const filteredForm = inspectionForm
+  const filteredForm = (inspectionForm as any[])
     .sort((a, b) => (a.position || 0) - (b.position || 0));
 
   if (filteredForm.length === 0) {
-    throw new Error(`No form fields found for vehicle type: ${vehicle.type}`);
+    throw new Error(`No form fields found for vehicle type: ${(vehicle as any).type}`);
   }
 
   return { inspectionForm: filteredForm, vehicle };
@@ -165,7 +165,7 @@ export async function getUserInspections(userId: string): Promise<FleetInspectio
   }
 
   // Now let's get the vehicles separately
-  const vehicleIds = inspections?.map(insp => insp.vehicle_id) || [];
+  const vehicleIds = inspections?.map((insp: any) => insp.vehicle_id) || [];
   const { data: vehicles, error: vehiclesError } = await client
     .from('vehicles')
     .select('id, type, regnumber')
@@ -176,10 +176,10 @@ export async function getUserInspections(userId: string): Promise<FleetInspectio
   }
 
   // Create a map of vehicle data
-  const vehicleMap = new Map(vehicles?.map(v => [v.id, v]) || []);
+  const vehicleMap = new Map((vehicles as any[])?.map(v => [v.id, v]) || []);
 
   // Combine the data
-  const inspectionsWithVehicles = inspections?.map(inspection => ({
+  const inspectionsWithVehicles = (inspections as any[])?.map(inspection => ({
     ...inspection,
     vehicle: vehicleMap.get(inspection.vehicle_id) || { type: 'unknown', regnumber: 'unknown' }
   })) || [];
@@ -204,7 +204,7 @@ export async function getAllInspections(): Promise<FleetInspectionWithVehicleAnd
     }
 
     // Get unique vehicle IDs
-    const vehicleIds = [...new Set(inspections.map(insp => insp.vehicle_id))];
+    const vehicleIds = [...new Set((inspections as any[]).map(insp => insp.vehicle_id))];
 
     // Fetch vehicles
     const { data: vehicles, error: vehiclesError } = await client
@@ -216,10 +216,10 @@ export async function getAllInspections(): Promise<FleetInspectionWithVehicleAnd
     }
 
     // Create a map of vehicle data
-    const vehicleMap = new Map(vehicles?.map(v => [v.id, v]) || []);
+    const vehicleMap = new Map((vehicles as any[])?.map(v => [v.id, v]) || []);
 
     // Combine the data - use full_name from inspection or fallback
-    const transformedInspections = inspections.map(inspection => ({
+    const transformedInspections = (inspections as any[]).map(inspection => ({
       ...inspection,
       vehicle: vehicleMap.get(inspection.vehicle_id) || {
         id: inspection.vehicle_id,
@@ -256,10 +256,10 @@ export async function getInspection(inspectionId: string) {
   }
 
   // Then get the vehicle details
-  const { data: vehicle, error: vehicleError } = await client
+  const { data: vehicle, error: vehicleError } = await (client as any)
     .from('vehicles')
     .select('id, regnumber, type')
-    .eq('id', inspection.vehicle_id)
+    .eq('id', (inspection as any).vehicle_id)
     .single();
 
   if (vehicleError) {
@@ -268,7 +268,7 @@ export async function getInspection(inspectionId: string) {
 
   // Combine the data
   const result = {
-    ...inspection,
+    ...(inspection as any),
     vehicle: vehicle || { id: 'unknown', regnumber: 'unknown', type: 'unknown' }
   };
 
@@ -294,7 +294,7 @@ export async function searchVehicles(searchTerm: string): Promise<Vehicle[]> {
     if (error) throw error;
 
     // Perform case-insensitive search across multiple fields
-    const exactMatches = vehicles.filter((vehicle) => {
+    const exactMatches = (vehicles as any[]).filter((vehicle: any) => {
       const searchTermLower = searchTerm.toLowerCase();
       return (
         vehicle.regnumber.toLowerCase().includes(searchTermLower) ||
