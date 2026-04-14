@@ -53,7 +53,7 @@ export default function ProfilePage() {
         // Now try to get user's inspections
         const { data: userInspections, error: userError } = await supabase
           .from('fleet_inspections')
-          .select('*')
+          .select('*') 
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
@@ -73,7 +73,7 @@ export default function ProfilePage() {
 
         // Get vehicles for these inspections
         const vehicleIds = [
-          ...new Set(userInspections.map((i) => i.vehicle_id)),
+          ...new Set((userInspections as any[]).map((i) => i.vehicle_id)),
         ];
 
         const { data: vehicles, error: vehiclesError } = await supabase
@@ -86,14 +86,14 @@ export default function ProfilePage() {
         }
 
         // Create a map of vehicles for easy lookup
-        const vehicleMap = new Map(vehicles?.map((v) => [v.id, v]));
+        const vehicleMap = new Map((vehicles as any[])?.map((v) => [v.id, v]));
 
         // Calculate stats
         const stats = {
-          completedInspections: userInspections.filter(
+          completedInspections: (userInspections as any[]).filter(
             (i) => i.status === 'passed'
           ).length,
-          pendingInspections: userInspections.filter(
+          pendingInspections: (userInspections as any[]).filter(
             (i) => i.status === 'failed'
           ).length,
           totalVehicles: vehicleIds.length,
@@ -102,7 +102,7 @@ export default function ProfilePage() {
         setStats(stats);
 
         // Get recent inspections with vehicle data
-        const recentOnes = userInspections.slice(0, 3).map((inspection) => ({
+        const recentOnes = (userInspections as any[]).slice(0, 3).map((inspection) => ({
           ...inspection,
           vehicle: vehicleMap.get(inspection.vehicle_id) || {
             type: 'unknown',
