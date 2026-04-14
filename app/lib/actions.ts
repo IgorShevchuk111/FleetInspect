@@ -267,7 +267,7 @@ export async function createUpdateInspection(formData: FormData, id?: string) {
     let result;
     try {
       if (id) {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('fleet_inspections')
           .update(finalData)
           .eq('id', id)
@@ -276,7 +276,7 @@ export async function createUpdateInspection(formData: FormData, id?: string) {
         if (error) throw error;
         result = data;
       } else {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('fleet_inspections')
           .insert([finalData])
           .select();
