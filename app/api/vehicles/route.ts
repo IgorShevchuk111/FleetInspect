@@ -1,4 +1,4 @@
-import { findVehicle } from '@/app/lib/data_servis';
+import { findVehicle } from '@/lib/data_servis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

@@ -1,6 +1,7 @@
-import { auth } from '@/app/features/auth/utils/auth';
-import TimesheetForm from '@/app/features/timesheets/components/TimesheetForm';
+// import { auth } from '@/app/_features/auth/auth';
+import TimesheetForm from '@/features/timesheets/components/TimesheetForm';
 import { ClockIcon } from '@heroicons/react/24/outline';
+import { createClient } from '../../../lib/supabase/client';
 
 export const metadata = {
   title: 'Timesheets',
@@ -9,9 +10,12 @@ export const metadata = {
 };
 
 export default async function TimesheetsPage() {
-  const session = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#f8faff] dark:bg-blue-950 px-4">
         <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-white mb-4 text-center">
