@@ -1,7 +1,7 @@
 // import { auth } from '@/app/_features/auth/auth';
 import TimesheetForm from '@/features/timesheets/components/TimesheetForm';
 import { ClockIcon } from '@heroicons/react/24/outline';
-import { createClient } from '../../../lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 export const metadata = {
   title: 'Timesheets',
