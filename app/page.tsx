@@ -1,37 +1,8 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getUser } from '@/lib/auth/auth';
 
-import { createClient } from '@/lib/supabase/client';
-
-const supabase = createClient();
-
-export default function HomePage() {
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setLoading(false);
-    };
-
-    getSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      },
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  if (loading) return null;
+export default async function HomePage() {
+  const user = await getUser();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -42,7 +13,7 @@ export default function HomePage() {
           </h1>
 
           <div className="flex gap-4 justify-center">
-            {session ? (
+            {user ? (
               <>
                 <Link
                   href="/inspection"

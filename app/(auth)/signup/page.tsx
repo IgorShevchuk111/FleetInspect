@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { toast, Toaster } from 'sonner';
 
 import { createClient } from '@/lib/supabase/client';
-import { createUser } from '@/features/users/services';
 
 import {
   EyeIcon,

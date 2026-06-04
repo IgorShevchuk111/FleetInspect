@@ -1,8 +1,9 @@
 import { getUserInspections } from '@/features/inspections/services';
-import InspectionList from '@/features/inspections/components/InspectionList';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import InspectionListContent from '@/features/inspections/components/InspectionListContent';
+import { getUser } from '@/lib/auth/auth';
+import { EmptyInspectionsState } from '@/features/inspections/components/EmptyInspectionsState';
+import { InspectionCardLayout } from '@/features/inspections/components/InspectionCardLayout';
+import HeaderInspections from '@/features/inspections/components/HeaderInspections';
 
 interface PageProps {
   searchParams: Promise<{
@@ -13,13 +14,10 @@ interface PageProps {
 }
 
 export default async function InspectionsPage({ searchParams }: PageProps) {
-  const supabase = await createClient();
+  const params = await searchParams;
+  const user = await getUser();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  console.log('user', user);
-  if (!user) {
+  if (!user?.id) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#f8faff] dark:bg-blue-950">
         <h1 className="text-2xl font-bold text-foreground dark:text-white mb-4">
@@ -29,51 +27,28 @@ export default async function InspectionsPage({ searchParams }: PageProps) {
     );
   }
 
-  const userId = user.id;
-  console.log('dddddd', userId);
+  const inspections = await getUserInspections(user.id);
+  const filter = params.filter ?? 'all';
+  const sortBy = params.sortBy ?? 'created_at-desc';
+  const searchQuery = params.search ?? '';
 
-  if (!userId) {
-    throw new Error('User ID not found in session');
+  if (!inspections.length) {
+    return <EmptyInspectionsState />;
   }
-
-  const inspections = await getUserInspections(userId);
-
-  // Get filter and sort parameters from URL
-  const params = await searchParams;
-  const filter = params.filter || 'all';
-  const sortBy = params.sortBy || 'created_at-desc';
-  const searchQuery = params.search || '';
 
   return (
     <div className="min-h-screen bg-[#f8faff] dark:bg-blue-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground dark:text-white">
-              Vehicle Inspections
-            </h1>
-            <p className="mt-1 text-muted-foreground dark:text-muted-foreground hidden md:block">
-              Manage and track your vehicle inspection records
-            </p>
-          </div>
-          <Link
-            href="/inspection"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <PlusIcon className="w-5 h-5" />
-            New Inspection
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-card rounded-xl shadow-sm">
-          <InspectionList
+        <HeaderInspections />
+        <InspectionCardLayout>
+          <InspectionListContent
             filter={filter}
             sortBy={sortBy}
             inspections={inspections}
             searchQuery={searchQuery}
             fromPage="inspections"
           />
-        </div>
+        </InspectionCardLayout>
       </div>
     </div>
   );

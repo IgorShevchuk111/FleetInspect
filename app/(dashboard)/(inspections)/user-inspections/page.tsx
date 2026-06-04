@@ -3,7 +3,7 @@ import {
   getAllInspections,
   getUserInspections,
 } from '@/features/inspections/services';
-import InspectionList from '@/features/inspections/components/InspectionList';
+import InspectionList from '@/features/inspections/components/InspectionListContent';
 import { UsersIcon } from '@heroicons/react/24/outline';
 import { createClient } from '@/lib/supabase/server';
 
