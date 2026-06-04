@@ -663,7 +663,7 @@
 //   );
 // }
 import { createClient } from '@/lib/supabase/client';
-import { getAllInspections } from '@/lib/data_servis';
+import { getAllInspections } from '@/features/inspections/services';
 import { redirect } from 'next/navigation';
 import { ChartBarIcon } from '@heroicons/react/24/outline';
 
