@@ -1,0 +1,67 @@
+Date : 2026-06-04 10:19:36
+Directory : /Users/igor/Desktop/fleetInspect/app
+Total : 23 files,  2570 codes, 1089 comments, 409 blanks, all 4068 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |         19 |      2,351 |      1,070 |        373 |      3,794 |
+| CSS            |          1 |        128 |          2 |         12 |        142 |
+| TypeScript     |          3 |         91 |         17 |         24 |        132 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                              | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| (auth)                                                                                            |          3 |        347 |          7 |         74 |        428 |
+| (auth)/auth                                                                                       |          1 |         16 |          0 |          7 |         23 |
+| (auth)/auth/callback                                                                              |          1 |         16 |          0 |          7 |         23 |
+| (auth)/login                                                                                      |          1 |          8 |          0 |          3 |         11 |
+| (auth)/signup                                                                                     |          1 |        323 |          7 |         64 |        394 |
+| (dashboard)                                                                                       |         11 |      1,843 |      1,058 |        282 |      3,183 |
+| (dashboard)/(inspections)                                                                         |          8 |      1,551 |         68 |        139 |      1,758 |
+| (dashboard)/(inspections)/inspection                                                              |          6 |      1,423 |         63 |        123 |      1,609 |
+| (dashboard)/(inspections)/inspection (Files)                                                      |          4 |         55 |          3 |         13 |         71 |
+| (dashboard)/(inspections)/inspection/[vehicleId]                                                  |          2 |      1,368 |         60 |        110 |      1,538 |
+| (dashboard)/(inspections)/inspections                                                             |          1 |         49 |          0 |          7 |         56 |
+| (dashboard)/(inspections)/user-inspections                                                        |          1 |         79 |          5 |          9 |         93 |
+| (dashboard)/profile                                                                               |          1 |        200 |        363 |         89 |        652 |
+| (dashboard)/reports                                                                               |          1 |         42 |        626 |         48 |        716 |
+| (dashboard)/timesheets                                                                            |          1 |         50 |          1 |          6 |         57 |
+| .                                                                                                 |         23 |      2,570 |      1,089 |        409 |      4,068 |
+| . (Files)                                                                                         |          8 |        347 |          7 |         38 |        392 |
+| api                                                                                               |          1 |         33 |         17 |         15 |         65 |
+| api/vehicles                                                                                      |          1 |         33 |         17 |         15 |         65 |
++---------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                          | language       | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| /Users/igor/Desktop/fleetInspect/app/(auth)/auth/callback/route.ts                                | TypeScript     |         16 |          0 |          7 |         23 |
+| /Users/igor/Desktop/fleetInspect/app/(auth)/login/page.tsx                                        | TypeScript JSX |          8 |          0 |          3 |         11 |
+| /Users/igor/Desktop/fleetInspect/app/(auth)/signup/page.tsx                                       | TypeScript JSX |        323 |          7 |         64 |        394 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/[vehicleId]/loading.tsx | TypeScript JSX |          4 |          0 |          2 |          6 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/[vehicleId]/page.tsx    | TypeScript JSX |      1,364 |         60 |        108 |      1,532 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/error.tsx               | TypeScript JSX |         14 |          0 |          3 |         17 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/layout.tsx              | TypeScript JSX |          7 |          0 |          1 |          8 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/loading.tsx             | TypeScript JSX |          4 |          0 |          2 |          6 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/page.tsx                | TypeScript JSX |         30 |          3 |          7 |         40 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspections/page.tsx               | TypeScript JSX |         49 |          0 |          7 |         56 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/user-inspections/page.tsx          | TypeScript JSX |         79 |          5 |          9 |         93 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/profile/page.tsx                                 | TypeScript JSX |        200 |        363 |         89 |        652 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/reports/page.tsx                                 | TypeScript JSX |         42 |        626 |         48 |        716 |
+| /Users/igor/Desktop/fleetInspect/app/(dashboard)/timesheets/page.tsx                              | TypeScript JSX |         50 |          1 |          6 |         57 |
+| /Users/igor/Desktop/fleetInspect/app/api/vehicles/route.ts                                        | TypeScript     |         33 |         17 |         15 |         65 |
+| /Users/igor/Desktop/fleetInspect/app/error.tsx                                                    | TypeScript JSX |         15 |          0 |          3 |         18 |
+| /Users/igor/Desktop/fleetInspect/app/globals.css                                                  | CSS            |        128 |          2 |         12 |        142 |
+| /Users/igor/Desktop/fleetInspect/app/layout.tsx                                                   | TypeScript JSX |         96 |          5 |          9 |        110 |
+| /Users/igor/Desktop/fleetInspect/app/loading.tsx                                                  | TypeScript JSX |          4 |          0 |          2 |          6 |
+| /Users/igor/Desktop/fleetInspect/app/metadata.ts                                                  | TypeScript     |         42 |          0 |          2 |         44 |
+| /Users/igor/Desktop/fleetInspect/app/not-found.tsx                                                | TypeScript JSX |         17 |          0 |          3 |         20 |
+| /Users/igor/Desktop/fleetInspect/app/page.tsx                                                     | TypeScript JSX |         41 |          0 |          5 |         46 |
+| /Users/igor/Desktop/fleetInspect/app/providers.tsx                                                | TypeScript JSX |          4 |          0 |          2 |          6 |
+| Total                                                                                             |                |      2,570 |      1,089 |        409 |      4,068 |
++---------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

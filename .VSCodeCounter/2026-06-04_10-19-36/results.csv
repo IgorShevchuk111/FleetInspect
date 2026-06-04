@@ -1,0 +1,25 @@
+"filename", "language", "TypeScript JSX", "CSS", "TypeScript", "comment", "blank", "total"
+"/Users/igor/Desktop/fleetInspect/app/(auth)/auth/callback/route.ts", "TypeScript", 0, 0, 16, 0, 7, 23
+"/Users/igor/Desktop/fleetInspect/app/(auth)/login/page.tsx", "TypeScript JSX", 8, 0, 0, 0, 3, 11
+"/Users/igor/Desktop/fleetInspect/app/(auth)/signup/page.tsx", "TypeScript JSX", 323, 0, 0, 7, 64, 394
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/[vehicleId]/loading.tsx", "TypeScript JSX", 4, 0, 0, 0, 2, 6
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/[vehicleId]/page.tsx", "TypeScript JSX", 1364, 0, 0, 60, 108, 1532
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/error.tsx", "TypeScript JSX", 14, 0, 0, 0, 3, 17
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/layout.tsx", "TypeScript JSX", 7, 0, 0, 0, 1, 8
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/loading.tsx", "TypeScript JSX", 4, 0, 0, 0, 2, 6
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspection/page.tsx", "TypeScript JSX", 30, 0, 0, 3, 7, 40
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/inspections/page.tsx", "TypeScript JSX", 49, 0, 0, 0, 7, 56
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/(inspections)/user-inspections/page.tsx", "TypeScript JSX", 79, 0, 0, 5, 9, 93
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/profile/page.tsx", "TypeScript JSX", 200, 0, 0, 363, 89, 652
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/reports/page.tsx", "TypeScript JSX", 42, 0, 0, 626, 48, 716
+"/Users/igor/Desktop/fleetInspect/app/(dashboard)/timesheets/page.tsx", "TypeScript JSX", 50, 0, 0, 1, 6, 57
+"/Users/igor/Desktop/fleetInspect/app/api/vehicles/route.ts", "TypeScript", 0, 0, 33, 17, 15, 65
+"/Users/igor/Desktop/fleetInspect/app/error.tsx", "TypeScript JSX", 15, 0, 0, 0, 3, 18
+"/Users/igor/Desktop/fleetInspect/app/globals.css", "CSS", 0, 128, 0, 2, 12, 142
+"/Users/igor/Desktop/fleetInspect/app/layout.tsx", "TypeScript JSX", 96, 0, 0, 5, 9, 110
+"/Users/igor/Desktop/fleetInspect/app/loading.tsx", "TypeScript JSX", 4, 0, 0, 0, 2, 6
+"/Users/igor/Desktop/fleetInspect/app/metadata.ts", "TypeScript", 0, 0, 42, 0, 2, 44
+"/Users/igor/Desktop/fleetInspect/app/not-found.tsx", "TypeScript JSX", 17, 0, 0, 0, 3, 20
+"/Users/igor/Desktop/fleetInspect/app/page.tsx", "TypeScript JSX", 41, 0, 0, 0, 5, 46
+"/Users/igor/Desktop/fleetInspect/app/providers.tsx", "TypeScript JSX", 4, 0, 0, 0, 2, 6
+"Total", "-", 2351, 128, 91, 1089, 409, 4068

@@ -1,0 +1,21 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
+"/Users/igor/Desktop/fleetInspect/features/inspections/actions.ts", "TypeScript", 154, 0, 29, 36, 219
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/EmptyInspectionsState.tsx", "TypeScript JSX", 0, 23, 1, 5, 29
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/HeaderInspections.tsx", "TypeScript JSX", 0, 24, 0, 3, 27
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionCardLayout.tsx", "TypeScript JSX", 0, 9, 0, 1, 10
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionListContent.tsx", "TypeScript JSX", 0, 30, 0, 7, 37
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionMobileCards.tsx", "TypeScript JSX", 0, 57, 0, 11, 68
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionOperations.tsx", "TypeScript JSX", 0, 31, 0, 3, 34
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionStatusBadge.tsx", "TypeScript JSX", 0, 17, 0, 4, 21
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/InspectionTable.tsx", "TypeScript JSX", 0, 88, 0, 12, 100
+"/Users/igor/Desktop/fleetInspect/features/inspections/components/TripSelector.tsx", "TypeScript JSX", 0, 36, 0, 8, 44
+"/Users/igor/Desktop/fleetInspect/features/inspections/hooks/useFilteredInspections.ts", "TypeScript", 73, 0, 0, 12, 85
+"/Users/igor/Desktop/fleetInspect/features/inspections/inspectionHelpers.ts", "TypeScript", 17, 0, 0, 1, 18
+"/Users/igor/Desktop/fleetInspect/features/inspections/inspectionStyles.ts", "TypeScript", 21, 0, 1, 3, 25
+"/Users/igor/Desktop/fleetInspect/features/inspections/services.ts", "TypeScript", 137, 0, 8, 40, 185
+"/Users/igor/Desktop/fleetInspect/features/inspections/storage.ts", "TypeScript", 19, 0, 0, 5, 24
+"/Users/igor/Desktop/fleetInspect/features/timesheets/components/TimesheetForm.tsx", "TypeScript JSX", 0, 314, 13, 16, 343
+"/Users/igor/Desktop/fleetInspect/features/vehicles/actions/searchVehicles.ts", "TypeScript", 14, 0, 0, 7, 21
+"/Users/igor/Desktop/fleetInspect/features/vehicles/components/VehicleSearch.tsx", "TypeScript JSX", 0, 58, 0, 11, 69
+"/Users/igor/Desktop/fleetInspect/features/vehicles/hooks/useVehicleSearch.ts", "TypeScript", 73, 0, 0, 21, 94
+"Total", "-", 508, 687, 52, 206, 1453
