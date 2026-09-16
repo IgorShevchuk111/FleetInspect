@@ -82,6 +82,7 @@ export default function Header() {
     >
       {({ open }) => (
         <>
+          <div className="h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600" />
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 justify-between">
               <div className="flex">

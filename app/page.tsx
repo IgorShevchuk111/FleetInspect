@@ -9,7 +9,7 @@ export default async function HomePage() {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Fleet Inspection <span className="text-blue-600">System</span>
+            Fleet <span className="text-primary">Inspection</span>
           </h1>
 
           <div className="flex gap-4 justify-center">
@@ -17,14 +17,14 @@ export default async function HomePage() {
               <>
                 <Link
                   href="/inspection"
-                  className="px-6 py-4 bg-blue-600 text-white rounded-lg"
+                  className="px-5 py-4 bg-primary text-white rounded-lg"
                 >
                   Start Inspection
                 </Link>
 
                 <Link
                   href="/inspections"
-                  className="px-6 py-4 border border-blue-600 text-blue-600 rounded-lg"
+                  className="px-5 py-4 border border-blue-600 text-blue-600 rounded-lg"
                 >
                   View Inspections
                 </Link>

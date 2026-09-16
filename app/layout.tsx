@@ -1,9 +1,9 @@
 import { Inter } from 'next/font/google';
 import Header from '@/components/layout/Header';
 import './globals.css';
-import { Providers } from './providers';
 import Footer from '@/components/layout/Footer';
 import Main from '@/components/layout/Main';
+import 'leaflet/dist/leaflet.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -91,18 +91,9 @@ export default function RootLayout({
       <body
         className={`h-full bg-gradient-to-b from-blue-50 to-white dark:from-blue-900 dark:to-blue-800 ${inter.className}`}
       >
-        <Providers>
-          <div className="min-h-full flex flex-col">
-            {/* Top accent line */}
-            <div className="h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600" />
-
-            <div className="relative z-[1000]">
-              <Header />
-            </div>
-            <Main>{children}</Main>
-            <Footer />
-          </div>
-        </Providers>
+        <Header />
+        <Main>{children}</Main>
+        <Footer />
       </body>
     </html>
   );

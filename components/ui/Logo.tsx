@@ -8,7 +8,7 @@ interface LogoProps {
 export default function Logo({ className = '', showLink = true }: LogoProps) {
   const logoContent = (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
         <svg
           className="w-5 h-5 text-white"
           fill="none"
@@ -25,7 +25,7 @@ export default function Logo({ className = '', showLink = true }: LogoProps) {
         </svg>
       </div>
       <span className="text-xl font-bold text-gray-900">
-        Fleet<span className="text-blue-600">Inspect</span>
+        Fleet<span className="text-primary">Inspect</span>
       </span>
     </div>
   );

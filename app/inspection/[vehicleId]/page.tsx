@@ -1423,7 +1423,7 @@ export default function InspectionDetailsPage() {
                         className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
                       >
                         <svg
-                          className="w-3 h-3 sm:w-4 sm:h-4"
+                          className="w-3 h-3 s         m:w-4 sm:h-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
