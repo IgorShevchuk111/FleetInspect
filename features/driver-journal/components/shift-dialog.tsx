@@ -5,6 +5,17 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -30,6 +41,7 @@ type ShiftDialogProps = {
   shift?: Shift | null;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ShiftFormData) => void;
+  onDelete?: () => void;
 };
 
 function getCurrentTime() {
@@ -87,8 +99,11 @@ export function ShiftDialog({
   shift,
   onOpenChange,
   onSubmit,
+  onDelete,
 }: ShiftDialogProps) {
   const [form, setForm] = useState<ShiftFormData>(getInitialForm());
+
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const isEditing = Boolean(shift);
 
@@ -126,86 +141,131 @@ export function ShiftDialog({
     onOpenChange(false);
   }
 
+  function handleDelete() {
+    if (!onDelete) {
+      return;
+    }
+
+    onDelete();
+    setIsDeleteConfirmOpen(false);
+    onOpenChange(false);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit shift' : 'Add shift'}</DialogTitle>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isEditing ? 'Edit shift' : 'Add shift'}</DialogTitle>
 
-          <DialogDescription>
-            {isEditing
-              ? 'Update the details of your driving shift.'
-              : 'Enter the details of your driving shift.'}
-          </DialogDescription>
-        </DialogHeader>
+            <DialogDescription>
+              {isEditing
+                ? 'Update the details of your driving shift.'
+                : 'Enter the details of your driving shift.'}
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-
-            <Input
-              id="date"
-              type="date"
-              value={form.date}
-              onChange={(event) => updateField('date', event.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="start">Start</Label>
+              <Label htmlFor="date">Date</Label>
 
               <Input
-                id="start"
-                type="time"
-                value={form.start}
-                onChange={(event) => updateField('start', event.target.value)}
+                id="date"
+                type="date"
+                value={form.date}
+                onChange={(event) => updateField('date', event.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="end">End</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start">Start</Label>
 
-              <Input
-                id="end"
-                type="time"
-                value={form.end}
-                onChange={(event) => updateField('end', event.target.value)}
+                <Input
+                  id="start"
+                  type="time"
+                  value={form.start}
+                  onChange={(event) => updateField('start', event.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="end">End</Label>
+
+                <Input
+                  id="end"
+                  type="time"
+                  value={form.end}
+                  onChange={(event) => updateField('end', event.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <DurationInputField
+                label="Driving"
+                value={form.driving}
+                onChange={(value) => updateField('driving', value)}
+              />
+
+              <DurationInputField
+                label="Shift"
+                value={form.shift}
+                onChange={(value) => updateField('shift', value)}
+              />
+
+              <DurationInputField
+                label="Break"
+                value={form.break}
+                onChange={(value) => updateField('break', value)}
               />
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <DurationInputField
-              label="Driving"
-              value={form.driving}
-              onChange={(value) => updateField('driving', value)}
-            />
+            <DialogFooter>
+              {isEditing && onDelete && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                  className="mr-auto"
+                >
+                  Delete
+                </Button>
+              )}
 
-            <DurationInputField
-              label="Shift"
-              value={form.shift}
-              onChange={(value) => updateField('shift', value)}
-            />
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
 
-            <DurationInputField
-              label="Break"
-              value={form.break}
-              onChange={(value) => updateField('break', value)}
-            />
-          </div>
+              <Button type="submit">
+                {isEditing ? 'Save changes' : 'Add shift'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
+      <AlertDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete shift?</AlertDialogTitle>
 
-            <Button type="submit">
-              {isEditing ? 'Save changes' : 'Add shift'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <AlertDialogDescription>
+              This action cannot be undone. This shift will be permanently
+              removed from the journal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

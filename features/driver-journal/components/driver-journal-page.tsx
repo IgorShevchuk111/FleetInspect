@@ -16,6 +16,7 @@ export default function DriverJournalPage() {
     startEditingShift,
     updateShift,
     cancelEditingShift,
+    deleteShift,
   } = useDriverJournal();
 
   return (
@@ -36,6 +37,7 @@ export default function DriverJournalPage() {
         onSubmit={
           editingShift ? (data) => updateShift(editingShift.id, data) : addShift
         }
+        onDelete={editingShift ? () => deleteShift(editingShift.id) : undefined}
       />
     </div>
   );

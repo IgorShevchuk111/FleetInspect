@@ -66,6 +66,14 @@ export function useDriverJournal() {
         setEditingShift(null);
     }
 
+    function deleteShift(shiftId: string) {
+        setShifts((current) =>
+            current.filter((shift) => shift.id !== shiftId),
+        );
+
+        setEditingShift(null);
+    }
+
     return {
         shifts,
         isAddShiftOpen,
@@ -75,5 +83,6 @@ export function useDriverJournal() {
         startEditingShift,
         updateShift,
         cancelEditingShift,
+        deleteShift,
     };
 }
