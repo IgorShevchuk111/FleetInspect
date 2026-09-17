@@ -8,6 +8,7 @@ import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
   shifts: Shift[];
+  onEdit: (shift: Shift) => void;
 };
 
 function groupShiftsByWeek(shifts: Shift[]) {
@@ -36,7 +37,7 @@ function groupShiftsByWeek(shifts: Shift[]) {
     }));
 }
 
-export function ShiftsTable({ shifts }: ShiftsTableProps) {
+export function ShiftsTable({ shifts, onEdit }: ShiftsTableProps) {
   const weeks = groupShiftsByWeek(shifts);
 
   if (weeks.length === 0) {
@@ -62,6 +63,7 @@ export function ShiftsTable({ shifts }: ShiftsTableProps) {
           key={weekStart.getTime()}
           weekStart={weekStart}
           shifts={shifts}
+          onEdit={onEdit}
         />
       ))}
     </div>

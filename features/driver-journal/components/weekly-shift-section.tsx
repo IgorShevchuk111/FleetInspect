@@ -31,11 +31,13 @@ import { WeeklySummary } from './weekly-summary';
 type WeeklyShiftSectionProps = {
   weekStart: Date;
   shifts: Shift[];
+  onEdit: (shift: Shift) => void;
 };
 
 export function WeeklyShiftSection({
   weekStart,
   shifts,
+  onEdit,
 }: WeeklyShiftSectionProps) {
   const totals: JournalTotals = calculateTotals(shifts);
 
@@ -73,7 +75,18 @@ export function WeeklyShiftSection({
 
             <TableBody>
               {sortedShifts.map((shift) => (
-                <TableRow key={shift.id}>
+                <TableRow
+                  key={shift.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  tabIndex={0}
+                  onClick={() => onEdit(shift)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onEdit(shift);
+                    }
+                  }}
+                >
                   <TableCell className="font-medium">{shift.date}</TableCell>
 
                   <TableCell>{shift.start}</TableCell>

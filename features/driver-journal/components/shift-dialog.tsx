@@ -16,12 +16,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-import type { ShiftFormData } from '@/features/driver-journal/types/ driver-journal';
+import type {
+  Shift,
+  ShiftFormData,
+} from '@/features/driver-journal/types/ driver-journal';
+
+import { minutesToDuration } from '../utils/driver-journal';
 
 import { DurationInputField } from './duration-input';
 
 type ShiftDialogProps = {
   open: boolean;
+  shift?: Shift | null;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ShiftFormData) => void;
 };
@@ -48,40 +54,56 @@ function getTodayDate() {
 function getInitialForm(): ShiftFormData {
   return {
     date: getTodayDate(),
-
     start: getCurrentTime(),
-
     driving: {
       hours: 0,
       minutes: 0,
     },
-
     shift: {
       hours: 0,
       minutes: 0,
     },
-
     break: {
       hours: 0,
       minutes: 0,
     },
-
     end: '',
+  };
+}
+
+function getShiftForm(shift: Shift): ShiftFormData {
+  return {
+    date: shift.date,
+    start: shift.start,
+    driving: minutesToDuration(shift.driving),
+    shift: minutesToDuration(shift.shift),
+    break: minutesToDuration(shift.break),
+    end: shift.end,
   };
 }
 
 export function ShiftDialog({
   open,
+  shift,
   onOpenChange,
   onSubmit,
 }: ShiftDialogProps) {
   const [form, setForm] = useState<ShiftFormData>(getInitialForm());
 
+  const isEditing = Boolean(shift);
+
   useEffect(() => {
-    if (open) {
-      setForm(getInitialForm());
+    if (!open) {
+      return;
     }
-  }, [open]);
+
+    if (shift) {
+      setForm(getShiftForm(shift));
+      return;
+    }
+
+    setForm(getInitialForm());
+  }, [open, shift]);
 
   function updateField(
     field: keyof ShiftFormData,
@@ -97,8 +119,6 @@ export function ShiftDialog({
     event.preventDefault();
 
     onSubmit(form);
-
-    setForm(getInitialForm());
   }
 
   function handleCancel() {
@@ -110,15 +130,16 @@ export function ShiftDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add shift</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit shift' : 'Add shift'}</DialogTitle>
 
           <DialogDescription>
-            Enter the details of your driving shift.
+            {isEditing
+              ? 'Update the details of your driving shift.'
+              : 'Enter the details of your driving shift.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
 
@@ -130,7 +151,6 @@ export function ShiftDialog({
             />
           </div>
 
-          {/* Start / End */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start">Start</Label>
@@ -155,7 +175,6 @@ export function ShiftDialog({
             </div>
           </div>
 
-          {/* Durations */}
           <div className="space-y-4">
             <DurationInputField
               label="Driving"
@@ -181,7 +200,9 @@ export function ShiftDialog({
               Cancel
             </Button>
 
-            <Button type="submit">Add shift</Button>
+            <Button type="submit">
+              {isEditing ? 'Save changes' : 'Add shift'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

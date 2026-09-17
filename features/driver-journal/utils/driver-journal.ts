@@ -14,6 +14,13 @@ export function durationToMinutes({
     return hours * 60 + minutes;
 }
 
+export function minutesToDuration(minutes: number) {
+    return {
+        hours: Math.floor(minutes / 60),
+        minutes: minutes % 60,
+    };
+}
+
 export function formatDuration(minutes: number) {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
