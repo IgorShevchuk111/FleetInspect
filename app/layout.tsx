@@ -88,9 +88,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="FleetInspect" />
       </head>
-      <body
-        className={`h-full bg-gradient-to-b from-blue-50 to-white dark:from-blue-900 dark:to-blue-800 ${inter.className}`}
-      >
+      <body className={`h-full ${inter.className}`}>
         <Header />
         <Main>{children}</Main>
         <Footer />

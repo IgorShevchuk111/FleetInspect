@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
-import { searchVehicles } from '@/features/vehicles/actions/searchVehicles';
+import { searchVehicles } from '@/features/fleet-inspection/vehicles/actions/searchVehicles';
 import { Database } from '@/types/supabase/database';
 
 type Vehicle = Database['public']['Tables']['vehicles']['Row'];
@@ -79,7 +79,7 @@ export function useVehicleSearch(
         if (!selectedTrip) return;
 
         router.push(
-            `/inspection/${vehicleId}?trip=${selectedTrip}`,
+            `/fleet-inspection/inspection/${vehicleId}?trip=${selectedTrip}`,
         );
     };
 

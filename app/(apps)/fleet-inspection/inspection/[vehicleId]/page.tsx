@@ -43,8 +43,8 @@ import Image from 'next/image';
 import {
   getInspectionForm,
   getInspection,
-} from '@/features/inspections/services';
-import { createUpdateInspection } from '@/features/inspections/actions';
+} from '@/features/fleet-inspection/inspections/services';
+import { createUpdateInspection } from '@/features/fleet-inspection/inspections/actions';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/types/supabase/database';
 import { compressImage } from '@/lib/images/compressImage';
@@ -663,7 +663,7 @@ export default function InspectionDetailsPage() {
         setSubmitAttempted(false); // Reset for next time
         setAutoFillUsed(false); // Reset auto-fill state
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        router.push('/inspections');
+        router.push('/fleet-inspection/inspections');
       } else {
         throw new Error('Failed to submit inspection');
       }
@@ -758,7 +758,7 @@ export default function InspectionDetailsPage() {
                           ? '/user-inspections'
                           : searchParams.get('from') === 'inspections'
                             ? '/inspections'
-                            : '/inspections'
+                            : '/fleet-inspection/inspections'
                     }
                     className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-primary-50 dark:hover:bg-muted rounded-lg transition-colors"
                   >

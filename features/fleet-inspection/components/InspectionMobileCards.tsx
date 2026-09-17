@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { TruckIcon, UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
-import { formatDate } from '@/features/inspections/inspectionStyles';
+import { formatDate } from '@/features/fleet-inspection/inspections/inspectionStyles';
 import InspectionStatusBadge from './InspectionStatusBadge';
 
 export default function InspectionMobileCards({ inspections, fromPage }: any) {

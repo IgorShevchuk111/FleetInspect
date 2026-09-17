@@ -1,5 +1,5 @@
-import { TripSelector } from '@/features/inspections/components/TripSelector';
-import VehicleSearch from '@/features/vehicles/components/VehicleSearch';
+import { TripSelector } from '@/features/fleet-inspection/components/TripSelector';
+import VehicleSearch from '@/features/fleet-inspection/vehicles/components/VehicleSearch';
 
 interface PageProps {
   searchParams: Promise<{

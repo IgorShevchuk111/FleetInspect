@@ -1,7 +1,7 @@
 'use client';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useVehicleSearch } from '@/features/vehicles/hooks/useVehicleSearch';
+import { useVehicleSearch } from '@/features/fleet-inspection/vehicles/hooks/useVehicleSearch';
 
 interface VehicleSearchProps {
   selectedTrip: string | null;

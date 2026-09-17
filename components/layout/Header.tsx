@@ -28,13 +28,13 @@ const publicNavigation: any[] = [];
 
 const privateNavigation = [
   // { name: 'Dashboard', href: '/' },
-  { name: 'Inspections', href: '/inspections' },
-  { name: 'Timesheets', href: '/timesheets' },
-  { name: 'Reports', href: '/reports' },
+  { name: 'Inspections', href: '/fleet-inspection/inspections' },
+  { name: 'Timesheets', href: '/fleet-inspection/timesheets' },
+  { name: 'Reports', href: '/fleet-inspection/reports' },
 ];
 
 const adminNavigation = [
-  { name: 'All User Inspections', href: '/user-inspections' },
+  { name: 'All User Inspections', href: '/fleet-inspection/user-inspections' },
 ];
 
 export default function Header() {

@@ -1,4 +1,4 @@
-import { getAllInspections } from '@/features/inspections/services';
+import { getAllInspections } from '@/features/fleet-inspection/inspections/services';
 import { redirect } from 'next/navigation';
 import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { getUser } from '@/lib/auth/auth';

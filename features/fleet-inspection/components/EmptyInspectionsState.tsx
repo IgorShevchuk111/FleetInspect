@@ -16,7 +16,7 @@ export function EmptyInspectionsState() {
         </p>
 
         <Link
-          href="/inspection"
+          href="/fleet-inspection/inspection"
           className="inline-flex mt-6 items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <PlusIcon className="w-5 h-5" />

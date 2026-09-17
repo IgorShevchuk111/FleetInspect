@@ -3,7 +3,7 @@
 import InspectionOperations from './InspectionOperations';
 import InspectionMobileCards from './InspectionMobileCards';
 import InspectionTable from './InspectionTable';
-import { useFilteredInspections } from '@/features/inspections/hooks/useFilteredInspections';
+import { useFilteredInspections } from '@/features/fleet-inspection/inspections/hooks/useFilteredInspections';
 
 export default function InspectionListContent(props: any) {
   const data = useFilteredInspections(props);

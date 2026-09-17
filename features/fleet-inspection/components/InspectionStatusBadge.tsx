@@ -3,7 +3,7 @@
 import {
   getStatusIcon,
   getStatusColor,
-} from '@/features/inspections/inspectionStyles';
+} from '@/features/fleet-inspection/inspections/inspectionStyles';
 
 export default function InspectionStatusBadge({ status }: { status: string }) {
   const Icon = getStatusIcon(status);

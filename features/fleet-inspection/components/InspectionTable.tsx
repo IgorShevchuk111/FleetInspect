@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { formatDate } from '@/features/inspections/inspectionStyles';
+import { formatDate } from '@/features/fleet-inspection/inspections/inspectionStyles';
 import InspectionStatusBadge from './InspectionStatusBadge';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 

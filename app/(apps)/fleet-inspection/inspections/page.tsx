@@ -1,9 +1,9 @@
-import { getUserInspections } from '@/features/inspections/services';
-import InspectionListContent from '@/features/inspections/components/InspectionListContent';
+import { getUserInspections } from '@/features/fleet-inspection/inspections/services';
+import InspectionListContent from '@/features/fleet-inspection/components/InspectionListContent';
 import { getUser } from '@/lib/auth/auth';
-import { EmptyInspectionsState } from '@/features/inspections/components/EmptyInspectionsState';
-import { InspectionCardLayout } from '@/features/inspections/components/InspectionCardLayout';
-import HeaderInspections from '@/features/inspections/components/HeaderInspections';
+import { EmptyInspectionsState } from '@/features/fleet-inspection//components/EmptyInspectionsState';
+import { InspectionCardLayout } from '@/features/fleet-inspection/components/InspectionCardLayout';
+import HeaderInspections from '@/features/fleet-inspection/components/HeaderInspections';
 
 interface PageProps {
   searchParams: Promise<{
