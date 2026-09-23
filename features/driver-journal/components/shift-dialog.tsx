@@ -117,7 +117,7 @@ function SectionHeader({
   title: string;
 }) {
   return (
-    <div className="mb-3 flex items-center gap-2">
+    <div className="mb-3 flex min-w-0 items-center gap-2">
       {' '}
       <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
         {' '}
@@ -207,7 +207,7 @@ export function ShiftDialog({
       {' '}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-xl flex-col gap-0 overflow-hidden p-0 sm:max-h-[90vh]"
+          className="flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90vh] sm:max-w-xl"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
           }}
@@ -236,11 +236,11 @@ export function ShiftDialog({
           </DialogHeader>
           <form
             onSubmit={handleSubmit}
-            className="flex min-h-0 flex-1 flex-col"
+            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
           >
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-              <div className="space-y-4 px-4 py-4 sm:px-6">
-                <section>
+            <div className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain">
+              <div className="min-w-0 space-y-4 px-4 py-4 sm:px-6">
+                <section className="min-w-0">
                   <SectionHeader icon={CalendarDays} title="Shift times" />
 
                   <div className="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -260,7 +260,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('date', event.target.value)
                           }
-                          className="min-w-0"
+                          className="min-w-0 max-w-full"
                         />
 
                         <Input
@@ -270,7 +270,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('start', event.target.value)
                           }
-                          className="min-w-0"
+                          className="min-w-0 max-w-full"
                         />
                       </div>
                     </div>
@@ -291,7 +291,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('endDate', event.target.value)
                           }
-                          className="min-w-0"
+                          className="min-w-0 max-w-full"
                         />
 
                         <Input
@@ -301,14 +301,14 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('end', event.target.value)
                           }
-                          className="min-w-0"
+                          className="min-w-0 max-w-full"
                         />
                       </div>
                     </div>
                   </div>
                 </section>
 
-                <section className="border-t pt-4">
+                <section className="min-w-0 border-t pt-4">
                   <SectionHeader icon={Timer} title="Driving & break" />
 
                   <div className="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -330,7 +330,7 @@ export function ShiftDialog({
                   </div>
                 </section>
 
-                <section className="border-t pt-4">
+                <section className="min-w-0 border-t pt-4">
                   <SectionHeader icon={Moon} title="Rest & earnings" />
 
                   <div className="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -348,7 +348,10 @@ export function ShiftDialog({
                           updateField('restType', value as RestType)
                         }
                       >
-                        <SelectTrigger id="rest-type" className="w-full">
+                        <SelectTrigger
+                          id="rest-type"
+                          className="w-full min-w-0"
+                        >
                           <SelectValue placeholder="Select rest type" />
                         </SelectTrigger>
 
@@ -373,7 +376,7 @@ export function ShiftDialog({
                         Earn (£)
                       </Label>
 
-                      <div className="relative">
+                      <div className="relative min-w-0">
                         <Banknote className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
                         <Input
@@ -386,7 +389,7 @@ export function ShiftDialog({
                           onFocus={handleEarnFocus}
                           onBlur={handleEarnBlur}
                           onChange={handleEarnChange}
-                          className="pl-9"
+                          className="min-w-0 max-w-full pl-9"
                         />
                       </div>
                     </div>

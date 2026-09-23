@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
 import {
   Table,
   TableBody,
@@ -14,21 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import { formatWeek } from '../utils/dates';
 import { calculateShiftMinutes } from '../utils/shifts';
 import { calculateWeeklySummary } from '../utils/weekly-summary';
-
 import {
   buildExtendedDrivingUsage,
   buildSharedAllowanceUsage,
-  MAX_EXTENDED_DRIVING_DAYS,
-  MAX_SHARED_ALLOWANCE,
   normalizeDrivingMinutes,
 } from '../utils/compliance-usage';
-
 import {
   getDrivingStatus,
   getRestStatus,
@@ -36,7 +30,6 @@ import {
   hasExtendedShift,
   isReducedDailyRest,
 } from './shift-status';
-
 import { ShiftRow } from './shift-row';
 import { WeeklySummary } from './weekly-summary';
 
@@ -70,24 +63,25 @@ export function WeeklyShiftSection({
 
   return (
     <Card className="overflow-hidden rounded-xl border">
+      {' '}
       <CardHeader className="border-b bg-muted/30 px-4 py-2.5 sm:px-6 sm:py-4">
+        {' '}
         <div className="flex items-center justify-between gap-2">
+          {' '}
           <div className="min-w-0">
+            {' '}
             <CardTitle className="text-lg font-semibold leading-tight">
-              {formatWeek(weekStart)}
+              {formatWeek(weekStart)}{' '}
             </CardTitle>
-
             <CardDescription className="mt-1 text-sm leading-tight">
               {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
             </CardDescription>
           </div>
-
           <div className="shrink-0 text-sm leading-tight text-muted-foreground">
             Mon – Sun
           </div>
         </div>
       </CardHeader>
-
       <CardContent className="p-0">
         <div className="overflow-x-auto overscroll-x-contain">
           <Table className="min-w-[466px] text-sm sm:min-w-[690px]">
@@ -200,6 +194,10 @@ export function WeeklyShiftSection({
                     drivingStatus={drivingStatus}
                     shiftStatus={shiftStatus}
                     restStatus={restStatus}
+                    drivingUsageAfter={drivingUsageAfter}
+                    sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
+                    reducedDailyRest={reducedDailyRest}
+                    extendedShift={extendedShift}
                     onEdit={onEdit}
                   />
                 );
