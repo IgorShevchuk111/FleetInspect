@@ -1,4 +1,3 @@
-
 import type {
     DurationInput,
     JournalTotals,
@@ -20,14 +19,6 @@ const MINIMUM_REDUCED_WEEKLY_REST = 24 * 60;
 
 const REGULAR_SHIFT_SPREAD = 13 * 60;
 const MAX_SHIFT_SPREAD = 15 * 60;
-
-export type RestStatus =
-    | 'daily-invalid'
-    | 'daily-reduced'
-    | 'daily-full'
-    | 'weekly-invalid'
-    | 'weekly-reduced'
-    | 'weekly-full';
 
 export function durationToMinutes(duration: DurationInput): number;
 export function durationToMinutes(
@@ -237,16 +228,6 @@ export function calculateShiftTotals(
     );
 }
 
-export function isSameWeek(
-    dateA: Date,
-    dateB: Date,
-): boolean {
-    return (
-        getStartOfWeek(dateA).getTime() ===
-        getStartOfWeek(dateB).getTime()
-    );
-}
-
 export function getShiftsForWeek(
     shifts: Shift[],
     weekStart: Date,
@@ -286,42 +267,6 @@ function sortShiftsChronologically(
             dateB.getTime()
         );
     });
-}
-
-export function getRestStatus(
-    shift: Shift,
-): RestStatus {
-    const rest = Number(shift.rest) || 0;
-
-    if (shift.restType === 'weekly') {
-        if (
-            rest >= REGULAR_WEEKLY_REST
-        ) {
-            return 'weekly-full';
-        }
-
-        if (
-            rest >= MINIMUM_REDUCED_WEEKLY_REST
-        ) {
-            return 'weekly-reduced';
-        }
-
-        return 'weekly-invalid';
-    }
-
-    if (
-        rest >= REGULAR_DAILY_REST
-    ) {
-        return 'daily-full';
-    }
-
-    if (
-        rest >= REDUCED_DAILY_REST
-    ) {
-        return 'daily-reduced';
-    }
-
-    return 'daily-invalid';
 }
 
 export function countExtendedDrivingDays(
@@ -417,14 +362,6 @@ export function calculateDailyRestCompliance(
                 reducedUsed,
             ),
     };
-}
-
-export function calculateReducedDailyRestRemaining(
-    shifts: Shift[],
-): number {
-    return calculateDailyRestCompliance(
-        shifts,
-    ).reducedDailyRestRemaining;
 }
 
 export function getWeeklyRestStatus(
@@ -653,12 +590,6 @@ export function calculateWeeklySummary(
             dailyRestCompliance.reducedDailyRestUsed,
 
         reducedDailyRestRemaining:
-            dailyRestCompliance.reducedDailyRestRemaining,
-
-        // Kept for compatibility with WeeklySummaryData.
-        extendedSpreadUsed: 0,
-
-        extendedSpreadDaysRemaining:
             dailyRestCompliance.reducedDailyRestRemaining,
 
         average17WeekWorking:

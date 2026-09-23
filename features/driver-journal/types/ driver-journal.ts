@@ -24,7 +24,6 @@ export type ShiftFormData = {
     start: string;
     driving: DurationInput;
     break: DurationInput;
-    rest: DurationInput;
     restType: RestType;
     end: string;
     endDate: string;
@@ -38,4 +37,4 @@ export type JournalTotals = {
     rest: number;
     working: number;
     earn: number;
-};  
+};
