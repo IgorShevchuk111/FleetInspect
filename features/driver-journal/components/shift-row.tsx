@@ -2,7 +2,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { formatDuration } from '../utils/driver-journal';
+import { formatDuration } from '../utils/duration';
 
 import type {
   getDrivingStatus,

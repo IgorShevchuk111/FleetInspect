@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { getStartOfWeek } from '../utils/driver-journal';
+import { getStartOfWeek } from '../utils/dates';
 
 import { WeeklyShiftSection } from './weekly-shift-section';
 

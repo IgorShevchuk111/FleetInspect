@@ -37,7 +37,7 @@ import type {
   ShiftFormData,
 } from '@/features/driver-journal/types/ driver-journal';
 
-import { minutesToDuration } from '@/features/driver-journal/utils/driver-journal';
+import { minutesToDuration } from '@/features/driver-journal/utils/duration';
 
 import { DurationInputField } from './duration-input';
 

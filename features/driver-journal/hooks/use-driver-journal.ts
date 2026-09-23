@@ -14,10 +14,8 @@ import type {
     ShiftFormData,
 } from '@/features/driver-journal/types/ driver-journal';
 
-import {
-    calculateShiftMinutes,
-    durationToMinutes,
-} from '@/features/driver-journal/utils/driver-journal';
+import { durationToMinutes } from '@/features/driver-journal/utils/duration';
+import { calculateShiftMinutes } from '@/features/driver-journal/utils/shifts';
 
 function getDateTime(date: string, time: string) {
     if (!date || !time) {

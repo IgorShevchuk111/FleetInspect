@@ -11,11 +11,8 @@ import {
 
 import { Button } from '@/components/ui/button';
 
-import {
-  formatDuration,
-  getEndOfWeek,
-  getStartOfWeek,
-} from '../utils/driver-journal';
+import { formatDuration } from '../utils/duration';
+import { getEndOfWeek, getStartOfWeek } from '../utils/dates';
 
 type WeeklySummaryData = {
   driving: number;

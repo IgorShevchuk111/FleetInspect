@@ -1,6 +1,6 @@
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { calculateShiftMinutes } from '../utils/driver-journal';
+import { calculateShiftMinutes } from '../utils/shifts';
 
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;

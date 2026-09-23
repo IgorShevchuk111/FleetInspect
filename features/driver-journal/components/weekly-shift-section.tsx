@@ -17,11 +17,9 @@ import {
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import {
-  calculateShiftMinutes,
-  calculateWeeklySummary,
-  formatWeek,
-} from '../utils/driver-journal';
+import { calculateShiftMinutes } from '../utils/shifts';
+import { calculateWeeklySummary } from '../utils/weekly-summary';
+import { formatWeek } from '../utils/dates';
 
 import {
   getDrivingStatus,
