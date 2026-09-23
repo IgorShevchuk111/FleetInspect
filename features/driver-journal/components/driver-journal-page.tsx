@@ -20,7 +20,7 @@ export default function DriverJournalPage() {
   } = useDriverJournal();
 
   return (
-    <div className="mx-auto max-w-7xl px-2 py-8 sm:px-6 sm:py-14 lg:px-8">
+    <div className="mx-auto max-w-7xl px-2 py-2 sm:px-6 sm:py-14 lg:px-8">
       <JournalHeader onAddShift={() => setIsAddShiftOpen(true)} />
 
       <ShiftsTable shifts={shifts} onEdit={startEditingShift} />

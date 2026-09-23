@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
 import {
   Table,
   TableBody,
@@ -14,12 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
+import { formatWeek } from '../utils/dates';
 import { calculateShiftMinutes } from '../utils/shifts';
 import { calculateWeeklySummary } from '../utils/weekly-summary';
-import { formatWeek } from '../utils/dates';
 import {
   buildExtendedDrivingUsage,
   buildSharedAllowanceUsage,
@@ -27,7 +25,6 @@ import {
   MAX_SHARED_ALLOWANCE,
   normalizeDrivingMinutes,
 } from '../utils/compliance-usage';
-
 import {
   getDrivingStatus,
   getRestStatus,
@@ -35,7 +32,6 @@ import {
   hasExtendedShift,
   isReducedDailyRest,
 } from './shift-status';
-
 import { ShiftRow } from './shift-row';
 import { WeeklySummary } from './weekly-summary';
 
@@ -45,6 +41,9 @@ type WeeklyShiftSectionProps = {
   allShifts: Shift[];
   onEdit: (shift: Shift) => void;
 };
+
+const headerClass =
+  'px-2 py-2.5 text-center text-xs font-medium text-muted-foreground sm:px-4 sm:py-3 sm:text-sm';
 
 export function WeeklyShiftSection({
   weekStart,
@@ -56,62 +55,84 @@ export function WeeklyShiftSection({
 
   const sortedShifts = [...shifts].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start}`).getTime();
-
     const dateB = new Date(`${b.date}T${b.start}`).getTime();
 
     return dateB - dateA;
   });
 
   const sharedAllowanceUsage = buildSharedAllowanceUsage(allShifts);
-
   const extendedDrivingUsage = buildExtendedDrivingUsage(shifts);
 
   return (
-    <Card className="rounded-none border-0 shadow-none sm:rounded-xl sm:border sm:shadow-sm">
-      <CardHeader className="px-0 py-3 sm:px-6 sm:py-6">
-        <CardTitle className="text-base sm:text-lg">
-          {formatWeek(weekStart)}
-        </CardTitle>
+    <Card className="overflow-hidden rounded-xl border shadow-sm">
+      <CardHeader className="border-b bg-muted/30 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <CardTitle className="text-base font-semibold sm:text-lg">
+              {formatWeek(weekStart)}
+            </CardTitle>
 
-        <CardDescription className="text-xs sm:text-sm">
-          {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
-        </CardDescription>
+            <CardDescription className="mt-1 text-xs sm:text-sm">
+              {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
+            </CardDescription>
+          </div>
+
+          <div className="shrink-0 rounded-md border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground">
+            Mon – Sun
+          </div>
+        </div>
       </CardHeader>
 
-      <CardContent className="px-0 pb-3 sm:px-6 sm:pb-6">
-        <div className="overflow-x-auto">
-          <Table className="min-w-[429px] text-[10px] sm:min-w-[850px] sm:text-sm">
+      <CardContent className="p-0">
+        <div className="overflow-x-auto overscroll-x-contain">
+          <Table className="min-w-[650px] text-xs sm:min-w-[850px] sm:text-sm">
             <TableHeader>
-              <TableRow>
-                <TableHead className="sticky left-0 z-30 w-[38px] min-w-[38px] bg-background px-0.5 py-1.5 text-[9px] shadow-[2px_0_3px_-2px_rgba(0,0,0,0.25)] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2 sm:text-sm">
+              <TableRow className="hover:bg-transparent">
+                <TableHead
+                  className={`${headerClass} sticky left-0 z-30 w-[72px] min-w-[72px] bg-background shadow-[2px_0_3px_-2px_rgba(0,0,0,0.2)] sm:w-[110px] sm:min-w-[110px]`}
+                >
                   Start
                 </TableHead>
 
-                <TableHead className="w-[58px] min-w-[58px] px-0.5 py-1.5 text-[9px] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[82px] min-w-[82px] sm:w-[110px] sm:min-w-[110px]`}
+                >
                   Driving
                 </TableHead>
 
-                <TableHead className="w-[55px] min-w-[55px] px-0.5 py-1.5 text-[9px] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[78px] min-w-[78px] sm:w-[110px] sm:min-w-[110px]`}
+                >
                   Shift
                 </TableHead>
 
-                <TableHead className="w-[32px] min-w-[32px] px-0.5 py-1.5 text-[9px] sm:w-[90px] sm:min-w-[90px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[58px] min-w-[58px] sm:w-[90px] sm:min-w-[90px]`}
+                >
                   Break
                 </TableHead>
 
-                <TableHead className="w-[64px] min-w-[64px] px-0.5 py-1.5 text-[9px] sm:w-[120px] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[92px] min-w-[92px] sm:w-[120px] sm:min-w-[120px]`}
+                >
                   Rest
                 </TableHead>
 
-                <TableHead className="w-[45px] min-w-[45px] px-0.5 py-1.5 text-[9px] sm:w-[100px] sm:min-w-[100px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[72px] min-w-[72px] sm:w-[100px] sm:min-w-[100px]`}
+                >
                   Earn
                 </TableHead>
 
-                <TableHead className="w-[45px] min-w-[45px] px-0.5 py-1.5 text-[9px] sm:w-[120px] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} w-[82px] min-w-[82px] sm:w-[120px] sm:min-w-[120px]`}
+                >
                   Working
                 </TableHead>
 
-                <TableHead className="sticky right-0 z-30 w-[38px] min-w-[38px] bg-background px-0.5 py-1.5 text-[9px] shadow-[-2px_0_3px_-2px_rgba(0,0,0,0.25)] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2 sm:text-sm">
+                <TableHead
+                  className={`${headerClass} sticky right-0 z-30 w-[72px] min-w-[72px] bg-background shadow-[-2px_0_3px_-2px_rgba(0,0,0,0.2)] sm:w-[110px] sm:min-w-[110px]`}
+                >
                   End
                 </TableHead>
               </TableRow>
@@ -135,7 +156,6 @@ export function WeeklyShiftSection({
                   sharedAllowanceUsage.get(shift.id) ?? 0;
 
                 const reducedDailyRest = isReducedDailyRest(shift);
-
                 const extendedShift = hasExtendedShift(shift);
 
                 const currentShiftUsesAllowance =
@@ -213,7 +233,7 @@ export function WeeklyShiftSection({
                 <TableRow>
                   <TableCell
                     colSpan={8}
-                    className="h-20 px-1 py-2 text-center text-muted-foreground sm:h-24"
+                    className="h-20 px-4 py-5 text-center text-xs text-muted-foreground sm:h-24 sm:text-sm"
                   >
                     No shifts this week.
                   </TableCell>
@@ -223,7 +243,7 @@ export function WeeklyShiftSection({
           </Table>
         </div>
 
-        <div className="mt-3 sm:mt-6">
+        <div className="border-t px-4 py-4 sm:px-6 sm:py-5">
           <WeeklySummary weekStart={weekStart} summary={weeklySummary} />
         </div>
       </CardContent>

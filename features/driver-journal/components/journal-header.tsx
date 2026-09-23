@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock3 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -10,20 +10,20 @@ type JournalHeaderProps = {
 
 export function JournalHeader({ onAddShift }: JournalHeaderProps) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Driver Journal
-        </h1>
+    <div className="mb-2 flex items-center justify-between sm:mb-6">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Driver Journal
+      </h1>
 
-        <p className="mt-2 text-muted-foreground">
-          Record your driving, shifts, breaks and working time.
-        </p>
-      </div>
-
-      <Button onClick={onAddShift}>
-        <Clock3 className="mr-2 size-4" />
-        Add shift
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={onAddShift}
+        aria-label="Add shift"
+        className="size-9"
+      >
+        <Plus className="size-6" />
       </Button>
     </div>
   );
