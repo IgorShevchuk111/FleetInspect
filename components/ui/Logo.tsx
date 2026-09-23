@@ -25,7 +25,7 @@ export default function Logo({ className = '', showLink = true }: LogoProps) {
         </svg>
       </div>
       <span className="text-xl font-bold text-gray-900">
-        Flow<span className="text-primary">Suite</span>
+        Fleet<span className="text-primary">Inspect</span>
       </span>
     </div>
   );

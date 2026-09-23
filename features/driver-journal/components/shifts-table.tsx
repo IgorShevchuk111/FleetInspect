@@ -58,11 +58,12 @@ export function ShiftsTable({ shifts, onEdit }: ShiftsTableProps) {
 
   return (
     <div className="space-y-6">
-      {weeks.map(({ weekStart, shifts }) => (
+      {weeks.map(({ weekStart, shifts: weekShifts }) => (
         <WeeklyShiftSection
           key={weekStart.getTime()}
           weekStart={weekStart}
-          shifts={shifts}
+          shifts={weekShifts}
+          allShifts={shifts}
           onEdit={onEdit}
         />
       ))}
