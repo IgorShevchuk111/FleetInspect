@@ -1,5 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
+
 import {
   Dialog,
   DialogContent,
@@ -9,10 +13,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-import { Button } from '@/components/ui/button';
-
-import { formatDuration } from '../utils/duration';
 import { getEndOfWeek, getStartOfWeek } from '../utils/dates';
+import { formatDuration } from '../utils/duration';
 
 type WeeklySummaryData = {
   driving: number;
@@ -33,6 +35,12 @@ type WeeklySummaryProps = {
   weekStart: Date;
 };
 
+type SummaryRowProps = {
+  label: string;
+  value: string;
+  prominent?: boolean;
+};
+
 function formatShortDate(date: Date) {
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
@@ -45,15 +53,7 @@ function formatDateRange(start: Date, end: Date) {
   return `${formatShortDate(start)} – ${formatShortDate(end)}`;
 }
 
-function SummaryRow({
-  label,
-  value,
-  prominent = false,
-}: {
-  label: string;
-  value: string;
-  prominent?: boolean;
-}) {
+function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-2">
       <span className={prominent ? 'font-medium' : 'text-muted-foreground'}>
@@ -71,7 +71,7 @@ function SummaryRow({
   );
 }
 
-function PeriodLabel({ children }: { children: React.ReactNode }) {
+function PeriodLabel({ children }: { children: ReactNode }) {
   return <p className="mt-0.5 text-xs text-muted-foreground">{children}</p>;
 }
 
@@ -82,15 +82,10 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
   const twoWeekStart = new Date(currentWeekStart);
   twoWeekStart.setDate(twoWeekStart.getDate() - 7);
 
-  const twoWeekEnd = currentWeekEnd;
-
   const seventeenWeekStart = new Date(currentWeekStart);
   seventeenWeekStart.setDate(seventeenWeekStart.getDate() - 16 * 7);
 
-  const seventeenWeekEnd = currentWeekEnd;
-
-  const year = currentWeekEnd.getFullYear();
-  const yearStart = new Date(year, 0, 1);
+  const yearStart = new Date(currentWeekEnd.getFullYear(), 0, 1);
 
   return (
     <div className="flex justify-end">
@@ -107,13 +102,11 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
 
             <DialogDescription>
               {formatDateRange(currentWeekStart, currentWeekEnd)}
-
               <span className="block">Monday – Sunday</span>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Main weekly totals */}
             <div className="divide-y">
               <SummaryRow
                 label="Driving"
@@ -140,7 +133,6 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               />
             </div>
 
-            {/* Driving limits */}
             <div className="border-t pt-2">
               <SummaryRow
                 label="Weekly driving"
@@ -164,11 +156,10 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               />
 
               <PeriodLabel>
-                {formatDateRange(twoWeekStart, twoWeekEnd)}
+                {formatDateRange(twoWeekStart, currentWeekEnd)}
               </PeriodLabel>
             </div>
 
-            {/* 17-week average */}
             <div className="border-t pt-2">
               <SummaryRow
                 label="17-week avg working"
@@ -178,11 +169,10 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               />
 
               <PeriodLabel>
-                {formatDateRange(seventeenWeekStart, seventeenWeekEnd)}
+                {formatDateRange(seventeenWeekStart, currentWeekEnd)}
               </PeriodLabel>
             </div>
 
-            {/* Year-to-date */}
             <div className="border-t pt-2">
               <SummaryRow
                 label="Year-to-date earnings"

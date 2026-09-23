@@ -8,11 +8,11 @@ import {
 
 import {
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  TableBody,
-  TableCell,
 } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
@@ -20,6 +20,13 @@ import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 import { calculateShiftMinutes } from '../utils/shifts';
 import { calculateWeeklySummary } from '../utils/weekly-summary';
 import { formatWeek } from '../utils/dates';
+import {
+  buildExtendedDrivingUsage,
+  buildSharedAllowanceUsage,
+  MAX_EXTENDED_DRIVING_DAYS,
+  MAX_SHARED_ALLOWANCE,
+  normalizeDrivingMinutes,
+} from '../utils/compliance-usage';
 
 import {
   getDrivingStatus,
@@ -32,133 +39,12 @@ import {
 import { ShiftRow } from './shift-row';
 import { WeeklySummary } from './weekly-summary';
 
-const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
-const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
-const MAX_SHARED_ALLOWANCE = 3;
-
-const EXTENDED_DAILY_DRIVING_MINUTES = 9 * 60;
-const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
-const MAX_EXTENDED_DRIVING_DAYS = 2;
-
-const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
-
 type WeeklyShiftSectionProps = {
   weekStart: Date;
   shifts: Shift[];
   allShifts: Shift[];
   onEdit: (shift: Shift) => void;
 };
-
-function sortShiftsChronologically(shifts: Shift[]) {
-  return [...shifts].sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.start}`).getTime();
-    const dateB = new Date(`${b.date}T${b.start}`).getTime();
-
-    return dateA - dateB;
-  });
-}
-
-function getFixedWeekKey(dateString: string) {
-  const date = new Date(`${dateString}T12:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  const day = date.getDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-
-  date.setDate(date.getDate() + mondayOffset);
-
-  return date.toISOString().slice(0, 10);
-}
-
-function normalizeDrivingMinutes(value: number) {
-  const minutes = Number(value);
-
-  if (!Number.isFinite(minutes)) {
-    return 0;
-  }
-
-  return Math.round(minutes);
-}
-
-function usesSharedAllowance(shift: Shift) {
-  const rest = Number(shift.rest) || 0;
-
-  const shiftMinutes = calculateShiftMinutes(
-    shift.date,
-    shift.start,
-    shift.endDate || shift.date,
-    shift.end,
-  );
-
-  const hasReducedDailyRest =
-    shift.restType === 'daily' && rest >= 9 * 60 && rest < 11 * 60;
-
-  const hasExtendedShift =
-    shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
-    shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
-
-  return hasReducedDailyRest || hasExtendedShift;
-}
-
-function buildSharedAllowanceUsage(shifts: Shift[]) {
-  const sortedShifts = sortShiftsChronologically(shifts);
-  const usageByShiftId = new Map<string, number>();
-
-  let allowanceUsed = 0;
-
-  for (const shift of sortedShifts) {
-    const rest = Number(shift.rest) || 0;
-
-    if (shift.restType === 'weekly' && rest >= MINIMUM_WEEKLY_REST_MINUTES) {
-      allowanceUsed = 0;
-      usageByShiftId.set(shift.id, allowanceUsed);
-      continue;
-    }
-
-    if (usesSharedAllowance(shift)) {
-      allowanceUsed += 1;
-    }
-
-    usageByShiftId.set(shift.id, allowanceUsed);
-  }
-
-  return usageByShiftId;
-}
-
-function buildExtendedDrivingUsage(shifts: Shift[]) {
-  const sortedShifts = sortShiftsChronologically(shifts);
-  const usageByShiftId = new Map<string, number>();
-  const usageByWeek = new Map<string, number>();
-
-  for (const shift of sortedShifts) {
-    const weekKey = getFixedWeekKey(shift.date);
-
-    if (!weekKey) {
-      usageByShiftId.set(shift.id, 0);
-      continue;
-    }
-
-    let extendedDrivingDaysUsed = usageByWeek.get(weekKey) ?? 0;
-
-    const drivingMinutes = normalizeDrivingMinutes(shift.driving);
-
-    const isExtendedDriving =
-      drivingMinutes > EXTENDED_DAILY_DRIVING_MINUTES &&
-      drivingMinutes <= MAX_DAILY_DRIVING_MINUTES;
-
-    if (isExtendedDriving) {
-      extendedDrivingDaysUsed += 1;
-    }
-
-    usageByWeek.set(weekKey, extendedDrivingDaysUsed);
-    usageByShiftId.set(shift.id, extendedDrivingDaysUsed);
-  }
-
-  return usageByShiftId;
-}
 
 export function WeeklyShiftSection({
   weekStart,
@@ -170,6 +56,7 @@ export function WeeklyShiftSection({
 
   const sortedShifts = [...shifts].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start}`).getTime();
+
     const dateB = new Date(`${b.date}T${b.start}`).getTime();
 
     return dateB - dateA;
@@ -247,7 +134,12 @@ export function WeeklyShiftSection({
                 const sharedAllowanceUsedAfter =
                   sharedAllowanceUsage.get(shift.id) ?? 0;
 
-                const currentShiftUsesAllowance = usesSharedAllowance(shift);
+                const reducedDailyRest = isReducedDailyRest(shift);
+
+                const extendedShift = hasExtendedShift(shift);
+
+                const currentShiftUsesAllowance =
+                  reducedDailyRest || extendedShift;
 
                 const sharedAllowanceUsedBefore = Math.max(
                   0,
@@ -260,9 +152,6 @@ export function WeeklyShiftSection({
                   MAX_SHARED_ALLOWANCE - sharedAllowanceUsedAfter,
                 );
 
-                const reducedDailyRest = isReducedDailyRest(shift);
-                const extendedShift = hasExtendedShift(shift);
-
                 const allowanceNotAllowed =
                   currentShiftUsesAllowance &&
                   sharedAllowanceUsedBefore >= MAX_SHARED_ALLOWANCE;
@@ -273,8 +162,7 @@ export function WeeklyShiftSection({
                   extendedDrivingUsage.get(shift.id) ?? 0;
 
                 const extendedDriving =
-                  drivingMinutes > EXTENDED_DAILY_DRIVING_MINUTES &&
-                  drivingMinutes <= MAX_DAILY_DRIVING_MINUTES;
+                  drivingMinutes > 9 * 60 && drivingMinutes <= 10 * 60;
 
                 const drivingUsageBefore = Math.max(
                   0,

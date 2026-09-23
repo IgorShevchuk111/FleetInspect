@@ -37,6 +37,9 @@ type ShiftRowProps = {
   onEdit: (shift: Shift) => void;
 };
 
+const statusClassName =
+  'mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px]';
+
 function formatShiftDate(date: string, time: string) {
   if (!date) {
     return time || '—';
@@ -62,6 +65,56 @@ function formatTime(time: string) {
   return time.slice(0, 5);
 }
 
+function AllowanceStatus({
+  label,
+  used,
+  remaining,
+  notAllowed,
+}: {
+  label: string;
+  used: number;
+  remaining: number;
+  notAllowed: boolean;
+}) {
+  const className = notAllowed
+    ? 'text-red-600 dark:text-red-400'
+    : 'text-orange-600 dark:text-orange-400';
+
+  return (
+    <>
+      <div className={`${statusClassName} ${className}`}>{label}</div>
+
+      <div className={`${statusClassName} ${className}`}>
+        {used}/3 used · {remaining} left
+      </div>
+    </>
+  );
+}
+
+function DrivingCounter({
+  status,
+  used,
+  remaining,
+}: {
+  status: NonNullable<DrivingStatus>;
+  used: number;
+  remaining: number;
+}) {
+  if (!status.showCounter) {
+    return null;
+  }
+
+  const className = status.notAllowed
+    ? 'text-red-600 dark:text-red-400'
+    : 'text-orange-600 dark:text-orange-400';
+
+  return (
+    <div className={`${statusClassName} ${className}`}>
+      {used}/2 used · {remaining} left
+    </div>
+  );
+}
+
 export function ShiftRow({
   shift,
   shiftMinutes,
@@ -79,12 +132,21 @@ export function ShiftRow({
   restStatus,
   onEdit,
 }: ShiftRowProps) {
+  const allowanceLabel = reducedDailyRest
+    ? allowanceNotAllowed
+      ? 'Reduced daily rest · Not allowed'
+      : 'Reduced daily rest'
+    : 'Extended shift';
+
+  const showAllowanceStatus = reducedDailyRest || extendedShift;
+
+  const showRegularRestStatus =
+    !showAllowanceStatus && shift.restType !== 'weekly';
+
+  const showWeeklyRestStatus = shift.restType === 'weekly';
+
   return (
-    <TableRow
-      key={shift.id}
-      className="cursor-pointer"
-      onClick={() => onEdit(shift)}
-    >
+    <TableRow className="cursor-pointer" onClick={() => onEdit(shift)}>
       <TableCell className="sticky left-0 z-20 w-[38px] min-w-[38px] bg-background px-0.5 py-1.5 shadow-[2px_0_3px_-2px_rgba(0,0,0,0.25)] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2">
         <div className="font-medium text-[10px] leading-tight sm:text-sm">
           {formatShiftDate(shift.date, shift.start)}
@@ -99,32 +161,24 @@ export function ShiftRow({
         <div>{formatDuration(drivingMinutes)}</div>
 
         {drivingStatus && (
-          <div
-            className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${drivingStatus.className}`}
-          >
+          <div className={`${statusClassName} ${drivingStatus.className}`}>
             {drivingStatus.label}
           </div>
         )}
 
-        {drivingStatus?.showCounter && (
-          <div
-            className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
-              drivingStatus.notAllowed
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-orange-600 dark:text-orange-400'
-            }`}
-          >
-            {drivingUsageAfter}/2 used · {drivingDaysRemaining} left
-          </div>
+        {drivingStatus && (
+          <DrivingCounter
+            status={drivingStatus}
+            used={drivingUsageAfter}
+            remaining={drivingDaysRemaining}
+          />
         )}
       </TableCell>
 
       <TableCell className="w-[55px] min-w-[55px] px-0.5 py-1.5 text-[10px] sm:w-[110px] sm:min-w-[110px] sm:px-4 sm:py-2 sm:text-sm">
         <div>{formatDuration(shiftMinutes)}</div>
 
-        <div
-          className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${shiftStatus.className}`}
-        >
+        <div className={`${statusClassName} ${shiftStatus.className}`}>
           {shiftStatus.label}
         </div>
       </TableCell>
@@ -136,72 +190,23 @@ export function ShiftRow({
       <TableCell className="w-[64px] min-w-[64px] px-0.5 py-1.5 text-[10px] sm:w-[120px] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-sm">
         <div>{formatDuration(shift.rest)}</div>
 
-        {reducedDailyRest && (
-          <>
-            <div
-              className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
-                allowanceNotAllowed
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}
-            >
-              {allowanceNotAllowed
-                ? 'Reduced daily rest · Not allowed'
-                : 'Reduced daily rest'}
-            </div>
-
-            <div
-              className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
-                allowanceNotAllowed
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}
-            >
-              {sharedAllowanceUsedAfter}/3 used · {sharedAllowanceRemaining}{' '}
-              left
-            </div>
-          </>
+        {showAllowanceStatus && (
+          <AllowanceStatus
+            label={allowanceLabel}
+            used={sharedAllowanceUsedAfter}
+            remaining={sharedAllowanceRemaining}
+            notAllowed={allowanceNotAllowed}
+          />
         )}
 
-        {!reducedDailyRest && extendedShift && (
-          <>
-            <div
-              className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
-                allowanceNotAllowed
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}
-            >
-              {allowanceNotAllowed
-                ? 'Extended shift · Not allowed'
-                : 'Extended shift'}
-            </div>
-
-            <div
-              className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
-                allowanceNotAllowed
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}
-            >
-              {sharedAllowanceUsedAfter}/3 used · {sharedAllowanceRemaining}{' '}
-              left
-            </div>
-          </>
-        )}
-
-        {!reducedDailyRest && !extendedShift && shift.restType !== 'weekly' && (
-          <div
-            className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${restStatus.className}`}
-          >
+        {showRegularRestStatus && (
+          <div className={`${statusClassName} ${restStatus.className}`}>
             {restStatus.label}
           </div>
         )}
 
-        {shift.restType === 'weekly' && (
-          <div
-            className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${restStatus.className}`}
-          >
+        {showWeeklyRestStatus && (
+          <div className={`${statusClassName} ${restStatus.className}`}>
             {restStatus.label}
           </div>
         )}

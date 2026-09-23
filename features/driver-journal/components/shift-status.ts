@@ -1,6 +1,11 @@
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import { calculateShiftMinutes } from '../utils/shifts';
+import {
+    MAX_EXTENDED_DRIVING_DAYS,
+    MAX_SHARED_ALLOWANCE,
+    normalizeDrivingMinutes,
+} from '../utils/compliance-usage';
 
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
@@ -8,22 +13,27 @@ const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
 const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
 
-const MAX_SHARED_ALLOWANCE = 3;
-
 const EXTENDED_DAILY_DRIVING_MINUTES = 9 * 60;
 const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
-const MAX_EXTENDED_DRIVING_DAYS = 2;
 
+const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
-function getMaxEndTime(shift: Shift, minutes: number) {
-    const startDate = new Date(`${shift.date}T${shift.start}`);
+function getMaxEndTime(
+    shift: Shift,
+    minutes: number,
+) {
+    const startDate = new Date(
+        `${shift.date}T${shift.start}`,
+    );
 
     if (Number.isNaN(startDate.getTime())) {
         return null;
     }
 
-    const maxEnd = new Date(startDate.getTime() + minutes * 60 * 1000);
+    const maxEnd = new Date(
+        startDate.getTime() + minutes * 60 * 1000,
+    );
 
     return maxEnd.toLocaleTimeString('en-GB', {
         hour: '2-digit',
@@ -33,12 +43,7 @@ function getMaxEndTime(shift: Shift, minutes: number) {
 }
 
 export function hasExtendedShift(shift: Shift) {
-    const shiftMinutes = calculateShiftMinutes(
-        shift.date,
-        shift.start,
-        shift.endDate || shift.date,
-        shift.end,
-    );
+    const shiftMinutes = calculateShiftMinutes(shift);
 
     return (
         shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
@@ -81,7 +86,10 @@ export function getShiftStatus(
     }
 
     if (shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES) {
-        if (sharedAllowanceUsedBeforeShift >= MAX_SHARED_ALLOWANCE) {
+        if (
+            sharedAllowanceUsedBeforeShift >=
+            MAX_SHARED_ALLOWANCE
+        ) {
             return {
                 label: 'Extended · Not allowed',
                 className: 'text-red-600 dark:text-red-400',
@@ -104,21 +112,13 @@ export function getShiftStatus(
     };
 }
 
-function normalizeDrivingMinutes(value: number) {
-    const minutes = Number(value);
-
-    if (!Number.isFinite(minutes)) {
-        return 0;
-    }
-
-    return Math.round(minutes);
-}
-
 export function getDrivingStatus(
     drivingMinutes: number,
     extendedDrivingDaysUsedBefore: number,
 ) {
-    const minutes = normalizeDrivingMinutes(drivingMinutes);
+    const minutes = normalizeDrivingMinutes(
+        drivingMinutes,
+    );
 
     if (minutes > MAX_DAILY_DRIVING_MINUTES) {
         return {
@@ -130,7 +130,10 @@ export function getDrivingStatus(
     }
 
     if (minutes > EXTENDED_DAILY_DRIVING_MINUTES) {
-        if (extendedDrivingDaysUsedBefore >= MAX_EXTENDED_DRIVING_DAYS) {
+        if (
+            extendedDrivingDaysUsedBefore >=
+            MAX_EXTENDED_DRIVING_DAYS
+        ) {
             return {
                 label: 'Extended driving · Not allowed',
                 className: 'text-red-600 dark:text-red-400',
@@ -161,7 +164,7 @@ export function getRestStatus(shift: Shift) {
             };
         }
 
-        if (rest < 45 * 60) {
+        if (rest < REGULAR_WEEKLY_REST_MINUTES) {
             return {
                 label: 'Reduced weekly rest',
                 className: 'text-orange-600 dark:text-orange-400',
