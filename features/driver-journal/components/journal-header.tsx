@@ -21,9 +21,9 @@ export function JournalHeader({ onAddShift }: JournalHeaderProps) {
         size="icon"
         onClick={onAddShift}
         aria-label="Add shift"
-        className="size-9"
+        className="size-11"
       >
-        <Plus className="size-6" />
+        <Plus className="size-7" />
       </Button>
     </div>
   );

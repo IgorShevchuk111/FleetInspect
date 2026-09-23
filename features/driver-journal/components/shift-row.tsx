@@ -32,7 +32,7 @@ type ShiftRowProps = {
   onEdit: (shift: Shift) => void;
 };
 
-const statusClassName = 'mt-1 text-[10px] font-medium leading-tight sm:text-xs';
+const statusClassName = 'mt-0.5 text-xs font-medium leading-tight';
 
 function formatShiftDate(date: string, time: string) {
   if (!date) {
@@ -75,7 +75,7 @@ function AllowanceStatus({
     : 'text-orange-600 dark:text-orange-400';
 
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-0">
       <div className={`${statusClassName} ${className}`}>{label}</div>
 
       <div className={`${statusClassName} ${className}`}>
@@ -147,35 +147,37 @@ export function ShiftRow({
       <TableCell
         className="
           sticky left-0 z-20
-          w-[72px] min-w-[72px]
+          w-[52px] min-w-[52px]
           bg-background
-          px-2 py-3
+          px-1 py-2
           text-center align-middle
           shadow-[2px_0_3px_-2px_rgba(0,0,0,0.2)]
-          sm:w-[110px] sm:min-w-[110px]
-          sm:px-4 sm:py-3
+          sm:w-[90px] sm:min-w-[90px]
+          sm:px-2 sm:py-2
         "
       >
-        <div className="text-xs font-semibold leading-tight tabular-nums sm:text-sm">
+        <div className="text-base font-semibold leading-tight tabular-nums">
           {formatShiftDate(shift.date, shift.start)}
         </div>
 
-        <div className="mt-0.5 text-xs leading-tight text-muted-foreground tabular-nums sm:text-sm">
+        <div className="mt-0.5 text-sm leading-tight text-muted-foreground tabular-nums">
           {formatTime(shift.start)}
         </div>
       </TableCell>
 
       <TableCell
         className="
-          w-[82px] min-w-[82px]
-          px-2 py-3
+          w-[64px] min-w-[64px]
+          px-1 py-2
           text-center align-middle
-          text-xs tabular-nums
-          sm:w-[110px] sm:min-w-[110px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm tabular-nums
+          sm:w-[90px] sm:min-w-[90px]
+          sm:px-2 sm:py-2
         "
       >
-        <div className="font-medium">{formatDuration(drivingMinutes)}</div>
+        <div className="font-medium leading-tight">
+          {formatDuration(drivingMinutes)}
+        </div>
 
         {drivingStatus && (
           <div className={`${statusClassName} ${drivingStatus.className}`}>
@@ -194,15 +196,17 @@ export function ShiftRow({
 
       <TableCell
         className="
-          w-[78px] min-w-[78px]
-          px-2 py-3
+          w-[60px] min-w-[60px]
+          px-1 py-2
           text-center align-middle
-          text-xs tabular-nums
-          sm:w-[110px] sm:min-w-[110px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm tabular-nums
+          sm:w-[85px] sm:min-w-[85px]
+          sm:px-2 sm:py-2
         "
       >
-        <div className="font-medium">{formatDuration(shiftMinutes)}</div>
+        <div className="font-medium leading-tight">
+          {formatDuration(shiftMinutes)}
+        </div>
 
         <div className={`${statusClassName} ${shiftStatus.className}`}>
           {shiftStatus.label}
@@ -211,12 +215,12 @@ export function ShiftRow({
 
       <TableCell
         className="
-          w-[58px] min-w-[58px]
-          px-2 py-3
+          w-[46px] min-w-[46px]
+          px-0.5 py-2
           text-center align-middle
-          text-xs tabular-nums
-          sm:w-[90px] sm:min-w-[90px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm tabular-nums
+          sm:w-[65px] sm:min-w-[65px]
+          sm:px-2 sm:py-2
         "
       >
         {formatDuration(shift.break)}
@@ -224,15 +228,17 @@ export function ShiftRow({
 
       <TableCell
         className="
-          w-[92px] min-w-[92px]
-          px-2 py-3
+          w-[68px] min-w-[68px]
+          px-1 py-2
           text-center align-middle
-          text-xs tabular-nums
-          sm:w-[120px] sm:min-w-[120px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm tabular-nums
+          sm:w-[100px] sm:min-w-[100px]
+          sm:px-2 sm:py-2
         "
       >
-        <div className="font-medium">{formatDuration(shift.rest)}</div>
+        <div className="font-medium leading-tight">
+          {formatDuration(shift.rest)}
+        </div>
 
         {showAllowanceStatus && (
           <AllowanceStatus
@@ -258,12 +264,12 @@ export function ShiftRow({
 
       <TableCell
         className="
-          w-[72px] min-w-[72px]
-          px-2 py-3
+          w-[58px] min-w-[58px]
+          px-1 py-2
           text-center align-middle
-          text-xs font-medium tabular-nums
-          sm:w-[100px] sm:min-w-[100px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm font-medium tabular-nums
+          sm:w-[80px] sm:min-w-[80px]
+          sm:px-2 sm:py-2
         "
       >
         £{Number(shift.earn).toFixed(2)}
@@ -271,12 +277,12 @@ export function ShiftRow({
 
       <TableCell
         className="
-          w-[82px] min-w-[82px]
-          px-2 py-3
+          w-[66px] min-w-[66px]
+          px-1 py-2
           text-center align-middle
-          text-xs tabular-nums
-          sm:w-[120px] sm:min-w-[120px]
-          sm:px-4 sm:py-3 sm:text-sm
+          text-sm tabular-nums
+          sm:w-[100px] sm:min-w-[100px]
+          sm:px-2 sm:py-2
         "
       >
         {formatDuration(workingMinutes)}
@@ -285,20 +291,20 @@ export function ShiftRow({
       <TableCell
         className="
           sticky right-0 z-20
-          w-[72px] min-w-[72px]
+          w-[52px] min-w-[52px]
           bg-background
-          px-2 py-3
+          px-1 py-2
           text-center align-middle
           shadow-[-2px_0_3px_-2px_rgba(0,0,0,0.2)]
-          sm:w-[110px] sm:min-w-[110px]
-          sm:px-4 sm:py-3
+          sm:w-[90px] sm:min-w-[90px]
+          sm:px-2 sm:py-2
         "
       >
-        <div className="text-xs font-semibold leading-tight tabular-nums sm:text-sm">
+        <div className="text-base font-semibold leading-tight tabular-nums">
           {formatShiftDate(shift.endDate || shift.date, shift.end)}
         </div>
 
-        <div className="mt-0.5 text-xs leading-tight text-muted-foreground tabular-nums sm:text-sm">
+        <div className="mt-0.5 text-sm leading-tight text-muted-foreground tabular-nums">
           {formatTime(shift.end)}
         </div>
       </TableCell>
