@@ -1,4 +1,4 @@
-import MapWrapper from '@/features/map/components/MapWrapper';
+import MapWrapper from '@/features/route-planner/map/components/MapWrapper';
 
 export default function Home() {
   return (

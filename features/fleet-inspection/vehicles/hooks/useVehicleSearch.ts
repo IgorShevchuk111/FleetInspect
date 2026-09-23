@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useDebounce } from '@/hooks/useDebounce';
-import { searchVehicles } from '@/features/fleet-inspection/vehicles/actions/searchVehicles';
-import { Database } from '@/types/supabase/database';
 
-type Vehicle = Database['public']['Tables']['vehicles']['Row'];
+import { useRouter, useSearchParams } from 'next/navigation';
+
+import { useDebounce } from '@/hooks/useDebounce';
+
+import { searchVehicles } from '@/features/fleet-inspection/vehicles/actions/searchVehicles';
+
+type Vehicle = {
+    id: string;
+    regnumber: string;
+    type: string;
+};
 
 export function useVehicleSearch(
     selectedTrip: string | null,

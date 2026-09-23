@@ -2,8 +2,9 @@
 import {
   getAllInspections,
   getUserInspections,
-} from '@/features/inspections/services';
-import InspectionList from '@/features/inspections/components/InspectionListContent';
+} from '@/features/fleet-inspection/inspections/services';
+
+import InspectionList from '@/features/fleet-inspection/components/InspectionListContent';
 import { UsersIcon } from '@heroicons/react/24/outline';
 import { createClient } from '@/lib/supabase/server';
 
