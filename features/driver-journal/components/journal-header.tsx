@@ -1,7 +1,4 @@
-'use client';
-
 import { Plus } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 
 type JournalHeaderProps = {
@@ -23,7 +20,7 @@ export function JournalHeader({ onAddShift }: JournalHeaderProps) {
         aria-label="Add shift"
         className="size-11"
       >
-        <Plus className="size-7" />
+        <Plus className="!size-7" />
       </Button>
     </div>
   );

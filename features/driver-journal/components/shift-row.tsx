@@ -1,311 +1,188 @@
+'use client';
+
+import { Info } from 'lucide-react';
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { TableCell, TableRow } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import { formatDuration } from '../utils/duration';
-
-import type {
+import { calculateShiftMinutes } from '../utils/shifts';
+import {
   getDrivingStatus,
   getRestStatus,
   getShiftStatus,
 } from './shift-status';
 
-type DrivingStatus = ReturnType<typeof getDrivingStatus>;
-type ShiftStatus = ReturnType<typeof getShiftStatus>;
-type RestStatus = ReturnType<typeof getRestStatus>;
-
 type ShiftRowProps = {
   shift: Shift;
-  shiftMinutes: number;
-  workingMinutes: number;
-  drivingMinutes: number;
-  sharedAllowanceUsedAfter: number;
-  sharedAllowanceRemaining: number;
-  reducedDailyRest: boolean;
-  extendedShift: boolean;
-  allowanceNotAllowed: boolean;
-  drivingUsageAfter: number;
-  drivingDaysRemaining: number;
-  drivingStatus: DrivingStatus;
-  shiftStatus: ShiftStatus;
-  restStatus: RestStatus;
+  drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
+  shiftStatus?: ReturnType<typeof getShiftStatus> | null;
+  restStatus?: ReturnType<typeof getRestStatus> | null;
   onEdit: (shift: Shift) => void;
 };
 
-const statusClassName = 'mt-0.5 text-xs font-medium leading-tight';
+function formatShiftDate(date: string) {
+  if (!date) return '';
 
-function formatShiftDate(date: string, time: string) {
-  if (!date) {
-    return time || '—';
+  const [year, month, day] = date.split('-');
+
+  if (!year || !month || !day) {
+    return date;
   }
 
-  const dateTime = new Date(`${date}T${time || '00:00'}`);
-
-  if (Number.isNaN(dateTime.getTime())) {
-    return `${date} ${time || ''}`.trim();
-  }
-
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-  }).format(dateTime);
+  return `${day}/${month}`;
 }
 
 function formatTime(time: string) {
-  if (!time) {
-    return '—';
-  }
+  if (!time) return '';
 
   return time.slice(0, 5);
 }
 
-function AllowanceStatus({
-  label,
-  used,
-  remaining,
-  notAllowed,
-}: {
-  label: string;
-  used: number;
-  remaining: number;
-  notAllowed: boolean;
-}) {
-  const className = notAllowed
-    ? 'text-red-600 dark:text-red-400'
-    : 'text-orange-600 dark:text-orange-400';
+function formatDurationStacked(minutes: number) {
+  const safeMinutes = Math.max(0, Math.round(minutes));
+  const hours = Math.floor(safeMinutes / 60);
+  const remainingMinutes = safeMinutes % 60;
 
   return (
-    <div className="space-y-0">
-      <div className={`${statusClassName} ${className}`}>{label}</div>
-
-      <div className={`${statusClassName} ${className}`}>
-        {used}/3 used · {remaining} left
-      </div>
-    </div>
+    <span className="flex flex-col items-center leading-tight">
+      <span>{hours}h</span>
+      <span>{remainingMinutes}m</span>
+    </span>
   );
 }
 
-function DrivingCounter({
-  status,
-  used,
-  remaining,
+function StatusInfo({
+  label,
+  className,
 }: {
-  status: NonNullable<DrivingStatus>;
-  used: number;
-  remaining: number;
+  label: string;
+  className?: string;
 }) {
-  if (!status.showCounter) {
-    return null;
-  }
-
-  const className = status.notAllowed
-    ? 'text-red-600 dark:text-red-400'
-    : 'text-orange-600 dark:text-orange-400';
-
   return (
-    <div className={`${statusClassName} ${className}`}>
-      {used}/2 used · {remaining} left
-    </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label="Show status information"
+          className="absolute right-1 top-1 z-10 inline-flex size-4 items-center justify-center rounded-full hover:bg-muted"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <Info className={`!size-3 ${className ?? 'text-muted-foreground'}`} />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        side="top"
+        align="center"
+        className="z-50 w-auto max-w-[280px] bg-background text-sm text-foreground shadow-md"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        {label}
+      </PopoverContent>
+    </Popover>
   );
+}
+
+function DrivingInfo({
+  status,
+}: {
+  status: NonNullable<ReturnType<typeof getDrivingStatus>>;
+}) {
+  return <StatusInfo label={status.label} className={status.className} />;
+}
+
+function ShiftInfo({
+  status,
+}: {
+  status: NonNullable<ReturnType<typeof getShiftStatus>>;
+}) {
+  return <StatusInfo label={status.label} className={status.className} />;
+}
+
+function RestInfo({
+  status,
+}: {
+  status: NonNullable<ReturnType<typeof getRestStatus>>;
+}) {
+  return <StatusInfo label={status.label} className={status.className} />;
 }
 
 export function ShiftRow({
   shift,
-  shiftMinutes,
-  workingMinutes,
-  drivingMinutes,
-  sharedAllowanceUsedAfter,
-  sharedAllowanceRemaining,
-  reducedDailyRest,
-  extendedShift,
-  allowanceNotAllowed,
-  drivingUsageAfter,
-  drivingDaysRemaining,
   drivingStatus,
   shiftStatus,
   restStatus,
   onEdit,
 }: ShiftRowProps) {
-  const allowanceLabel = reducedDailyRest
-    ? allowanceNotAllowed
-      ? 'Reduced daily rest · Not allowed'
-      : 'Reduced daily rest'
-    : 'Extended shift';
-
-  const showAllowanceStatus = reducedDailyRest || extendedShift;
-
-  const showRegularRestStatus =
-    !showAllowanceStatus && shift.restType !== 'weekly';
-
-  const showWeeklyRestStatus = shift.restType === 'weekly';
+  const shiftMinutes = calculateShiftMinutes(shift);
+  const workingMinutes = shiftMinutes - shift.break;
+  const endDate = shift.endDate || shift.date;
 
   return (
-    <TableRow
-      className="cursor-pointer transition-colors"
-      onClick={() => onEdit(shift)}
-    >
-      <TableCell
-        className="
-          sticky left-0 z-20
-          w-[52px] min-w-[52px]
-          bg-background
-          px-1 py-2
-          text-center align-middle
-          shadow-[2px_0_3px_-2px_rgba(0,0,0,0.2)]
-          sm:w-[90px] sm:min-w-[90px]
-          sm:px-2 sm:py-2
-        "
-      >
-        <div className="text-base font-semibold leading-tight tabular-nums">
-          {formatShiftDate(shift.date, shift.start)}
-        </div>
-
-        <div className="mt-0.5 text-sm leading-tight text-muted-foreground tabular-nums">
-          {formatTime(shift.start)}
+    <TableRow className="cursor-pointer" onClick={() => onEdit(shift)}>
+      <TableCell className="sticky left-0 z-10 bg-background px-1.5 py-2 text-center text-sm">
+        <div className="flex flex-col items-center leading-tight">
+          <span>{formatShiftDate(shift.date)}</span>
+          <span className="text-muted-foreground">
+            {formatTime(shift.start)}
+          </span>
         </div>
       </TableCell>
 
-      <TableCell
-        className="
-          w-[64px] min-w-[64px]
-          px-1 py-2
-          text-center align-middle
-          text-sm tabular-nums
-          sm:w-[90px] sm:min-w-[90px]
-          sm:px-2 sm:py-2
-        "
-      >
-        <div className="font-medium leading-tight">
-          {formatDuration(drivingMinutes)}
+      <TableCell className="relative px-1.5 py-2 text-center text-sm">
+        <div className="flex min-h-9 items-center justify-center">
+          {formatDurationStacked(shift.driving)}
         </div>
 
-        {drivingStatus && (
-          <div className={`${statusClassName} ${drivingStatus.className}`}>
-            {drivingStatus.label}
-          </div>
-        )}
-
-        {drivingStatus && (
-          <DrivingCounter
-            status={drivingStatus}
-            used={drivingUsageAfter}
-            remaining={drivingDaysRemaining}
-          />
-        )}
+        {drivingStatus && <DrivingInfo status={drivingStatus} />}
       </TableCell>
 
-      <TableCell
-        className="
-          w-[60px] min-w-[60px]
-          px-1 py-2
-          text-center align-middle
-          text-sm tabular-nums
-          sm:w-[85px] sm:min-w-[85px]
-          sm:px-2 sm:py-2
-        "
-      >
-        <div className="font-medium leading-tight">
-          {formatDuration(shiftMinutes)}
+      <TableCell className="relative px-1.5 py-2 text-center text-sm">
+        <div className="flex min-h-9 items-center justify-center">
+          {formatDurationStacked(shiftMinutes)}
         </div>
 
-        <div className={`${statusClassName} ${shiftStatus.className}`}>
-          {shiftStatus.label}
-        </div>
+        {shiftStatus && <ShiftInfo status={shiftStatus} />}
       </TableCell>
 
-      <TableCell
-        className="
-          w-[46px] min-w-[46px]
-          px-0.5 py-2
-          text-center align-middle
-          text-sm tabular-nums
-          sm:w-[65px] sm:min-w-[65px]
-          sm:px-2 sm:py-2
-        "
-      >
+      <TableCell className="px-1.5 py-2 text-center text-sm">
         {formatDuration(shift.break)}
       </TableCell>
 
-      <TableCell
-        className="
-          w-[68px] min-w-[68px]
-          px-1 py-2
-          text-center align-middle
-          text-sm tabular-nums
-          sm:w-[100px] sm:min-w-[100px]
-          sm:px-2 sm:py-2
-        "
-      >
-        <div className="font-medium leading-tight">
-          {formatDuration(shift.rest)}
+      <TableCell className="relative px-1.5 py-2 text-center text-sm">
+        <div className="flex min-h-9 items-center justify-center">
+          {formatDurationStacked(shift.rest)}
         </div>
 
-        {showAllowanceStatus && (
-          <AllowanceStatus
-            label={allowanceLabel}
-            used={sharedAllowanceUsedAfter}
-            remaining={sharedAllowanceRemaining}
-            notAllowed={allowanceNotAllowed}
-          />
-        )}
-
-        {showRegularRestStatus && (
-          <div className={`${statusClassName} ${restStatus.className}`}>
-            {restStatus.label}
-          </div>
-        )}
-
-        {showWeeklyRestStatus && (
-          <div className={`${statusClassName} ${restStatus.className}`}>
-            {restStatus.label}
-          </div>
-        )}
+        {restStatus && <RestInfo status={restStatus} />}
       </TableCell>
 
-      <TableCell
-        className="
-          w-[58px] min-w-[58px]
-          px-1 py-2
-          text-center align-middle
-          text-sm font-medium tabular-nums
-          sm:w-[80px] sm:min-w-[80px]
-          sm:px-2 sm:py-2
-        "
-      >
-        £{Number(shift.earn).toFixed(2)}
+      <TableCell className="px-1.5 py-2 text-center text-sm">
+        £{shift.earn.toFixed(2)}
       </TableCell>
 
-      <TableCell
-        className="
-          w-[66px] min-w-[66px]
-          px-1 py-2
-          text-center align-middle
-          text-sm tabular-nums
-          sm:w-[100px] sm:min-w-[100px]
-          sm:px-2 sm:py-2
-        "
-      >
-        {formatDuration(workingMinutes)}
+      <TableCell className="px-1.5 py-2 text-center text-sm">
+        {formatDurationStacked(workingMinutes)}
       </TableCell>
 
-      <TableCell
-        className="
-          sticky right-0 z-20
-          w-[52px] min-w-[52px]
-          bg-background
-          px-1 py-2
-          text-center align-middle
-          shadow-[-2px_0_3px_-2px_rgba(0,0,0,0.2)]
-          sm:w-[90px] sm:min-w-[90px]
-          sm:px-2 sm:py-2
-        "
-      >
-        <div className="text-base font-semibold leading-tight tabular-nums">
-          {formatShiftDate(shift.endDate || shift.date, shift.end)}
-        </div>
-
-        <div className="mt-0.5 text-sm leading-tight text-muted-foreground tabular-nums">
-          {formatTime(shift.end)}
+      <TableCell className="sticky right-0 z-10 bg-background px-1.5 py-2 text-center text-sm">
+        <div className="flex flex-col items-center leading-tight">
+          <span>{formatShiftDate(endDate)}</span>
+          <span className="text-muted-foreground">{formatTime(shift.end)}</span>
         </div>
       </TableCell>
     </TableRow>

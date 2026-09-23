@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
+
 import {
   Dialog,
   DialogContent,
@@ -17,14 +18,9 @@ import { formatDuration } from '../utils/duration';
 
 type WeeklySummaryData = {
   driving: number;
-  shift: number;
-  break: number;
-  rest: number;
   working: number;
   earn: number;
   twoWeekDriving: number;
-  weeklyDrivingRemaining: number;
-  twoWeekDrivingRemaining: number;
   average17WeekWorking: number;
   annualEarned: number;
 };
@@ -113,7 +109,6 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
 
             <DialogDescription className="text-xs leading-relaxed sm:text-sm">
               {formatDateRange(currentWeekStart, currentWeekEnd)}
-
               <span className="block">Monday – Sunday</span>
             </DialogDescription>
           </DialogHeader>
@@ -129,24 +124,9 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
                   />
 
                   <SummaryRow
-                    label="Shift"
-                    value={formatDuration(summary.shift)}
-                  />
-
-                  <SummaryRow
                     label="Working time"
                     value={formatDuration(summary.working)}
                     prominent
-                  />
-
-                  <SummaryRow
-                    label="Break"
-                    value={formatDuration(summary.break)}
-                  />
-
-                  <SummaryRow
-                    label="Rest"
-                    value={formatDuration(summary.rest)}
                   />
 
                   <SummaryRow
@@ -167,18 +147,8 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
                 />
 
                 <SummaryRow
-                  label="Weekly driving remaining"
-                  value={formatDuration(summary.weeklyDrivingRemaining)}
-                />
-
-                <SummaryRow
                   label="2-week driving"
                   value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
-                />
-
-                <SummaryRow
-                  label="2-week driving remaining"
-                  value={formatDuration(summary.twoWeekDrivingRemaining)}
                 />
 
                 <PeriodLabel>

@@ -1,8 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+  Banknote,
+  CalendarDays,
+  Clock3,
+  Moon,
+  Timer,
+  Trash2,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+
 import {
   Dialog,
   DialogContent,
@@ -21,8 +31,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
 import {
   Select,
   SelectContent,
@@ -94,6 +106,24 @@ function getShiftForm(shift: Shift): ShiftFormData {
     endDate: shift.endDate ?? shift.date,
     earn: shift.earn,
   };
+}
+
+function SectionHeader({
+  icon: Icon,
+  title,
+}: {
+  icon: typeof CalendarDays;
+  title: string;
+}) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <div className="flex size-7 items-center justify-center rounded-md bg-muted">
+        <Icon className="size-3.5 text-muted-foreground" />
+      </div>
+
+      <span className="text-sm font-medium">{title}</span>
+    </div>
+  );
 }
 
 export function ShiftDialog({
@@ -173,139 +203,213 @@ export function ShiftDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit shift' : 'Add shift'}</DialogTitle>
+        <DialogContent
+          className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-xl"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <DialogHeader className="border-b px-5 py-4 sm:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <Clock3 className="size-4.5 text-primary" />
+              </div>
 
-            <DialogDescription>
-              {isEditing
-                ? 'Update the details of your driving shift.'
-                : 'Enter the details of your driving shift.'}
-            </DialogDescription>
+              <div>
+                <DialogTitle className="text-lg">
+                  {isEditing ? 'Edit shift' : 'Add shift'}
+                </DialogTitle>
+
+                <DialogDescription className="mt-0.5 text-xs">
+                  {isEditing
+                    ? 'Update your driving shift details.'
+                    : 'Enter your driving shift details.'}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Start */}
-            <div className="space-y-2">
-              <Label>Start</Label>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4 px-5 py-4 sm:px-6">
+              <section>
+                <SectionHeader icon={CalendarDays} title="Shift times" />
 
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  id="start-date"
-                  type="date"
-                  value={form.date}
-                  onChange={(event) => updateField('date', event.target.value)}
-                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="start-date"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Start
+                    </Label>
 
-                <Input
-                  id="start-time"
-                  type="time"
-                  value={form.start}
-                  onChange={(event) => updateField('start', event.target.value)}
-                />
-              </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="start-date"
+                        type="date"
+                        value={form.date}
+                        onChange={(event) =>
+                          updateField('date', event.target.value)
+                        }
+                      />
+
+                      <Input
+                        id="start-time"
+                        type="time"
+                        value={form.start}
+                        onChange={(event) =>
+                          updateField('start', event.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="end-date"
+                      className="text-xs text-muted-foreground"
+                    >
+                      End
+                    </Label>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="end-date"
+                        type="date"
+                        value={form.endDate}
+                        onChange={(event) =>
+                          updateField('endDate', event.target.value)
+                        }
+                      />
+
+                      <Input
+                        id="end-time"
+                        type="time"
+                        value={form.end}
+                        onChange={(event) =>
+                          updateField('end', event.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="border-t pt-4">
+                <SectionHeader icon={Timer} title="Driving & break" />
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
+                    <DurationInputField
+                      label="Driving"
+                      value={form.driving}
+                      onChange={(value) => updateField('driving', value)}
+                    />
+                  </div>
+
+                  <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
+                    <DurationInputField
+                      label="Break"
+                      value={form.break}
+                      onChange={(value) => updateField('break', value)}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="border-t pt-4">
+                <SectionHeader icon={Moon} title="Rest & earnings" />
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="rest-type"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Rest type
+                    </Label>
+
+                    <Select
+                      value={form.restType}
+                      onValueChange={(value) =>
+                        updateField('restType', value as RestType)
+                      }
+                    >
+                      <SelectTrigger id="rest-type" className="w-full">
+                        <SelectValue placeholder="Select rest type" />
+                      </SelectTrigger>
+
+                      <SelectContent
+                        position="popper"
+                        side="bottom"
+                        sideOffset={6}
+                        className="z-[100] min-w-[var(--radix-select-trigger-width)] bg-background"
+                      >
+                        <SelectItem value="daily">Daily rest</SelectItem>
+
+                        <SelectItem value="weekly">Weekly rest</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="earn"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Earn (£)
+                    </Label>
+
+                    <div className="relative">
+                      <Banknote className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+                      <Input
+                        id="earn"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0"
+                        value={form.earn}
+                        onFocus={handleEarnFocus}
+                        onBlur={handleEarnBlur}
+                        onChange={handleEarnChange}
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
 
-            {/* End */}
-            <div className="space-y-2">
-              <Label>End</Label>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={form.endDate}
-                  onChange={(event) =>
-                    updateField('endDate', event.target.value)
-                  }
-                />
-
-                <Input
-                  id="end-time"
-                  type="time"
-                  value={form.end}
-                  onChange={(event) => updateField('end', event.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Durations */}
-            <div className="space-y-4">
-              <DurationInputField
-                label="Driving"
-                value={form.driving}
-                onChange={(value) => updateField('driving', value)}
-              />
-
-              <DurationInputField
-                label="Break"
-                value={form.break}
-                onChange={(value) => updateField('break', value)}
-              />
-            </div>
-
-            {/* Rest type */}
-            <div className="space-y-2">
-              <Label htmlFor="rest-type">Rest type</Label>
-
-              <Select
-                value={form.restType}
-                onValueChange={(value) =>
-                  updateField('restType', value as RestType)
-                }
-              >
-                <SelectTrigger id="rest-type" className="w-full">
-                  <SelectValue placeholder="Select rest type" />
-                </SelectTrigger>
-
-                <SelectContent
-                  position="popper"
-                  side="bottom"
-                  sideOffset={6}
-                  className="z-[100] min-w-[var(--radix-select-trigger-width)] bg-background"
-                >
-                  <SelectItem value="daily">Daily rest</SelectItem>
-                  <SelectItem value="weekly">Weekly rest</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Earn */}
-            <div className="space-y-2">
-              <Label htmlFor="earn">Earn (£)</Label>
-
-              <Input
-                id="earn"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0"
-                value={form.earn}
-                onFocus={handleEarnFocus}
-                onBlur={handleEarnBlur}
-                onChange={handleEarnChange}
-              />
-            </div>
-
-            <DialogFooter>
-              {isEditing && (
+            <DialogFooter className="flex-row items-center justify-between gap-2 border-t px-5 py-3 sm:px-6">
+              {isEditing ? (
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="ghost"
                   onClick={() => setIsDeleteConfirmOpen(true)}
-                  className="mr-auto"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
+                  <Trash2 className="size-4" />
                   Delete
                 </Button>
+              ) : (
+                <div />
               )}
 
-              <Button type="button" variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="min-w-20"
+                >
+                  Cancel
+                </Button>
 
-              <Button type="submit">
-                {isEditing ? 'Save changes' : 'Add shift'}
-              </Button>
+                <Button type="submit" className="min-w-28">
+                  {isEditing ? 'Save changes' : 'Add shift'}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

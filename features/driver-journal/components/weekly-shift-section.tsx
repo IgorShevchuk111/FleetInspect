@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 import { formatWeek } from '../utils/dates';
 import { calculateShiftMinutes } from '../utils/shifts';
 import { calculateWeeklySummary } from '../utils/weekly-summary';
+
 import {
   buildExtendedDrivingUsage,
   buildSharedAllowanceUsage,
@@ -26,6 +28,7 @@ import {
   MAX_SHARED_ALLOWANCE,
   normalizeDrivingMinutes,
 } from '../utils/compliance-usage';
+
 import {
   getDrivingStatus,
   getRestStatus,
@@ -33,6 +36,7 @@ import {
   hasExtendedShift,
   isReducedDailyRest,
 } from './shift-status';
+
 import { ShiftRow } from './shift-row';
 import { WeeklySummary } from './weekly-summary';
 
@@ -65,8 +69,8 @@ export function WeeklyShiftSection({
   const extendedDrivingUsage = buildExtendedDrivingUsage(shifts);
 
   return (
-    <Card className="overflow-hidden rounded-xl border shadow-sm">
-      <CardHeader className="border-b bg-muted/30 px-4 py-3 sm:px-6 sm:py-4">
+    <Card className="overflow-hidden rounded-xl border">
+      <CardHeader className="border-b bg-muted/30 px-4 py-2.5 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <CardTitle className="text-lg font-semibold leading-tight">
@@ -78,7 +82,7 @@ export function WeeklyShiftSection({
             </CardDescription>
           </div>
 
-          <div className="shrink-0 rounded-md border bg-background px-2 py-1 text-sm font-medium leading-tight text-muted-foreground">
+          <div className="shrink-0 text-sm leading-tight text-muted-foreground">
             Mon – Sun
           </div>
         </div>
@@ -148,16 +152,10 @@ export function WeeklyShiftSection({
                   shift.end,
                 );
 
-                const workingMinutes = Math.max(
-                  0,
-                  shiftMinutes - (Number(shift.break) || 0),
-                );
-
                 const sharedAllowanceUsedAfter =
                   sharedAllowanceUsage.get(shift.id) ?? 0;
 
                 const reducedDailyRest = isReducedDailyRest(shift);
-
                 const extendedShift = hasExtendedShift(shift);
 
                 const currentShiftUsesAllowance =
@@ -168,15 +166,6 @@ export function WeeklyShiftSection({
                   sharedAllowanceUsedAfter -
                     (currentShiftUsesAllowance ? 1 : 0),
                 );
-
-                const sharedAllowanceRemaining = Math.max(
-                  0,
-                  MAX_SHARED_ALLOWANCE - sharedAllowanceUsedAfter,
-                );
-
-                const allowanceNotAllowed =
-                  currentShiftUsesAllowance &&
-                  sharedAllowanceUsedBefore >= MAX_SHARED_ALLOWANCE;
 
                 const drivingMinutes = normalizeDrivingMinutes(shift.driving);
 
@@ -189,11 +178,6 @@ export function WeeklyShiftSection({
                 const drivingUsageBefore = Math.max(
                   0,
                   drivingUsageAfter - (extendedDriving ? 1 : 0),
-                );
-
-                const drivingDaysRemaining = Math.max(
-                  0,
-                  MAX_EXTENDED_DRIVING_DAYS - drivingUsageAfter,
                 );
 
                 const drivingStatus = getDrivingStatus(
@@ -213,16 +197,6 @@ export function WeeklyShiftSection({
                   <ShiftRow
                     key={shift.id}
                     shift={shift}
-                    shiftMinutes={shiftMinutes}
-                    workingMinutes={workingMinutes}
-                    drivingMinutes={drivingMinutes}
-                    sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
-                    sharedAllowanceRemaining={sharedAllowanceRemaining}
-                    reducedDailyRest={reducedDailyRest}
-                    extendedShift={extendedShift}
-                    allowanceNotAllowed={allowanceNotAllowed}
-                    drivingUsageAfter={drivingUsageAfter}
-                    drivingDaysRemaining={drivingDaysRemaining}
                     drivingStatus={drivingStatus}
                     shiftStatus={shiftStatus}
                     restStatus={restStatus}

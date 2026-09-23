@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import { getStartOfWeek } from '../utils/dates';
-
 import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
@@ -11,56 +10,56 @@ type ShiftsTableProps = {
   onEdit: (shift: Shift) => void;
 };
 
-function groupShiftsByWeek(shifts: Shift[]) {
-  const weeks = new Map<number, Shift[]>();
+export function ShiftsTable({ shifts, onEdit }: ShiftsTableProps) {
+  const shiftsByWeek = new Map<string, Shift[]>();
 
-  shifts.forEach((shift) => {
-    const shiftDate = new Date(`${shift.date}T00:00:00`);
-
-    if (Number.isNaN(shiftDate.getTime())) {
-      return;
+  for (const shift of shifts) {
+    if (!shift.date) {
+      continue;
     }
 
-    const weekStart = getStartOfWeek(shiftDate);
-    const weekKey = weekStart.getTime();
+    const date = new Date(`${shift.date}T00:00:00`);
 
-    const currentShifts = weeks.get(weekKey) ?? [];
+    if (Number.isNaN(date.getTime())) {
+      continue;
+    }
 
-    weeks.set(weekKey, [...currentShifts, shift]);
-  });
+    const weekStart = getStartOfWeek(date);
+    const weekKey = weekStart.toISOString().slice(0, 10);
 
-  return Array.from(weeks.entries())
-    .sort(([weekA], [weekB]) => weekB - weekA)
+    const weekShifts = shiftsByWeek.get(weekKey) ?? [];
+    weekShifts.push(shift);
+    shiftsByWeek.set(weekKey, weekShifts);
+  }
+
+  const weeks = Array.from(shiftsByWeek.entries())
     .map(([weekKey, weekShifts]) => ({
-      weekStart: new Date(weekKey),
+      weekStart: new Date(`${weekKey}T00:00:00`),
       shifts: weekShifts,
-    }));
-}
-
-export function ShiftsTable({ shifts, onEdit }: ShiftsTableProps) {
-  const weeks = groupShiftsByWeek(shifts);
+    }))
+    .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
 
   if (weeks.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Shifts</CardTitle>
+          <CardTitle>No shifts yet</CardTitle>
         </CardHeader>
 
         <CardContent>
-          <div className="py-10 text-center text-muted-foreground">
-            No shifts recorded.
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Add your first shift to start your driver journal.
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {weeks.map(({ weekStart, shifts: weekShifts }) => (
         <WeeklyShiftSection
-          key={weekStart.getTime()}
+          key={weekStart.toISOString()}
           weekStart={weekStart}
           shifts={weekShifts}
           allShifts={shifts}
