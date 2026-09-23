@@ -24,16 +24,24 @@ import {
   formatWeek,
 } from '../utils/driver-journal';
 
+import {
+  getDrivingStatus,
+  getRestStatus,
+  getShiftStatus,
+  hasExtendedShift,
+  isReducedDailyRest,
+} from './shift-status';
+
 import { WeeklySummary } from './weekly-summary';
 
-const REDUCED_DAILY_REST_MINUTES = 9 * 60;
-const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
 const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
 const MAX_SHARED_ALLOWANCE = 3;
+
 const EXTENDED_DAILY_DRIVING_MINUTES = 9 * 60;
 const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
 const MAX_EXTENDED_DRIVING_DAYS = 2;
+
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
 type WeeklyShiftSectionProps = {
@@ -97,29 +105,13 @@ function usesSharedAllowance(shift: Shift) {
   );
 
   const hasReducedDailyRest =
-    shift.restType === 'daily' &&
-    rest >= REDUCED_DAILY_REST_MINUTES &&
-    rest < REGULAR_DAILY_REST_MINUTES;
+    shift.restType === 'daily' && rest >= 9 * 60 && rest < 11 * 60;
 
   const hasExtendedShift =
     shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
     shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
 
   return hasReducedDailyRest || hasExtendedShift;
-}
-
-function hasExtendedShift(shift: Shift) {
-  const shiftMinutes = calculateShiftMinutes(
-    shift.date,
-    shift.start,
-    shift.endDate || shift.date,
-    shift.end,
-  );
-
-  return (
-    shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
-    shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES
-  );
 }
 
 function buildSharedAllowanceUsage(shifts: Shift[]) {
@@ -190,151 +182,6 @@ function buildExtendedDrivingUsage(shifts: Shift[]) {
   }
 
   return usageByShiftId;
-}
-
-function getMaxEndTime(shift: Shift, minutes: number) {
-  const startDate = new Date(`${shift.date}T${shift.start}`);
-
-  if (Number.isNaN(startDate.getTime())) {
-    return null;
-  }
-
-  const maxEnd = new Date(startDate.getTime() + minutes * 60 * 1000);
-
-  return maxEnd.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
-}
-
-function getShiftStatus(
-  shift: Shift,
-  shiftMinutes: number,
-  sharedAllowanceUsedBeforeShift: number,
-) {
-  const regularMaxEnd = getMaxEndTime(shift, REGULAR_SHIFT_SPREAD_MINUTES);
-
-  const extendedMaxEnd = getMaxEndTime(shift, MAX_SHIFT_SPREAD_MINUTES);
-
-  if (shiftMinutes > MAX_SHIFT_SPREAD_MINUTES) {
-    return {
-      label: extendedMaxEnd
-        ? `Over limit · max ${extendedMaxEnd}`
-        : 'Over limit · max 15h',
-      className: 'text-red-600 dark:text-red-400',
-    };
-  }
-
-  if (shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES) {
-    if (sharedAllowanceUsedBeforeShift >= MAX_SHARED_ALLOWANCE) {
-      return {
-        label: 'Extended · Not allowed',
-        className: 'text-red-600 dark:text-red-400',
-      };
-    }
-
-    return {
-      label: extendedMaxEnd
-        ? `Extended · max ${extendedMaxEnd}`
-        : 'Extended · max 15h',
-      className: 'text-orange-600 dark:text-orange-400',
-    };
-  }
-
-  return {
-    label: regularMaxEnd
-      ? `Regular · max ${regularMaxEnd}`
-      : 'Regular · max 13h',
-    className: 'text-green-600 dark:text-green-400',
-  };
-}
-
-function getDrivingStatus(
-  drivingMinutes: number,
-  extendedDrivingDaysUsedBefore: number,
-) {
-  const minutes = normalizeDrivingMinutes(drivingMinutes);
-
-  /**
-   * More than 10h is ALWAYS over the daily driving limit.
-   */
-  if (minutes > MAX_DAILY_DRIVING_MINUTES) {
-    return {
-      label: 'Over limit · Max 10h',
-      className: 'text-red-600 dark:text-red-400',
-      showCounter: false,
-      notAllowed: true,
-    };
-  }
-
-  /**
-   * More than 9h and up to 10h requires
-   * one of the two extended-driving uses.
-   */
-  if (minutes > EXTENDED_DAILY_DRIVING_MINUTES) {
-    if (extendedDrivingDaysUsedBefore >= MAX_EXTENDED_DRIVING_DAYS) {
-      return {
-        label: 'Extended driving · Not allowed',
-        className: 'text-red-600 dark:text-red-400',
-        showCounter: true,
-        notAllowed: true,
-      };
-    }
-
-    return {
-      label: 'Extended',
-      className: 'text-orange-600 dark:text-orange-400',
-      showCounter: true,
-      notAllowed: false,
-    };
-  }
-
-  return null;
-}
-
-function getRestStatus(shift: Shift) {
-  const rest = Number(shift.rest) || 0;
-
-  if (shift.restType === 'weekly') {
-    if (rest < MINIMUM_WEEKLY_REST_MINUTES) {
-      return {
-        label: 'Insufficient weekly rest',
-        className: 'text-red-600 dark:text-red-400',
-      };
-    }
-
-    if (rest < 45 * 60) {
-      return {
-        label: 'Reduced weekly rest',
-        className: 'text-orange-600 dark:text-orange-400',
-      };
-    }
-
-    return {
-      label: 'Regular weekly rest',
-      className: 'text-green-600 dark:text-green-400',
-    };
-  }
-
-  if (rest < REDUCED_DAILY_REST_MINUTES) {
-    return {
-      label: 'Insufficient daily rest',
-      className: 'text-red-600 dark:text-red-400',
-    };
-  }
-
-  if (rest < REGULAR_DAILY_REST_MINUTES) {
-    return {
-      label: 'Reduced daily rest',
-      className: 'text-orange-600 dark:text-orange-400',
-    };
-  }
-
-  return {
-    label: 'Regular daily rest',
-    className: 'text-green-600 dark:text-green-400',
-  };
 }
 
 /**
@@ -481,12 +328,9 @@ export function WeeklyShiftSection({
 
                 const restMinutes = Number(shift.rest) || 0;
 
-                const isReducedDailyRest =
-                  shift.restType === 'daily' &&
-                  restMinutes >= REDUCED_DAILY_REST_MINUTES &&
-                  restMinutes < REGULAR_DAILY_REST_MINUTES;
+                const reducedDailyRest = isReducedDailyRest(shift);
 
-                const isExtendedShift = hasExtendedShift(shift);
+                const extendedShift = hasExtendedShift(shift);
 
                 const allowanceNotAllowed =
                   currentShiftUsesAllowance &&
@@ -497,13 +341,13 @@ export function WeeklyShiftSection({
                 const drivingUsageAfter =
                   extendedDrivingUsage.get(shift.id) ?? 0;
 
-                const isExtendedDriving =
+                const extendedDriving =
                   drivingMinutes > EXTENDED_DAILY_DRIVING_MINUTES &&
                   drivingMinutes <= MAX_DAILY_DRIVING_MINUTES;
 
                 const drivingUsageBefore = Math.max(
                   0,
-                  drivingUsageAfter - (isExtendedDriving ? 1 : 0),
+                  drivingUsageAfter - (extendedDriving ? 1 : 0),
                 );
 
                 const drivingDaysRemaining = Math.max(
@@ -582,7 +426,7 @@ export function WeeklyShiftSection({
                     <TableCell className="w-[64px] min-w-[64px] px-0.5 py-1.5 text-[10px] sm:w-[120px] sm:min-w-[120px] sm:px-4 sm:py-2 sm:text-sm">
                       <div>{formatDuration(shift.rest)}</div>
 
-                      {isReducedDailyRest && (
+                      {reducedDailyRest && (
                         <>
                           <div
                             className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
@@ -609,7 +453,7 @@ export function WeeklyShiftSection({
                         </>
                       )}
 
-                      {!isReducedDailyRest && isExtendedShift && (
+                      {!reducedDailyRest && extendedShift && (
                         <>
                           <div
                             className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${
@@ -636,8 +480,8 @@ export function WeeklyShiftSection({
                         </>
                       )}
 
-                      {!isReducedDailyRest &&
-                        !isExtendedShift &&
+                      {!reducedDailyRest &&
+                        !extendedShift &&
                         shift.restType !== 'weekly' && (
                           <div
                             className={`mt-0.5 text-[8px] font-medium leading-tight sm:text-[10px] ${restStatus.className}`}
