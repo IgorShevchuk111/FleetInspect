@@ -56,7 +56,8 @@ function formatDurationStacked(minutes: number) {
 
   return (
     <span className="flex flex-col items-center leading-tight">
-      <span>{hours}h</span> <span>{remainingMinutes}m</span>
+      <span>{hours}h</span>
+      <span>{remainingMinutes}m</span>
     </span>
   );
 }
@@ -148,8 +149,9 @@ function RestInfo({
   reducedDailyRest?: boolean;
   extendedShift?: boolean;
 }) {
-  const label =
-    reducedDailyRest && usageAfter > 3
+  const label = extendedShift
+    ? 'Extended shift'
+    : reducedDailyRest && usageAfter > 3
       ? 'Reduced daily rest · Not allowed'
       : status.label;
 
@@ -178,16 +180,38 @@ export function ShiftRow({
   const workingMinutes = shiftMinutes - shift.break;
   const endDate = shift.endDate || shift.date;
 
+  const isRegularWeeklyRest = restStatus?.label === 'Regular weekly rest';
+
+  const isReducedWeeklyRest = restStatus?.label === 'Reduced weekly rest';
+
+  const isWeeklyRest = isRegularWeeklyRest || isReducedWeeklyRest;
+
+  const rowClassName = isWeeklyRest
+    ? 'cursor-pointer bg-muted/40 hover:bg-muted/60'
+    : 'cursor-pointer';
+
+  const stickyCellClassName = isWeeklyRest ? 'bg-muted' : 'bg-background';
+
+  const weeklyRestBorderClassName = isRegularWeeklyRest
+    ? 'border-l-green-500'
+    : isReducedWeeklyRest
+      ? 'border-l-red-500'
+      : 'border-l-transparent';
+
   return (
-    <TableRow className="cursor-pointer" onClick={() => onEdit(shift)}>
-      <TableCell className="sticky left-0 z-10 bg-background px-1.5 py-2 text-center text-sm">
+    <TableRow className={rowClassName} onClick={() => onEdit(shift)}>
+      <TableCell
+        className={`sticky left-0 z-10 border-l-2 px-1.5 py-2 text-center text-sm ${weeklyRestBorderClassName} ${stickyCellClassName}`}
+      >
         <div className="flex flex-col items-center leading-tight">
           <span>{formatShiftDate(shift.date)}</span>
+
           <span className="text-muted-foreground">
             {formatTime(shift.start)}
           </span>
         </div>
       </TableCell>
+
       <TableCell className="relative px-1.5 py-2 text-center text-sm">
         <div className="flex min-h-9 items-center justify-center">
           {formatDurationStacked(shift.driving)}
@@ -197,6 +221,7 @@ export function ShiftRow({
           <DrivingInfo status={drivingStatus} usageAfter={drivingUsageAfter} />
         ) : null}
       </TableCell>
+
       <TableCell className="relative px-1.5 py-2 text-center text-sm">
         <div className="flex min-h-9 items-center justify-center">
           {formatDurationStacked(shiftMinutes)}
@@ -204,9 +229,11 @@ export function ShiftRow({
 
         {shiftStatus ? <ShiftInfo status={shiftStatus} /> : null}
       </TableCell>
+
       <TableCell className="px-1.5 py-2 text-center text-sm">
         {formatDuration(shift.break)}
       </TableCell>
+
       <TableCell className="relative px-1.5 py-2 text-center text-sm">
         <div className="flex min-h-9 items-center justify-center">
           {formatDurationStacked(shift.rest)}
@@ -221,15 +248,21 @@ export function ShiftRow({
           />
         ) : null}
       </TableCell>
+
       <TableCell className="px-1.5 py-2 text-center text-sm">
         £{shift.earn.toFixed(2)}
       </TableCell>
+
       <TableCell className="px-1.5 py-2 text-center text-sm">
         {formatDurationStacked(workingMinutes)}
       </TableCell>
-      <TableCell className="sticky right-0 z-10 bg-background px-1.5 py-2 text-center text-sm">
+
+      <TableCell
+        className={`sticky right-0 z-10 px-1.5 py-2 text-center text-sm ${stickyCellClassName}`}
+      >
         <div className="flex flex-col items-center leading-tight">
           <span>{formatShiftDate(endDate)}</span>
+
           <span className="text-muted-foreground">{formatTime(shift.end)}</span>
         </div>
       </TableCell>
