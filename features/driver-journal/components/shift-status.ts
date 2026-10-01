@@ -153,8 +153,13 @@ export function getDrivingStatus(
     return null;
 }
 
-export function getRestStatus(shift: Shift) {
-    const rest = Number(shift.rest) || 0;
+export function getRestStatus(
+    shift: Shift,
+    effectiveRestMinutes?: number,
+) {
+    const rest =
+        effectiveRestMinutes ??
+        (Number(shift.rest) || 0);
 
     if (shift.restType === 'weekly') {
         if (rest < MINIMUM_WEEKLY_REST_MINUTES) {

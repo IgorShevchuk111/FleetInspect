@@ -1,4 +1,5 @@
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 
 import { getEndOfWeek, getStartOfWeek } from './dates';
 import {
@@ -101,6 +102,7 @@ function calculateAnnualEarned(
 export function calculateWeeklySummary(
     shifts: Shift[],
     weekStart: Date,
+    restCompensations: RestCompensation[] = [],
 ) {
     const currentWeekStart =
         getStartOfWeek(weekStart);
@@ -150,6 +152,7 @@ export function calculateWeeklySummary(
     const weeklyRestCompliance =
         calculateWeeklyRestCompliance(
             shifts,
+            restCompensations,
         );
 
     const currentWeekEnd =

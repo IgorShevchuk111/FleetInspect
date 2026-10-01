@@ -9,6 +9,10 @@ import { ShiftsTable } from './shifts-table';
 export default function DriverJournalPage() {
   const {
     shifts,
+    restCompensations,
+    acceptRestCompensation,
+    declineRestCompensation,
+    cancelRestCompensation,
     isAddShiftOpen,
     setIsAddShiftOpen,
     addShift,
@@ -23,11 +27,19 @@ export default function DriverJournalPage() {
     <div className="mx-auto max-w-7xl px-2 py-2 sm:px-6 sm:py-14 lg:px-8">
       <JournalHeader onAddShift={() => setIsAddShiftOpen(true)} />
 
-      <ShiftsTable shifts={shifts} onEdit={startEditingShift} />
+      <ShiftsTable
+        shifts={shifts}
+        restCompensations={restCompensations}
+        onAcceptRestCompensation={acceptRestCompensation}
+        onDeclineRestCompensation={declineRestCompensation}
+        onCancelRestCompensation={cancelRestCompensation}
+        onEdit={startEditingShift}
+      />
 
       <ShiftDialog
         open={isAddShiftOpen || Boolean(editingShift)}
         shift={editingShift}
+        shifts={shifts}
         onOpenChange={(open) => {
           if (!open) {
             setIsAddShiftOpen(false);

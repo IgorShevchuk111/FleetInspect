@@ -85,110 +85,109 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
   const yearStart = new Date(currentWeekEnd.getFullYear(), 0, 1);
 
   return (
-    <div className="flex justify-end">
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button type="button" variant="outline" size="sm" className="min-h-9">
-            Weekly summary
-          </Button>
-        </DialogTrigger>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="min-h-9">
+          Weekly Summary
+        </Button>
+      </DialogTrigger>
 
-        <DialogContent
-          className="
-            w-[calc(100%-1rem)]
-            max-w-sm
-            overflow-hidden
-            p-0
-            sm:w-full
-          "
-        >
-          <DialogHeader className="border-b px-5 py-4 text-left sm:px-6 sm:py-5">
-            <DialogTitle className="text-base sm:text-lg">
-              Weekly summary
-            </DialogTitle>
+      <DialogContent
+        className="
+          w-[calc(100%-1rem)]
+          max-w-sm
+          overflow-hidden
+          p-0
+          sm:w-full
+        "
+      >
+        <DialogHeader className="border-b px-5 py-4 text-left sm:px-6 sm:py-5">
+          <DialogTitle className="text-base sm:text-lg">
+            Weekly Summary
+          </DialogTitle>
 
-            <DialogDescription className="text-xs leading-relaxed sm:text-sm">
-              {formatDateRange(currentWeekStart, currentWeekEnd)}
-              <span className="block">Monday – Sunday</span>
-            </DialogDescription>
-          </DialogHeader>
+          <DialogDescription className="text-xs leading-relaxed sm:text-sm">
+            {formatDateRange(currentWeekStart, currentWeekEnd)}
 
-          <div className="max-h-[70vh] overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
-            <div className="space-y-5">
-              <section>
-                <div className="divide-y rounded-lg border px-3">
-                  <SummaryRow
-                    label="Driving"
-                    value={formatDuration(summary.driving)}
-                    prominent
-                  />
+            <span className="block">Monday – Sunday</span>
+          </DialogDescription>
+        </DialogHeader>
 
-                  <SummaryRow
-                    label="Working time"
-                    value={formatDuration(summary.working)}
-                    prominent
-                  />
-
-                  <SummaryRow
-                    label="Earned"
-                    value={`£${summary.earn.toFixed(2)}`}
-                    prominent
-                  />
-                </div>
-              </section>
-
-              <section className="border-t pt-4">
-                <h3 className="mb-1 text-sm font-semibold">Driving limits</h3>
-
+        <div className="max-h-[70vh] overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
+          <div className="space-y-5">
+            <section>
+              <div className="divide-y rounded-lg border px-3">
                 <SummaryRow
-                  label="Weekly driving"
-                  value={`${formatDuration(summary.driving)} / 56h`}
+                  label="Driving"
+                  value={formatDuration(summary.driving)}
                   prominent
                 />
 
                 <SummaryRow
-                  label="2-week driving"
-                  value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
-                />
-
-                <PeriodLabel>
-                  {formatDateRange(twoWeekStart, currentWeekEnd)}
-                </PeriodLabel>
-              </section>
-
-              <section className="border-t pt-4">
-                <h3 className="mb-1 text-sm font-semibold">Working time</h3>
-
-                <SummaryRow
-                  label="17-week average"
-                  value={`${formatDuration(
-                    Math.round(summary.average17WeekWorking),
-                  )} / week`}
+                  label="Working time"
+                  value={formatDuration(summary.working)}
                   prominent
                 />
 
-                <PeriodLabel>
-                  {formatDateRange(seventeenWeekStart, currentWeekEnd)}
-                </PeriodLabel>
-              </section>
-
-              <section className="border-t pt-4">
-                <h3 className="mb-1 text-sm font-semibold">Earnings</h3>
-
                 <SummaryRow
-                  label="Year-to-date"
-                  value={`£${summary.annualEarned.toFixed(2)}`}
+                  label="Earned"
+                  value={`£${summary.earn.toFixed(2)}`}
                   prominent
                 />
+              </div>
+            </section>
 
-                <PeriodLabel>
-                  {formatDateRange(yearStart, currentWeekEnd)}
-                </PeriodLabel>
-              </section>
-            </div>
+            <section className="border-t pt-4">
+              <h3 className="mb-1 text-sm font-semibold">Driving limits</h3>
+
+              <SummaryRow
+                label="Weekly driving"
+                value={`${formatDuration(summary.driving)} / 56h`}
+                prominent
+              />
+
+              <SummaryRow
+                label="2-week driving"
+                value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
+              />
+
+              <PeriodLabel>
+                {formatDateRange(twoWeekStart, currentWeekEnd)}
+              </PeriodLabel>
+            </section>
+
+            <section className="border-t pt-4">
+              <h3 className="mb-1 text-sm font-semibold">Working time</h3>
+
+              <SummaryRow
+                label="17-week average"
+                value={`${formatDuration(
+                  Math.round(summary.average17WeekWorking),
+                )} / week`}
+                prominent
+              />
+
+              <PeriodLabel>
+                {formatDateRange(seventeenWeekStart, currentWeekEnd)}
+              </PeriodLabel>
+            </section>
+
+            <section className="border-t pt-4">
+              <h3 className="mb-1 text-sm font-semibold">Earnings</h3>
+
+              <SummaryRow
+                label="Year-to-date"
+                value={`£${summary.annualEarned.toFixed(2)}`}
+                prominent
+              />
+
+              <PeriodLabel>
+                {formatDateRange(yearStart, currentWeekEnd)}
+              </PeriodLabel>
+            </section>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

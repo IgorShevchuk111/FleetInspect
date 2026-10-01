@@ -1,16 +1,27 @@
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { calculateShiftMinutes, sortShiftsChronologically } from './shifts';
+import type { RestCompensation } from '../services/driver-journal';
+
+import {
+    calculateShiftMinutes,
+    sortShiftsChronologically,
+} from './shifts';
 
 const MAX_SHARED_ALLOWANCE = 3;
+
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
 const EXTENDED_DAILY_DRIVING_MINUTES = 9 * 60;
+
 const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
+
 const MAX_EXTENDED_DRIVING_DAYS = 2;
 
 const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
+
 const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
+
+const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 
 function getFixedWeekKey(dateString: string) {
     const date = new Date(`${dateString}T12:00:00`);
@@ -27,7 +38,24 @@ function getFixedWeekKey(dateString: string) {
     return date.toISOString().slice(0, 10);
 }
 
-function usesSharedAllowance(shift: Shift) {
+function hasAcceptedReducedDailyRestCompensation(
+    shiftId: string,
+    restCompensations: RestCompensation[],
+) {
+    return restCompensations.some(
+        (compensation) =>
+            compensation.compensation_shift_id === shiftId &&
+            compensation.decision === 'accepted' &&
+            Number(compensation.daily_rest_minutes) >= 9 * 60 &&
+            Number(compensation.daily_rest_minutes) <
+            REGULAR_DAILY_REST_MINUTES,
+    );
+}
+
+function usesSharedAllowance(
+    shift: Shift,
+    restCompensations: RestCompensation[] = [],
+) {
     const rest = Number(shift.rest) || 0;
 
     const shiftMinutes = calculateShiftMinutes(shift);
@@ -35,17 +63,28 @@ function usesSharedAllowance(shift: Shift) {
     const hasReducedDailyRest =
         shift.restType === 'daily' &&
         rest >= 9 * 60 &&
-        rest < 11 * 60;
+        rest < REGULAR_DAILY_REST_MINUTES;
+
+    const hasReducedDailyRestCompensation =
+        hasAcceptedReducedDailyRestCompensation(
+            shift.id,
+            restCompensations,
+        );
 
     const hasExtendedShift =
         shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
         shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
 
-    return hasReducedDailyRest || hasExtendedShift;
+    return (
+        hasReducedDailyRest ||
+        hasReducedDailyRestCompensation ||
+        hasExtendedShift
+    );
 }
 
 export function buildSharedAllowanceUsage(
     shifts: Shift[],
+    restCompensations: RestCompensation[] = [],
 ): Map<string, number> {
     const sortedShifts =
         sortShiftsChronologically(shifts);
@@ -62,14 +101,21 @@ export function buildSharedAllowanceUsage(
             rest >= MINIMUM_WEEKLY_REST_MINUTES
         ) {
             allowanceUsed = 0;
+
             usageByShiftId.set(
                 shift.id,
                 allowanceUsed,
             );
+
             continue;
         }
 
-        if (usesSharedAllowance(shift)) {
+        if (
+            usesSharedAllowance(
+                shift,
+                restCompensations,
+            )
+        ) {
             allowanceUsed += 1;
         }
 
@@ -89,6 +135,7 @@ export function buildExtendedDrivingUsage(
         sortShiftsChronologically(shifts);
 
     const usageByShiftId = new Map<string, number>();
+
     const usageByWeek = new Map<string, number>();
 
     for (const shift of sortedShifts) {
@@ -97,7 +144,11 @@ export function buildExtendedDrivingUsage(
         );
 
         if (!weekKey) {
-            usageByShiftId.set(shift.id, 0);
+            usageByShiftId.set(
+                shift.id,
+                0,
+            );
+
             continue;
         }
 
@@ -131,7 +182,9 @@ export function buildExtendedDrivingUsage(
     return usageByShiftId;
 }
 
-export function normalizeDrivingMinutes(value: number) {
+export function normalizeDrivingMinutes(
+    value: number,
+) {
     const minutes = Number(value);
 
     if (!Number.isFinite(minutes)) {

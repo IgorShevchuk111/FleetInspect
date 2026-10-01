@@ -1,7 +1,11 @@
+import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { calculateShiftMinutes } from './shifts';
-import { getShiftsForWeek, sortShiftsChronologically } from './shifts';
+import {
+    calculateShiftMinutes,
+    getShiftsForWeek,
+    sortShiftsChronologically,
+} from './shifts';
 
 const DAILY_DRIVING_LIMIT = 9 * 60;
 const EXTENDED_DAILY_DRIVING_LIMIT = 10 * 60;
@@ -47,7 +51,6 @@ function usesReducedDailyRestAllowance(
     shift: Shift,
 ): boolean {
     const rest = Number(shift.rest) || 0;
-
     const shiftMinutes = calculateShiftMinutes(shift);
 
     const hasReducedDailyRest =
@@ -101,9 +104,7 @@ export function getWeeklyRestStatus(
         return 'regular';
     }
 
-    if (
-        restMinutes >= MINIMUM_REDUCED_WEEKLY_REST
-    ) {
+    if (restMinutes >= MINIMUM_REDUCED_WEEKLY_REST) {
         return 'reduced';
     }
 
@@ -112,6 +113,7 @@ export function getWeeklyRestStatus(
 
 export function calculateWeeklyRestCompliance(
     shifts: Shift[],
+    compensations: RestCompensation[] = [],
 ) {
     const weeklyRestShifts = sortShiftsChronologically(
         shifts,
@@ -120,26 +122,50 @@ export function calculateWeeklyRestCompliance(
     );
 
     let reducedWeeklyRestUsed = 0;
-    let compensationOwed = 0;
+    let totalCompensationOwed = 0;
 
     for (const shift of weeklyRestShifts) {
-        const status = getWeeklyRestStatus(
-            shift.rest,
+        const status = getWeeklyRestStatus(shift.rest);
+
+        if (status !== 'reduced') {
+            continue;
+        }
+
+        reducedWeeklyRestUsed += 1;
+
+        const compensationOwed = Math.max(
+            0,
+            REGULAR_WEEKLY_REST - shift.rest,
         );
 
-        if (status === 'reduced') {
-            reducedWeeklyRestUsed += 1;
-
-            compensationOwed += Math.max(
+        const compensationTaken = compensations
+            .filter(
+                (compensation) =>
+                    compensation.reduced_weekly_rest_shift_id ===
+                    shift.id &&
+                    compensation.decision === 'accepted',
+            )
+            .reduce(
+                (total, compensation) =>
+                    total +
+                    Math.max(
+                        0,
+                        Number(
+                            compensation.compensation_minutes,
+                        ) || 0,
+                    ),
                 0,
-                REGULAR_WEEKLY_REST - shift.rest,
             );
-        }
+
+        totalCompensationOwed += Math.max(
+            0,
+            compensationOwed - compensationTaken,
+        );
     }
 
     return {
         reducedWeeklyRestUsed,
-        compensationOwed,
+        compensationOwed: totalCompensationOwed,
     };
 }
 

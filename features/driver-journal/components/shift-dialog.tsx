@@ -37,6 +37,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
+import { Calendar } from '@/components/ui/calendar';
+
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -51,12 +59,14 @@ import type {
 } from '@/features/driver-journal/types/ driver-journal';
 
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
+import { getWeeklyRestValidation } from '@/features/driver-journal/utils/weekly-rest-rules';
 
 import { DurationInputField } from './duration-input';
 
 type ShiftDialogProps = {
   open: boolean;
   shift?: Shift | null;
+  shifts?: Shift[];
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ShiftFormData) => void;
   onDelete?: () => void;
@@ -87,8 +97,14 @@ function getInitialForm(): ShiftFormData {
   return {
     date: today,
     start: getCurrentTime(),
-    driving: { hours: 0, minutes: 0 },
-    break: { hours: 0, minutes: 0 },
+    driving: {
+      hours: 0,
+      minutes: 0,
+    },
+    break: {
+      hours: 0,
+      minutes: 0,
+    },
     restType: 'daily',
     end: '',
     endDate: today,
@@ -109,6 +125,42 @@ function getShiftForm(shift: Shift): ShiftFormData {
   };
 }
 
+function dateStringToDate(value: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+
+  if (!year || !month || !day) {
+    return undefined;
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+function dateToDateString(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatDate(value: string) {
+  const date = dateStringToDate(value);
+
+  if (!date) {
+    return 'Select date';
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
 function SectionHeader({
   icon: Icon,
   title,
@@ -118,19 +170,66 @@ function SectionHeader({
 }) {
   return (
     <div className="mb-3 flex min-w-0 items-center gap-2">
-      {' '}
       <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
-        {' '}
-        <Icon className="size-3.5 text-muted-foreground" />{' '}
+        <Icon className="size-3.5 text-muted-foreground" />
       </div>
+
       <span className="text-sm font-medium">{title}</span>
     </div>
+  );
+}
+
+function DatePicker({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedDate = dateStringToDate(value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          type="button"
+          variant="outline"
+          className="min-w-0 flex-1 justify-start text-left font-normal"
+        >
+          <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
+          <span className="truncate">{formatDate(value)}</span>
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start" className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => {
+            if (!date) {
+              return;
+            }
+
+            onChange(dateToDateString(date));
+            setOpen(false);
+          }}
+          captionLayout="dropdown"
+          startMonth={new Date(2000, 0)}
+          endMonth={new Date(2100, 11)}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
 export function ShiftDialog({
   open,
   shift,
+  shifts = [],
   onOpenChange,
   onSubmit,
   onDelete,
@@ -141,7 +240,9 @@ export function ShiftDialog({
   const isEditing = Boolean(shift);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
 
     if (shift) {
       setForm(getShiftForm(shift));
@@ -150,6 +251,14 @@ export function ShiftDialog({
 
     setForm(getInitialForm());
   }, [open, shift]);
+
+  const weeklyRestValidation =
+    form.restType === 'weekly'
+      ? getWeeklyRestValidation(shifts, form.date, form.start, shift?.id)
+      : {
+          valid: true,
+          isReduced: false,
+        };
 
   function updateField(
     field: keyof ShiftFormData,
@@ -163,6 +272,11 @@ export function ShiftDialog({
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (form.restType === 'weekly' && !weeklyRestValidation.valid) {
+      return;
+    }
+
     onSubmit(form);
   }
 
@@ -172,7 +286,9 @@ export function ShiftDialog({
   }
 
   function handleDelete() {
-    if (!onDelete) return;
+    if (!onDelete) {
+      return;
+    }
 
     onDelete();
     setIsDeleteConfirmOpen(false);
@@ -202,9 +318,11 @@ export function ShiftDialog({
     }
   }
 
+  const isWeeklyRestBlocked =
+    form.restType === 'weekly' && !weeklyRestValidation.valid;
+
   return (
     <>
-      {' '}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           className="flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90vh] sm:max-w-xl"
@@ -212,15 +330,12 @@ export function ShiftDialog({
             event.preventDefault();
           }}
         >
-          {' '}
           <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6 sm:py-4">
-            {' '}
             <div className="flex min-w-0 items-center gap-3">
-              {' '}
               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                {' '}
-                <Clock3 className="size-4.5 text-primary" />{' '}
+                <Clock3 className="size-4.5 text-primary" />
               </div>
+
               <div className="min-w-0">
                 <DialogTitle className="text-lg">
                   {isEditing ? 'Edit shift' : 'Add shift'}
@@ -234,6 +349,7 @@ export function ShiftDialog({
               </div>
             </div>
           </DialogHeader>
+
           <form
             onSubmit={handleSubmit}
             className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
@@ -252,15 +368,11 @@ export function ShiftDialog({
                         Start
                       </Label>
 
-                      <div className="grid min-w-0 grid-cols-2 gap-2">
-                        <Input
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
+                        <DatePicker
                           id="start-date"
-                          type="date"
                           value={form.date}
-                          onChange={(event) =>
-                            updateField('date', event.target.value)
-                          }
-                          className="min-w-0 max-w-full"
+                          onChange={(value) => updateField('date', value)}
                         />
 
                         <Input
@@ -270,7 +382,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('start', event.target.value)
                           }
-                          className="min-w-0 max-w-full"
+                          className="w-[7.5rem]"
                         />
                       </div>
                     </div>
@@ -283,15 +395,11 @@ export function ShiftDialog({
                         End
                       </Label>
 
-                      <div className="grid min-w-0 grid-cols-2 gap-2">
-                        <Input
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
+                        <DatePicker
                           id="end-date"
-                          type="date"
                           value={form.endDate}
-                          onChange={(event) =>
-                            updateField('endDate', event.target.value)
-                          }
-                          className="min-w-0 max-w-full"
+                          onChange={(value) => updateField('endDate', value)}
                         />
 
                         <Input
@@ -301,7 +409,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('end', event.target.value)
                           }
-                          className="min-w-0 max-w-full"
+                          className="w-[7.5rem]"
                         />
                       </div>
                     </div>
@@ -366,6 +474,30 @@ export function ShiftDialog({
                           <SelectItem value="weekly">Weekly rest</SelectItem>
                         </SelectContent>
                       </Select>
+
+                      {form.restType === 'weekly' &&
+                      weeklyRestValidation.valid &&
+                      weeklyRestValidation.isReduced ? (
+                        <p className="text-xs text-amber-600">
+                          Reduced weekly rest: 24–44h 59m. Your next weekly rest
+                          must be regular.
+                        </p>
+                      ) : null}
+
+                      {form.restType === 'weekly' &&
+                      weeklyRestValidation.valid &&
+                      !weeklyRestValidation.isReduced ? (
+                        <p className="text-xs text-green-600">
+                          Regular weekly rest: 45 hours or more.
+                        </p>
+                      ) : null}
+
+                      {form.restType === 'weekly' &&
+                      !weeklyRestValidation.valid ? (
+                        <p className="text-xs font-medium text-destructive">
+                          {weeklyRestValidation.message}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="min-w-0 space-y-1.5">
@@ -423,7 +555,11 @@ export function ShiftDialog({
                   Cancel
                 </Button>
 
-                <Button type="submit" className="min-w-28">
+                <Button
+                  type="submit"
+                  disabled={isWeeklyRestBlocked}
+                  className="min-w-28"
+                >
                   {isEditing ? 'Save changes' : 'Add shift'}
                 </Button>
               </div>
@@ -431,6 +567,7 @@ export function ShiftDialog({
           </form>
         </DialogContent>
       </Dialog>
+
       <AlertDialog
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}

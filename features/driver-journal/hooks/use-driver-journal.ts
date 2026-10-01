@@ -4,18 +4,30 @@ import { useEffect, useState } from 'react';
 
 import {
     createDriverJournalShift,
+    createRestCompensation,
     deleteDriverJournalShift,
+    deleteRestCompensation,
     getDriverJournalShifts,
+    getRestCompensations,
     updateDriverJournalShift,
+    updateRestCompensation,
 } from '@/features/driver-journal/services/driver-journal';
 
 import type {
+    RestType,
     Shift,
     ShiftFormData,
 } from '@/features/driver-journal/types/ driver-journal';
 
+import type { Database } from '@/types/supabase/database';
+
 import { durationToMinutes } from '@/features/driver-journal/utils/duration';
 import { calculateShiftMinutes } from '@/features/driver-journal/utils/shifts';
+
+import type { RestCompensation } from '../services/driver-journal';
+
+type DriverJournalShiftRow =
+    Database['public']['Tables']['driver_journal_shifts']['Row'];
 
 function getDateTime(date: string, time: string) {
     if (!date || !time) {
@@ -69,17 +81,13 @@ function calculateRest(
             continue;
         }
 
-        if (
-            shiftEnd.getTime() >=
-            currentStart.getTime()
-        ) {
+        if (shiftEnd.getTime() >= currentStart.getTime()) {
             continue;
         }
 
         if (
             !previousEnd ||
-            shiftEnd.getTime() >
-            previousEnd.getTime()
+            shiftEnd.getTime() > previousEnd.getTime()
         ) {
             previousEnd = shiftEnd;
         }
@@ -92,8 +100,7 @@ function calculateRest(
     return Math.max(
         0,
         Math.round(
-            (currentStart.getTime() -
-                previousEnd.getTime()) /
+            (currentStart.getTime() - previousEnd.getTime()) /
             60000,
         ),
     );
@@ -102,17 +109,13 @@ function calculateRest(
 function recalculateRest(shifts: Shift[]) {
     return shifts.map((shift) => ({
         ...shift,
-        rest: calculateRest(
-            shifts,
-            shift,
-        ),
+        rest: calculateRest(shifts, shift),
     }));
 }
 
 function sortShifts(shifts: Shift[]) {
     return [...shifts].sort((a, b) => {
-        const dateComparison =
-            b.date.localeCompare(a.date);
+        const dateComparison = b.date.localeCompare(a.date);
 
         if (dateComparison !== 0) {
             return dateComparison;
@@ -123,7 +126,7 @@ function sortShifts(shifts: Shift[]) {
 }
 
 function mapDatabaseShift(
-    shift: any,
+    shift: DriverJournalShiftRow,
 ): Shift {
     return {
         id: shift.id,
@@ -139,17 +142,20 @@ function mapDatabaseShift(
         break: shift.break,
         rest: shift.rest,
         restType:
-            shift.rest_type ?? 'unspecified',
+            shift.rest_type === 'weekly'
+                ? 'weekly'
+                : 'daily',
         end: shift.end ?? '',
-        endDate:
-            shift.end_date ?? shift.date,
+        endDate: shift.end_date ?? shift.date,
         earn: Number(shift.earn),
     };
 }
 
 export function useDriverJournal() {
-    const [shifts, setShifts] =
-        useState<Shift[]>([]);
+    const [shifts, setShifts] = useState<Shift[]>([]);
+
+    const [restCompensations, setRestCompensations] =
+        useState<RestCompensation[]>([]);
 
     const [isAddShiftOpen, setIsAddShiftOpen] =
         useState(false);
@@ -158,33 +164,36 @@ export function useDriverJournal() {
         useState<Shift | null>(null);
 
     useEffect(() => {
-        async function loadShifts() {
+        async function loadDriverJournal() {
             try {
-                const data =
-                    await getDriverJournalShifts();
+                const [shiftData, compensationData] =
+                    await Promise.all([
+                        getDriverJournalShifts(),
+                        getRestCompensations(),
+                    ]);
 
                 const mappedShifts =
-                    data.map(mapDatabaseShift);
+                    shiftData.map(mapDatabaseShift);
 
                 const recalculatedShifts =
-                    recalculateRest(
-                        mappedShifts,
-                    );
+                    recalculateRest(mappedShifts);
 
                 setShifts(
-                    sortShifts(
-                        recalculatedShifts,
-                    ),
+                    sortShifts(recalculatedShifts),
+                );
+
+                setRestCompensations(
+                    compensationData,
                 );
             } catch (error) {
                 console.error(
-                    'Failed to load driver journal shifts:',
+                    'Failed to load driver journal:',
                     error,
                 );
             }
         }
 
-        loadShifts();
+        loadDriverJournal();
     }, []);
 
     async function saveRestValues(
@@ -242,7 +251,10 @@ export function useDriverJournal() {
                 ),
                 break: createdShift.break,
                 rest: 0,
-                restType: createdShift.rest_type === 'weekly' ? 'weekly' : 'daily',
+                restType:
+                    createdShift.rest_type === 'weekly'
+                        ? 'weekly'
+                        : 'daily',
                 end:
                     createdShift.end ?? '',
                 endDate:
@@ -293,6 +305,39 @@ export function useDriverJournal() {
         data: ShiftFormData,
     ) {
         try {
+            const currentShift =
+                shifts.find(
+                    (shift) =>
+                        shift.id === shiftId,
+                );
+
+            const restTypeChanged =
+                currentShift &&
+                currentShift.restType !==
+                data.restType;
+
+            const relatedCompensations =
+                restTypeChanged
+                    ? restCompensations.filter(
+                        (compensation) =>
+                            compensation.reduced_weekly_rest_shift_id ===
+                            shiftId ||
+                            compensation.compensation_shift_id ===
+                            shiftId,
+                    )
+                    : [];
+
+            if (relatedCompensations.length > 0) {
+                await Promise.all(
+                    relatedCompensations.map(
+                        (compensation) =>
+                            deleteRestCompensation(
+                                compensation.id,
+                            ),
+                    ),
+                );
+            }
+
             const updatedShift =
                 await updateDriverJournalShift(
                     shiftId,
@@ -318,8 +363,7 @@ export function useDriverJournal() {
                     },
                 );
 
-            const updatedShiftModel: Shift =
-            {
+            const updatedShiftModel: Shift = {
                 id: updatedShift.id,
                 date: updatedShift.date,
                 start: updatedShift.start,
@@ -333,7 +377,10 @@ export function useDriverJournal() {
                 ),
                 break: updatedShift.break,
                 rest: 0,
-                restType: updatedShift.rest_type === 'weekly' ? 'weekly' : 'daily',
+                restType:
+                    updatedShift.rest_type === 'weekly'
+                        ? 'weekly'
+                        : 'daily',
                 end:
                     updatedShift.end ?? '',
                 endDate:
@@ -366,6 +413,19 @@ export function useDriverJournal() {
                 ),
             );
 
+            if (relatedCompensations.length > 0) {
+                setRestCompensations(
+                    (current) =>
+                        current.filter(
+                            (compensation) =>
+                                compensation.reduced_weekly_rest_shift_id !==
+                                shiftId &&
+                                compensation.compensation_shift_id !==
+                                shiftId,
+                        ),
+                );
+            }
+
             setEditingShift(null);
         } catch (error) {
             console.error(
@@ -385,6 +445,24 @@ export function useDriverJournal() {
         try {
             await deleteDriverJournalShift(
                 shiftId,
+            );
+
+            const relatedCompensations =
+                restCompensations.filter(
+                    (compensation) =>
+                        compensation.reduced_weekly_rest_shift_id ===
+                        shiftId ||
+                        compensation.compensation_shift_id ===
+                        shiftId,
+                );
+
+            await Promise.all(
+                relatedCompensations.map(
+                    (compensation) =>
+                        deleteRestCompensation(
+                            compensation.id,
+                        ),
+                ),
             );
 
             const remainingShifts =
@@ -408,6 +486,17 @@ export function useDriverJournal() {
                 ),
             );
 
+            setRestCompensations(
+                (current) =>
+                    current.filter(
+                        (compensation) =>
+                            compensation.reduced_weekly_rest_shift_id !==
+                            shiftId &&
+                            compensation.compensation_shift_id !==
+                            shiftId,
+                    ),
+            );
+
             setEditingShift(null);
         } catch (error) {
             console.error(
@@ -417,8 +506,167 @@ export function useDriverJournal() {
         }
     }
 
+    async function acceptRestCompensation(
+        reducedWeeklyRestShiftId: string,
+        compensationShiftId: string,
+        dailyRestMinutes: number,
+        compensationMinutes: number,
+    ) {
+        try {
+            const existing =
+                restCompensations.find(
+                    (compensation) =>
+                        compensation.reduced_weekly_rest_shift_id ===
+                        reducedWeeklyRestShiftId &&
+                        compensation.compensation_shift_id ===
+                        compensationShiftId,
+                );
+
+            if (existing) {
+                const updated =
+                    await updateRestCompensation(
+                        existing.id,
+                        {
+                            decision: 'accepted',
+                            daily_rest_minutes:
+                                dailyRestMinutes,
+                            compensation_minutes:
+                                compensationMinutes,
+                        },
+                    );
+
+                setRestCompensations(
+                    (current) =>
+                        current.map(
+                            (compensation) =>
+                                compensation.id ===
+                                    existing.id
+                                    ? updated
+                                    : compensation,
+                        ),
+                );
+
+                return;
+            }
+
+            const created =
+                await createRestCompensation({
+                    reduced_weekly_rest_shift_id:
+                        reducedWeeklyRestShiftId,
+                    compensation_shift_id:
+                        compensationShiftId,
+                    decision: 'accepted',
+                    daily_rest_minutes:
+                        dailyRestMinutes,
+                    compensation_minutes:
+                        compensationMinutes,
+                });
+
+            setRestCompensations(
+                (current) => [
+                    ...current,
+                    created,
+                ],
+            );
+        } catch (error) {
+            console.error(
+                'Failed to accept rest compensation:',
+                error,
+            );
+        }
+    }
+
+    async function declineRestCompensation(
+        reducedWeeklyRestShiftId: string,
+        compensationShiftId: string,
+    ) {
+        try {
+            const existing =
+                restCompensations.find(
+                    (compensation) =>
+                        compensation.reduced_weekly_rest_shift_id ===
+                        reducedWeeklyRestShiftId &&
+                        compensation.compensation_shift_id ===
+                        compensationShiftId,
+                );
+
+            if (existing) {
+                const updated =
+                    await updateRestCompensation(
+                        existing.id,
+                        {
+                            decision: 'declined',
+                            daily_rest_minutes: 0,
+                            compensation_minutes: 0,
+                        },
+                    );
+
+                setRestCompensations(
+                    (current) =>
+                        current.map(
+                            (compensation) =>
+                                compensation.id ===
+                                    existing.id
+                                    ? updated
+                                    : compensation,
+                        ),
+                );
+
+                return;
+            }
+
+            const created =
+                await createRestCompensation({
+                    reduced_weekly_rest_shift_id:
+                        reducedWeeklyRestShiftId,
+                    compensation_shift_id:
+                        compensationShiftId,
+                    decision: 'declined',
+                    daily_rest_minutes: 0,
+                    compensation_minutes: 0,
+                });
+
+            setRestCompensations(
+                (current) => [
+                    ...current,
+                    created,
+                ],
+            );
+        } catch (error) {
+            console.error(
+                'Failed to decline rest compensation:',
+                error,
+            );
+        }
+    }
+
+    async function cancelRestCompensation(
+        compensationId: string,
+    ) {
+        try {
+            await deleteRestCompensation(
+                compensationId,
+            );
+
+            setRestCompensations(
+                (current) =>
+                    current.filter(
+                        (compensation) =>
+                            compensation.id !==
+                            compensationId,
+                    ),
+            );
+        } catch (error) {
+            console.error(
+                'Failed to cancel rest compensation:',
+                error,
+            );
+        }
+    }
+
     return {
         shifts,
+        restCompensations,
         isAddShiftOpen,
         setIsAddShiftOpen,
         addShift,
@@ -427,5 +675,8 @@ export function useDriverJournal() {
         updateShift,
         cancelEditingShift,
         deleteShift,
+        acceptRestCompensation,
+        declineRestCompensation,
+        cancelRestCompensation,
     };
 }

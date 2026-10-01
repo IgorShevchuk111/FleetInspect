@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type JournalHeaderProps = {
@@ -12,15 +11,8 @@ export function JournalHeader({ onAddShift }: JournalHeaderProps) {
         Driver Journal
       </h1>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={onAddShift}
-        aria-label="Add shift"
-        className="size-11"
-      >
-        <Plus className="!size-7" />
+      <Button type="button" variant="outline" onClick={onAddShift}>
+        Add Shift
       </Button>
     </div>
   );
