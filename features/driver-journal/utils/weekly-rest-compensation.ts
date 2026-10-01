@@ -6,7 +6,6 @@ import { sortShiftsChronologically } from './shifts';
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
-
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 
@@ -48,9 +47,7 @@ function formatDate(date: Date): string {
     return date.toISOString().slice(0, 10);
 }
 
-function getCompensationDeadline(
-    dateString: string,
-): string | null {
+function getCompensationDeadline(dateString: string): string | null {
     const weekStart = getWeekStart(dateString);
 
     if (!weekStart) {
@@ -97,68 +94,53 @@ function getCompensationOptions(
         return [];
     }
 
-    /*
-     * Compensation is taken from the candidate rest period.
-     *
-     * The actual stored rest remains unchanged.
-     *
-     * Example:
-     *
-     * 53h actual rest
-     * - 20h compensation
-     * = 33h effective rest
-     *
-     * Therefore this period cannot simultaneously be
-     * classified as a regular weekly rest.
-     */
     const effectiveRestMinutes =
         restMinutes - requiredCompensationMinutes;
 
-    /*
-     * A weekly rest used for compensation can only remain
-     * a regular weekly rest if enough rest is left after
-     * the compensation is allocated.
-     */
     if (restType === 'weekly') {
-        if (
-            effectiveRestMinutes >=
-            REGULAR_WEEKLY_REST_MINUTES
-        ) {
+        /*
+         * A weekly rest used for compensation must still leave
+         * at least 45 hours of weekly rest.
+         *
+         * Example:
+         * 53h 05m - 19h 59m = 33h 06m
+         *
+         * Therefore this cannot be used as a weekly-rest
+         * compensation period.
+         */
+
+        if (effectiveRestMinutes >= REGULAR_WEEKLY_REST_MINUTES) {
             return [
                 {
                     restType,
-                    dailyRestMinutes: restMinutes,
+                    dailyRestMinutes: effectiveRestMinutes,
                     compensationMinutes: requiredCompensationMinutes,
                     usesReducedDailyRest: false,
                 },
             ];
         }
 
-        /*
-         * If compensation leaves less than 45 hours,
-         * this weekly rest cannot be treated as a regular
-         * weekly rest.
-         *
-         * We also do not offer it as a reduced weekly rest
-         * because the previous weekly rest was already reduced.
-         */
         return [];
     }
 
-    /*
-     * Daily rest can receive compensation separately.
-     *
-     * The stored daily rest remains unchanged.
-     */
     if (restType === 'daily') {
+        /*
+         * Compensation is taken from the candidate rest period.
+         *
+         * Example:
+         * 53h 05m - 19h 59m = 33h 06m remaining rest.
+         *
+         * The original Shift.rest value is not changed.
+         */
+
         return [
             {
                 restType,
-                dailyRestMinutes: restMinutes,
+                dailyRestMinutes: effectiveRestMinutes,
                 compensationMinutes: requiredCompensationMinutes,
                 usesReducedDailyRest:
-                    restMinutes >= REDUCED_DAILY_REST_MINUTES &&
-                    restMinutes < REGULAR_DAILY_REST_MINUTES,
+                    effectiveRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
+                    effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES,
             },
         ];
     }
@@ -182,6 +164,17 @@ export function buildWeeklyRestCompensationCandidates(
             continue;
         }
 
+        /*
+         * Only ACCEPTED compensation closes the reduced weekly rest.
+         *
+         * DECLINED compensation does NOT close it.
+         *
+         * This means the user can still see:
+         *
+         * Accept / Decline
+         *
+         * after previously declining a compensation.
+         */
         const alreadyAccepted = hasAcceptedCompensation(
             reducedRest.id,
             restCompensations,

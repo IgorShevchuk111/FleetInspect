@@ -5,9 +5,7 @@ import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 import type { RestCompensation } from '../services/driver-journal';
 
 import { formatWeek } from '../utils/dates';
-
 import { calculateShiftMinutes } from '../utils/shifts';
-
 import { calculateWeeklySummary } from '../utils/weekly-summary';
 
 import {
@@ -27,7 +25,6 @@ import {
 } from './shift-status';
 
 import { ShiftRow } from './shift-row';
-
 import { WeeklySummary } from './weekly-summary';
 
 type WeeklyShiftSectionProps = {
@@ -35,17 +32,17 @@ type WeeklyShiftSectionProps = {
   shifts: Shift[];
   allShifts: Shift[];
   restCompensations: RestCompensation[];
+
   onEdit: (shift: Shift) => void;
+  onDelete: (shift: Shift) => void;
+
   onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-  onDeclineRestCompensation: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-  ) => Promise<void>;
+
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
 };
 
@@ -55,8 +52,8 @@ export function WeeklyShiftSection({
   allShifts,
   restCompensations,
   onEdit,
+  onDelete,
   onAcceptRestCompensation,
-  onDeclineRestCompensation,
   onCancelRestCompensation,
 }: WeeklyShiftSectionProps) {
   const weeklySummary = calculateWeeklySummary(
@@ -86,24 +83,8 @@ export function WeeklyShiftSection({
   return (
     <>
       <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
-        <TableCell colSpan={8} className="p-0">
-          <div
-            className="
-              sticky
-              left-0
-              z-20
-              w-[calc(100vw-1.5rem)]
-              max-w-[100vw]
-              min-w-0
-              border-b
-              bg-background
-              px-3
-              py-3
-              sm:w-full
-              sm:px-4
-              sm:py-4
-            "
-          >
+        <TableCell colSpan={5} className="p-0">
+          <div className="border-b bg-background px-3 py-3 sm:px-4 sm:py-4">
             <div className="flex flex-col items-center gap-2">
               <div className="text-center text-sm font-semibold leading-tight sm:text-base">
                 Week: {formatWeek(weekStart)}
@@ -162,17 +143,6 @@ export function WeeklyShiftSection({
         const reducedDailyRest =
           baseReducedDailyRest || compensationUsesReducedDailyRest;
 
-        /*
-         * The compensation receiver becomes another
-         * reduced daily rest when the remaining rest
-         * after compensation is between 9h and 11h.
-         *
-         * Example:
-         *
-         * Previous usage: 1/3
-         * 29h53 rest - 19h59 compensation = 9h54
-         * New usage: 2/3
-         */
         const compensationAddsAllowance =
           compensationUsesReducedDailyRest && !baseReducedDailyRest;
 
@@ -211,8 +181,9 @@ export function WeeklyShiftSection({
 
         const restStatus = getRestStatus(shift, effectiveRestMinutes);
 
-        const weeklyRestCompensationCandidatesForShift =
-          weeklyRestCompensationCandidates.get(shift.id);
+        const candidatesForShift = weeklyRestCompensationCandidates.get(
+          shift.id,
+        );
 
         const savedCompensationsForShift = restCompensations.filter(
           (compensation) =>
@@ -231,14 +202,12 @@ export function WeeklyShiftSection({
             sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
             reducedDailyRest={reducedDailyRest}
             extendedShift={extendedShift}
-            weeklyRestCompensationCandidates={
-              weeklyRestCompensationCandidatesForShift
-            }
+            weeklyRestCompensationCandidates={candidatesForShift}
             restCompensations={savedCompensationsForShift}
             onAcceptRestCompensation={onAcceptRestCompensation}
-            onDeclineRestCompensation={onDeclineRestCompensation}
             onCancelRestCompensation={onCancelRestCompensation}
             onEdit={onEdit}
+            onDelete={onDelete}
           />
         );
       })}
@@ -246,7 +215,7 @@ export function WeeklyShiftSection({
       {sortedShifts.length === 0 ? (
         <TableRow>
           <TableCell
-            colSpan={8}
+            colSpan={5}
             className="h-20 px-2 py-4 text-center text-sm text-muted-foreground"
           >
             No shifts this week.

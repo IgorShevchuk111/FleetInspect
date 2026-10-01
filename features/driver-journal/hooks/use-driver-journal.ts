@@ -22,6 +22,7 @@ import type {
 import type { Database } from '@/types/supabase/database';
 
 import { durationToMinutes } from '@/features/driver-journal/utils/duration';
+
 import { calculateShiftMinutes } from '@/features/driver-journal/utils/shifts';
 
 import type { RestCompensation } from '../services/driver-journal';
@@ -100,7 +101,8 @@ function calculateRest(
     return Math.max(
         0,
         Math.round(
-            (currentStart.getTime() - previousEnd.getTime()) /
+            (currentStart.getTime() -
+                previousEnd.getTime()) /
             60000,
         ),
     );
@@ -576,70 +578,6 @@ export function useDriverJournal() {
         }
     }
 
-    async function declineRestCompensation(
-        reducedWeeklyRestShiftId: string,
-        compensationShiftId: string,
-    ) {
-        try {
-            const existing =
-                restCompensations.find(
-                    (compensation) =>
-                        compensation.reduced_weekly_rest_shift_id ===
-                        reducedWeeklyRestShiftId &&
-                        compensation.compensation_shift_id ===
-                        compensationShiftId,
-                );
-
-            if (existing) {
-                const updated =
-                    await updateRestCompensation(
-                        existing.id,
-                        {
-                            decision: 'declined',
-                            daily_rest_minutes: 0,
-                            compensation_minutes: 0,
-                        },
-                    );
-
-                setRestCompensations(
-                    (current) =>
-                        current.map(
-                            (compensation) =>
-                                compensation.id ===
-                                    existing.id
-                                    ? updated
-                                    : compensation,
-                        ),
-                );
-
-                return;
-            }
-
-            const created =
-                await createRestCompensation({
-                    reduced_weekly_rest_shift_id:
-                        reducedWeeklyRestShiftId,
-                    compensation_shift_id:
-                        compensationShiftId,
-                    decision: 'declined',
-                    daily_rest_minutes: 0,
-                    compensation_minutes: 0,
-                });
-
-            setRestCompensations(
-                (current) => [
-                    ...current,
-                    created,
-                ],
-            );
-        } catch (error) {
-            console.error(
-                'Failed to decline rest compensation:',
-                error,
-            );
-        }
-    }
-
     async function cancelRestCompensation(
         compensationId: string,
     ) {
@@ -676,7 +614,6 @@ export function useDriverJournal() {
         cancelEditingShift,
         deleteShift,
         acceptRestCompensation,
-        declineRestCompensation,
         cancelRestCompensation,
     };
 }

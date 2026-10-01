@@ -1,11 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+'use client';
+
+import { BedDouble, CircleGauge } from 'lucide-react';
 
 import {
   Table,
   TableBody,
   TableHead,
   TableHeader,
-  TableRow,
 } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
@@ -25,176 +26,134 @@ type ShiftsTableProps = {
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-  onDeclineRestCompensation: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-  ) => Promise<void>;
+
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
   onEdit: (shift: Shift) => void;
+  onDelete: (shift: Shift) => void;
 };
-
-const headerClass =
-  'sticky top-0 border-r border-border/40 bg-background px-1 py-2 text-left text-sm font-medium leading-tight text-muted-foreground sm:px-2 sm:py-2';
 
 export function ShiftsTable({
   shifts,
   restCompensations,
   onAcceptRestCompensation,
-  onDeclineRestCompensation,
   onCancelRestCompensation,
   onEdit,
+  onDelete,
 }: ShiftsTableProps) {
-  const shiftsByWeek = new Map<string, Shift[]>();
+  const weeks = new Map<string, Shift[]>();
 
   for (const shift of shifts) {
-    if (!shift.date) {
-      continue;
-    }
+    const weekStart = getStartOfWeek(new Date(`${shift.date}T12:00:00`));
 
-    const date = new Date(`${shift.date}T00:00:00`);
+    const key = weekStart.toISOString().slice(0, 10);
 
-    if (Number.isNaN(date.getTime())) {
-      continue;
-    }
+    const existing = weeks.get(key) ?? [];
 
-    const weekStart = getStartOfWeek(date);
-
-    const weekKey = [
-      weekStart.getFullYear(),
-      String(weekStart.getMonth() + 1).padStart(2, '0'),
-      String(weekStart.getDate()).padStart(2, '0'),
-    ].join('-');
-
-    const weekShifts = shiftsByWeek.get(weekKey) ?? [];
-
-    weekShifts.push(shift);
-
-    shiftsByWeek.set(weekKey, weekShifts);
+    existing.push(shift);
+    weeks.set(key, existing);
   }
 
-  const weeks = Array.from(shiftsByWeek.entries())
-    .map(([weekKey, weekShifts]) => ({
-      weekStart: new Date(`${weekKey}T00:00:00`),
+  const sortedWeeks = Array.from(weeks.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, weekShifts]) => ({
+      key,
+      weekStart: new Date(`${key}T12:00:00`),
       shifts: weekShifts,
-    }))
-    .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
+    }));
 
-  if (weeks.length === 0) {
+  if (sortedWeeks.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No shifts yet</CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Add your first shift to start your driver journal.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        No shifts yet.
+      </div>
     );
   }
 
+  const tableClass = `
+    w-full
+    table-fixed
+    border-separate
+    border-spacing-0
+    text-sm
+    [&_tbody_tr]:border-b
+    [&_tbody_td]:border-r
+    [&_tbody_td]:border-border/30
+    [&_tbody_td:last-child]:border-r-0
+    [&_thead_th]:border-r
+    [&_thead_th]:border-border/30
+    [&_thead_th:last-child]:border-r-0
+  `;
+
+  const headerClass =
+    'bg-background px-1 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground';
+
   return (
-    <div className="w-full">
-      <Table
-        containerClassName="
-          max-h-[calc(100vh-180px)]
-          overflow-auto
-        "
-        className="
-        min-w-[466px]
-        text-sm
-        sm:min-w-[690px]
-      
-        [&_thead_th]:border-r
-        [&_thead_th]:border-border/40
-        [&_thead_th:last-child]:border-r-0
-      
-        [&_tbody_td:not(:first-child)]:border-r
-        [&_tbody_td:not(:first-child)]:border-border/30
-        [&_tbody_td:last-child]:border-r-0
-      
-        [&_tbody_td:first-child]:!sticky
-        [&_tbody_td:first-child]:!left-0
-        [&_tbody_td:first-child]:!z-30
-        [&_tbody_td:first-child]:!bg-background
-        [&_tbody_td:first-child]:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.25)]
-      
-        [&_tbody_td:last-child]:!static
-        [&_tbody_td:last-child]:!right-auto
-        [&_tbody_td:last-child]:!z-auto
-        [&_tbody_td:last-child]:!shadow-none
-      "
-      >
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead
-              className={`${headerClass} left-0 z-50 w-[52px] min-w-[52px] !bg-background shadow-[2px_0_4px_-2px_rgba(0,0,0,0.25)] sm:w-[90px] sm:min-w-[90px]`}
-            >
-              Start
-            </TableHead>
+    <div className="w-full overflow-hidden">
+      {/* FIXED HEADER */}
+      <div className="w-full overflow-hidden bg-background">
+        <Table className={tableClass}>
+          <colgroup>
+            <col className="w-[24%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+          </colgroup>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[64px] min-w-[64px] sm:w-[90px] sm:min-w-[90px]`}
-            >
-              Driving
-            </TableHead>
+          <TableHeader className="bg-background">
+            <tr className="border-b bg-background">
+              <TableHead className={headerClass}>Start</TableHead>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[60px] min-w-[60px] sm:w-[85px] sm:min-w-[85px]`}
-            >
-              Shift
-            </TableHead>
+              <TableHead className={headerClass}>
+                <div className="flex flex-col items-center justify-center gap-0.5">
+                  <CircleGauge className="size-4" />
+                  <span>Driving</span>
+                </div>
+              </TableHead>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[46px] min-w-[46px] sm:w-[65px] sm:min-w-[65px]`}
-            >
-              Break
-            </TableHead>
+              <TableHead className={headerClass}>Shift</TableHead>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[68px] min-w-[68px] sm:w-[100px] sm:min-w-[100px]`}
-            >
-              Rest
-            </TableHead>
+              <TableHead className={headerClass}>
+                <div className="flex flex-col items-center justify-center gap-0.5">
+                  <BedDouble className="size-4" />
+                  <span>Brake</span>
+                </div>
+              </TableHead>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[58px] min-w-[58px] sm:w-[80px] sm:min-w-[80px]`}
-            >
-              Earn
-            </TableHead>
+              <TableHead className={headerClass}>End</TableHead>
+            </tr>
+          </TableHeader>
+        </Table>
+      </div>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[66px] min-w-[66px] sm:w-[100px] sm:min-w-[100px]`}
-            >
-              Working
-            </TableHead>
+      {/* SCROLLABLE BODY */}
+      <div className="max-h-[calc(100vh-180px)] overflow-y-auto overflow-x-hidden overscroll-contain">
+        <Table className={tableClass}>
+          <colgroup>
+            <col className="w-[24%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+            <col className="w-[19%]" />
+          </colgroup>
 
-            <TableHead
-              className={`${headerClass} z-40 w-[52px] min-w-[52px] sm:w-[90px] sm:min-w-[90px]`}
-            >
-              End
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {weeks.map(({ weekStart, shifts: weekShifts }) => (
-            <WeeklyShiftSection
-              key={weekStart.toISOString()}
-              weekStart={weekStart}
-              shifts={weekShifts}
-              allShifts={shifts}
-              restCompensations={restCompensations}
-              onAcceptRestCompensation={onAcceptRestCompensation}
-              onDeclineRestCompensation={onDeclineRestCompensation}
-              onCancelRestCompensation={onCancelRestCompensation}
-              onEdit={onEdit}
-            />
-          ))}
-        </TableBody>
-      </Table>
+          <TableBody>
+            {sortedWeeks.map(({ key, weekStart, shifts: weekShifts }) => (
+              <WeeklyShiftSection
+                key={key}
+                weekStart={weekStart}
+                shifts={weekShifts}
+                allShifts={shifts}
+                restCompensations={restCompensations}
+                onAcceptRestCompensation={onAcceptRestCompensation}
+                onCancelRestCompensation={onCancelRestCompensation}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

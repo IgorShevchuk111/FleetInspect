@@ -1,33 +1,27 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
+import { useRef, useState, type PointerEvent } from 'react';
 
-import { Info } from 'lucide-react';
+import { CircleGauge, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 import { TableCell, TableRow } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
-
-import { formatDuration } from '../utils/duration';
 
 import { calculateShiftMinutes } from '../utils/shifts';
 
@@ -38,6 +32,8 @@ import {
   getRestStatus,
   getShiftStatus,
 } from './shift-status';
+
+import { ShiftDetailsDialog } from './shift-details-dialog';
 
 type ShiftRowProps = {
   shift: Shift;
@@ -67,14 +63,11 @@ type ShiftRowProps = {
     compensationMinutes: number,
   ) => Promise<void>;
 
-  onDeclineRestCompensation?: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-  ) => Promise<void>;
-
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
 
   onEdit: (shift: Shift) => void;
+
+  onDelete: (shift: Shift) => void;
 };
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
@@ -85,763 +78,24 @@ const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 
-function formatShiftDate(dateString: string): string {
-  const [year, month, day] = dateString.split('-');
+function formatDate(dateString: string): string {
+  const [, month, day] = dateString.split('-');
 
-  return `${day}/${month}/${year}`;
+  return `${day}/${month}`;
 }
 
 function formatTime(time: string): string {
-  if (!time) {
-    return '';
-  }
-
-  return time.slice(0, 5);
+  return time ? time.slice(0, 5) : '';
 }
 
-function formatDurationStacked(minutes: number) {
-  const safeMinutes = Math.max(0, Math.round(minutes));
-  const hours = Math.floor(safeMinutes / 60);
-  const remainingMinutes = safeMinutes % 60;
+function formatCompactDuration(value: number | string): string {
+  const minutes = Math.max(0, Math.round(Number(value) || 0));
 
-  return (
-    <span className="flex flex-col items-start leading-tight">
-      <span>{hours}h</span>
-      <span>{remainingMinutes}m</span>
-    </span>
-  );
-}
+  const hours = Math.floor(minutes / 60);
 
-function StatusInfo({
-  label,
-  counter,
-  secondary,
-  className,
-}: {
-  label: string;
-  counter?: string;
-  secondary?: string;
-  className?: string;
-}) {
-  return (
-    <Popover>
-      <PopoverTrigger
-        type="button"
-        aria-label="Show status information"
-        className="absolute right-0 top-0 z-20 inline-flex size-7 items-center justify-center rounded-full hover:bg-muted"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        <Info
-          className={`!size-4 ${className ?? 'text-muted-foreground'}`}
-        />{' '}
-      </PopoverTrigger>
+  const remaining = minutes % 60;
 
-      <PopoverContent
-        side="top"
-        align="center"
-        className="z-50 w-auto max-w-[280px] bg-background text-sm text-foreground shadow-md"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        <div className="flex flex-col items-start gap-1.5">
-          <span className="block max-w-full break-words">{label}</span>
-
-          {counter ? (
-            <span className="block max-w-full break-words text-muted-foreground">
-              {counter}
-            </span>
-          ) : null}
-
-          {secondary ? (
-            <span className="block max-w-full break-words text-muted-foreground">
-              {secondary}
-            </span>
-          ) : null}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function DrivingInfo({
-  status,
-  usageAfter = 0,
-}: {
-  status: NonNullable<ReturnType<typeof getDrivingStatus>>;
-  usageAfter?: number;
-}) {
-  const counter = status.showCounter
-    ? `${usageAfter}/2 used · ${Math.max(0, 2 - usageAfter)} left`
-    : undefined;
-
-  return (
-    <StatusInfo
-      label={status.label}
-      counter={counter}
-      className={status.className}
-    />
-  );
-}
-
-function ShiftInfo({
-  status,
-}: {
-  status: NonNullable<ReturnType<typeof getShiftStatus>>;
-}) {
-  return <StatusInfo label={status.label} className={status.className} />;
-}
-
-function RestCompensationDialog({
-  open,
-  onOpenChange,
-  candidates,
-  restCompensations,
-  reducedDailyRestUsedAfter = 0,
-  onAccept,
-  onDecline,
-  onCancel,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-
-  candidates: WeeklyRestCompensationCandidate[];
-
-  restCompensations: RestCompensation[];
-
-  reducedDailyRestUsedAfter?: number;
-
-  onAccept?: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-    dailyRestMinutes: number,
-    compensationMinutes: number,
-  ) => Promise<void>;
-
-  onDecline?: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-  ) => Promise<void>;
-
-  onCancel?: (compensationId: string) => Promise<void>;
-}) {
-  const [selectedCandidateIndex, setSelectedCandidateIndex] = useState(0);
-
-  const [saving, setSaving] = useState(false);
-
-  const selectedCandidate = candidates[selectedCandidateIndex] ?? candidates[0];
-
-  if (!selectedCandidate) {
-    return null;
-  }
-
-  const savedCompensation = restCompensations.find(
-    (compensation) =>
-      compensation.reduced_weekly_rest_shift_id ===
-        selectedCandidate.reducedWeeklyRestShiftId &&
-      compensation.compensation_shift_id === selectedCandidate.shiftId,
-  );
-
-  const selectedOption = selectedCandidate.options[0];
-
-  const isAccepted = savedCompensation?.decision === 'accepted';
-
-  const isDeclined = savedCompensation?.decision === 'declined';
-
-  const remainingRestMinutes = selectedOption
-    ? Math.max(
-        0,
-        selectedOption.dailyRestMinutes - selectedOption.compensationMinutes,
-      )
-    : 0;
-
-  const usesReducedDailyRest =
-    selectedOption?.restType === 'daily' &&
-    remainingRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
-    remainingRestMinutes < REGULAR_DAILY_REST_MINUTES;
-
-  const reducedDailyRestUsed = usesReducedDailyRest
-    ? Math.min(3, reducedDailyRestUsedAfter + 1)
-    : reducedDailyRestUsedAfter;
-
-  const reducedDailyRestRemaining = Math.max(0, 3 - reducedDailyRestUsed);
-
-  async function handleAccept() {
-    if (!selectedOption || !onAccept || isAccepted) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await onAccept(
-        selectedCandidate.reducedWeeklyRestShiftId,
-        selectedCandidate.shiftId,
-        selectedOption.dailyRestMinutes,
-        selectedOption.compensationMinutes,
-      );
-
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDecline() {
-    if (!onDecline || isAccepted) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await onDecline(
-        selectedCandidate.reducedWeeklyRestShiftId,
-        selectedCandidate.shiftId,
-      );
-
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleCancel() {
-    if (!savedCompensation || !isAccepted || !onCancel) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await onCancel(savedCompensation.id);
-
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[480px]"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        {' '}
-        <DialogHeader>
-          {' '}
-          <DialogTitle>Weekly rest compensation</DialogTitle>
-          <DialogDescription>
-            Choose whether to accept or decline this compensation.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          {candidates.length > 1 ? (
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Compensation period</div>
-
-              <div className="flex flex-wrap gap-2">
-                {candidates.map((candidate, index) => {
-                  const isSelected = index === selectedCandidateIndex;
-
-                  return (
-                    <Button
-                      key={`${candidate.reducedWeeklyRestShiftId}-${candidate.shiftId}`}
-                      type="button"
-                      variant={isSelected ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedCandidateIndex(index)}
-                    >
-                      {formatShiftDate(candidate.deadline)}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="rounded-md border p-3">
-            <div className="text-sm font-medium">Compensation required</div>
-
-            <div className="mt-1 text-sm text-muted-foreground">
-              {formatDuration(selectedCandidate.requiredCompensationMinutes)}
-            </div>
-
-            <div className="mt-3 text-sm">
-              Reduced weekly rest:{' '}
-              {formatDuration(selectedCandidate.reducedWeeklyRestMinutes)}
-            </div>
-
-            <div className="mt-1 text-sm text-muted-foreground">
-              Deadline: {formatShiftDate(selectedCandidate.deadline)}
-            </div>
-          </div>
-
-          {selectedOption ? (
-            <div className="rounded-md border p-3">
-              <div className="text-sm font-medium">Available option</div>
-
-              <div className="mt-2 text-sm">
-                {selectedOption.restType === 'weekly'
-                  ? 'Weekly rest before compensation'
-                  : 'Daily rest before compensation'}
-                : {formatDuration(selectedOption.dailyRestMinutes)}
-              </div>
-
-              <div className="text-sm">
-                Compensation:{' '}
-                {formatDuration(selectedOption.compensationMinutes)}
-              </div>
-
-              <div className="text-sm font-medium">
-                Remaining rest: {formatDuration(remainingRestMinutes)}
-              </div>
-
-              {usesReducedDailyRest ? (
-                <div className="mt-2 text-sm font-medium text-red-600">
-                  Reduced daily rest · {reducedDailyRestUsed}/3 used ·{' '}
-                  {reducedDailyRestRemaining} left
-                </div>
-              ) : null}
-
-              {selectedOption.usesReducedDailyRest && !usesReducedDailyRest ? (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  This option uses reduced daily rest.
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {savedCompensation ? (
-            <div className="rounded-md bg-muted/50 p-3 text-sm">
-              <div className="font-medium">Compensation decision</div>
-
-              <div className="mt-1 text-muted-foreground">
-                {isAccepted
-                  ? 'Accepted'
-                  : isDeclined
-                    ? 'Declined'
-                    : savedCompensation.decision}
-              </div>
-
-              {isAccepted ? (
-                <div className="mt-1 text-muted-foreground">
-                  {formatDuration(savedCompensation.compensation_minutes)}{' '}
-                  compensation applied.
-                </div>
-              ) : isDeclined ? (
-                <div className="mt-1 text-muted-foreground">
-                  You can change this decision.
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-        <DialogFooter className="gap-2 sm:gap-2">
-          {isAccepted ? (
-            <>
-              {onCancel ? (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={saving}
-                  onClick={handleCancel}
-                >
-                  {saving ? 'Cancelling...' : 'Cancel decision'}
-                </Button>
-              ) : null}
-
-              <Button
-                type="button"
-                variant="outline"
-                disabled={saving}
-                onClick={() => onOpenChange(false)}
-              >
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={saving}
-                onClick={handleDecline}
-              >
-                {saving ? 'Saving...' : 'Decline'}
-              </Button>
-
-              <Button
-                type="button"
-                disabled={saving || !selectedOption}
-                onClick={handleAccept}
-              >
-                {saving ? 'Saving...' : 'Accept'}
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function AcceptedCompensationDialog({
-  open,
-  onOpenChange,
-  compensation,
-  onCancel,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  compensation: RestCompensation;
-  onCancel?: (compensationId: string) => Promise<void>;
-}) {
-  const [saving, setSaving] = useState(false);
-
-  async function handleCancel() {
-    if (!onCancel) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await onCancel(compensation.id);
-
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[420px]"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        {' '}
-        <DialogHeader>
-          {' '}
-          <DialogTitle>Change compensation decision </DialogTitle>
-          <DialogDescription>
-            This compensation has already been accepted. You can cancel the
-            decision and review it again.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="rounded-md bg-muted/50 p-3 text-sm">
-          <div className="font-medium">Accepted compensation</div>
-
-          <div className="mt-1 text-muted-foreground">
-            {formatDuration(compensation.compensation_minutes)} compensation
-            applied.
-          </div>
-        </div>
-        <DialogFooter className="gap-2 sm:gap-2">
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={saving || !onCancel}
-            onClick={handleCancel}
-          >
-            {saving ? 'Cancelling...' : 'Cancel decision'}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            disabled={saving}
-            onClick={() => onOpenChange(false)}
-          >
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function RestInfo({
-  status,
-  shiftId,
-  usageAfter = 0,
-  reducedDailyRest = false,
-  extendedShift = false,
-  isWeeklyRest = false,
-  isReducedWeeklyRest = false,
-  isRegularWeeklyRest = false,
-  compensationUsesReducedDailyRest = false,
-  weeklyRestCompensationCandidates = [],
-  restCompensations = [],
-  isCompensatedWeeklyRest = false,
-  acceptedCompensation,
-  onAcceptRestCompensation,
-  onDeclineRestCompensation,
-  onCancelRestCompensation,
-}: {
-  status: NonNullable<ReturnType<typeof getRestStatus>>;
-  shiftId: string;
-  usageAfter?: number;
-  reducedDailyRest?: boolean;
-  extendedShift?: boolean;
-  isWeeklyRest?: boolean;
-  isReducedWeeklyRest?: boolean;
-  isRegularWeeklyRest?: boolean;
-  compensationUsesReducedDailyRest?: boolean;
-  weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
-  restCompensations?: RestCompensation[];
-  isCompensatedWeeklyRest?: boolean;
-  acceptedCompensation?: RestCompensation;
-  onAcceptRestCompensation?: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-    dailyRestMinutes: number,
-    compensationMinutes: number,
-  ) => Promise<void>;
-  onDeclineRestCompensation?: (
-    reducedWeeklyRestShiftId: string,
-    compensationShiftId: string,
-  ) => Promise<void>;
-  onCancelRestCompensation?: (compensationId: string) => Promise<void>;
-}) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const [acceptedDecisionDialogOpen, setAcceptedDecisionDialogOpen] =
-    useState(false);
-
-  const hasAcceptedCompensation = Boolean(acceptedCompensation);
-
-  const hasCandidates = weeklyRestCompensationCandidates.length > 0;
-
-  const firstCandidate = weeklyRestCompensationCandidates[0];
-
-  const hasDeclinedCompensation = restCompensations.some(
-    (compensation) =>
-      compensation.decision === 'declined' &&
-      weeklyRestCompensationCandidates.some(
-        (candidate) =>
-          candidate.reducedWeeklyRestShiftId ===
-            compensation.reduced_weekly_rest_shift_id &&
-          candidate.shiftId === compensation.compensation_shift_id,
-      ),
-  );
-
-  const isCompensationSource =
-    isWeeklyRest &&
-    isReducedWeeklyRest &&
-    acceptedCompensation?.reduced_weekly_rest_shift_id === shiftId;
-
-  const isCompensationReceiver =
-    Boolean(acceptedCompensation) &&
-    acceptedCompensation?.compensation_shift_id !== undefined;
-
-  const label = compensationUsesReducedDailyRest
-    ? 'Reduced daily rest · Compensation applied'
-    : isCompensationSource
-      ? 'Reduced weekly rest · Compensation applied'
-      : isWeeklyRest && isRegularWeeklyRest && isCompensationReceiver
-        ? 'Regular weekly rest · Compensation applied'
-        : isWeeklyRest && isReducedWeeklyRest
-          ? 'Reduced weekly rest'
-          : hasAcceptedCompensation
-            ? 'Daily rest · Compensation applied'
-            : extendedShift
-              ? 'Extended shift'
-              : reducedDailyRest && usageAfter > 3
-                ? 'Reduced daily rest · Not allowed'
-                : status.label;
-
-  const usesReducedDailyRestAllowance =
-    reducedDailyRest || compensationUsesReducedDailyRest;
-
-  const counter =
-    usesReducedDailyRestAllowance || extendedShift
-      ? `${usageAfter}/3 used · ${Math.max(0, 3 - usageAfter)} left`
-      : undefined;
-
-  const compensationCounter =
-    hasAcceptedCompensation || hasDeclinedCompensation
-      ? undefined
-      : firstCandidate
-        ? `${formatDuration(
-            firstCandidate.requiredCompensationMinutes,
-          )} compensation required`
-        : undefined;
-
-  const compensationSecondary = hasAcceptedCompensation
-    ? `Compensated ${formatDuration(
-        Number(acceptedCompensation?.compensation_minutes ?? 0),
-      )}`
-    : hasDeclinedCompensation
-      ? 'Driver decision saved'
-      : 'Driver choice required';
-
-  function handleReview(event: MouseEvent) {
-    event.stopPropagation();
-
-    setDialogOpen(true);
-  }
-
-  function handleChangeAcceptedDecision(event: MouseEvent) {
-    event.stopPropagation();
-
-    setAcceptedDecisionDialogOpen(true);
-  }
-
-  const infoClassName = compensationUsesReducedDailyRest
-    ? 'text-red-600'
-    : hasAcceptedCompensation
-      ? isCompensationSource
-        ? 'text-amber-600'
-        : 'text-green-600'
-      : hasCandidates || hasDeclinedCompensation
-        ? 'text-green-600'
-        : (status.className ?? 'text-muted-foreground');
-
-  return (
-    <>
-      {' '}
-      <Popover>
-        <PopoverTrigger
-          type="button"
-          aria-label="Show rest information"
-          className="absolute right-1 top-0 z-20 inline-flex size-7 items-center justify-center rounded-full hover:bg-muted"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <Info className={`!size-4 ${infoClassName}`} />{' '}
-        </PopoverTrigger>
-
-        <PopoverContent
-          side="top"
-          align="center"
-          className="
-        z-50
-        w-[calc(100vw-2rem)]
-        max-w-[280px]
-        bg-background
-        text-sm
-        text-foreground
-        shadow-md
-      "
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <div className="flex min-w-0 flex-col items-start gap-1.5">
-            <span className="block max-w-full break-words">{label}</span>
-
-            {counter ? (
-              <span className="block max-w-full break-words text-muted-foreground">
-                {counter}
-              </span>
-            ) : null}
-
-            {hasAcceptedCompensation ? (
-              <>
-                <span className="block max-w-full break-words text-muted-foreground">
-                  {compensationSecondary}
-                </span>
-
-                {onCancelRestCompensation ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="mt-2 h-8 shrink-0"
-                    onClick={handleChangeAcceptedDecision}
-                    onPointerDown={(event) => {
-                      event.stopPropagation();
-                    }}
-                  >
-                    Change decision
-                  </Button>
-                ) : null}
-              </>
-            ) : null}
-
-            {!hasAcceptedCompensation &&
-            (hasCandidates || hasDeclinedCompensation) ? (
-              <>
-                {compensationCounter ? (
-                  <span className="block max-w-full break-words text-muted-foreground">
-                    {compensationCounter}
-                  </span>
-                ) : null}
-
-                <span className="block max-w-full break-words text-muted-foreground">
-                  {compensationSecondary}
-                </span>
-              </>
-            ) : null}
-
-            {hasCandidates ? (
-              <Button
-                type="button"
-                size="sm"
-                className="mt-2 h-8 shrink-0"
-                onClick={handleReview}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                }}
-              >
-                {hasDeclinedCompensation
-                  ? 'Change decision'
-                  : 'Review compensation'}
-              </Button>
-            ) : null}
-          </div>
-        </PopoverContent>
-      </Popover>
-      {hasCandidates ? (
-        <RestCompensationDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          candidates={weeklyRestCompensationCandidates}
-          restCompensations={restCompensations}
-          reducedDailyRestUsedAfter={usageAfter}
-          onAccept={onAcceptRestCompensation}
-          onDecline={onDeclineRestCompensation}
-          onCancel={onCancelRestCompensation}
-        />
-      ) : null}
-      {acceptedCompensation ? (
-        <AcceptedCompensationDialog
-          open={acceptedDecisionDialogOpen}
-          onOpenChange={setAcceptedDecisionDialogOpen}
-          compensation={acceptedCompensation}
-          onCancel={onCancelRestCompensation}
-        />
-      ) : null}
-    </>
-  );
+  return `${hours}h ${String(remaining).padStart(2, '0')}m`;
 }
 
 export function ShiftRow({
@@ -849,20 +103,30 @@ export function ShiftRow({
   drivingStatus,
   shiftStatus,
   restStatus,
-  drivingUsageAfter,
-  sharedAllowanceUsedAfter,
-  reducedDailyRest,
-  extendedShift,
-  weeklyRestCompensationCandidates,
+  drivingUsageAfter = 0,
+  sharedAllowanceUsedAfter = 0,
+  reducedDailyRest = false,
+  extendedShift = false,
+  weeklyRestCompensationCandidates = [],
   restCompensations = [],
   onAcceptRestCompensation,
-  onDeclineRestCompensation,
   onCancelRestCompensation,
   onEdit,
+  onDelete,
 }: ShiftRowProps) {
-  const shiftMinutes = calculateShiftMinutes(shift);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const workingMinutes = shiftMinutes - shift.break;
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [swiped, setSwiped] = useState(false);
+
+  const pointerStartX = useRef<number | null>(null);
+
+  const pointerStartY = useRef<number | null>(null);
+
+  const swiping = useRef(false);
+
+  const shiftMinutes = calculateShiftMinutes(shift);
 
   const endDate = shift.endDate || shift.date;
 
@@ -873,166 +137,275 @@ export function ShiftRow({
         compensation.reduced_weekly_rest_shift_id === shift.id),
   );
 
-  const acceptedCompensationForShift = restCompensations.find(
-    (compensation) =>
-      compensation.decision === 'accepted' &&
-      compensation.compensation_shift_id === shift.id,
-  );
+  const acceptedCompensationForShift =
+    acceptedCompensation?.compensation_shift_id === shift.id
+      ? acceptedCompensation
+      : undefined;
 
-  const isWeeklyRest = shift.restType === 'weekly';
-
-  const actualRestMinutes = Number(shift.rest) || 0;
-
-  const compensationMinutesForShift = Number(
+  const compensationMinutes = Number(
     acceptedCompensationForShift?.compensation_minutes ?? 0,
   );
 
-  const effectiveDailyRestMinutes =
-    !isWeeklyRest && acceptedCompensationForShift
-      ? Math.max(0, actualRestMinutes - compensationMinutesForShift)
+  const actualRestMinutes = Number(shift.rest) || 0;
+
+  const effectiveRestMinutes =
+    shift.restType === 'daily'
+      ? Math.max(0, actualRestMinutes - compensationMinutes)
       : actualRestMinutes;
 
-  const compensationUsesReducedDailyRest =
-    Boolean(acceptedCompensationForShift) &&
-    !isWeeklyRest &&
-    effectiveDailyRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
-    effectiveDailyRestMinutes < REGULAR_DAILY_REST_MINUTES;
+  const isWeeklyRest = shift.restType === 'weekly';
 
   const isReducedWeeklyRest =
     isWeeklyRest &&
-    actualRestMinutes >= MINIMUM_WEEKLY_REST_MINUTES &&
-    actualRestMinutes < REGULAR_WEEKLY_REST_MINUTES;
+    effectiveRestMinutes >= MINIMUM_WEEKLY_REST_MINUTES &&
+    effectiveRestMinutes < REGULAR_WEEKLY_REST_MINUTES;
 
   const isRegularWeeklyRest =
-    isWeeklyRest && actualRestMinutes >= REGULAR_WEEKLY_REST_MINUTES;
-
-  const isCompensationSourceWeeklyRest =
-    isWeeklyRest &&
-    isReducedWeeklyRest &&
-    acceptedCompensation?.reduced_weekly_rest_shift_id === shift.id;
-
-  const isCompensationReceiverWeeklyRest =
-    isWeeklyRest && Boolean(acceptedCompensationForShift);
-
-  const isCompensatedWeeklyRest =
-    isCompensationSourceWeeklyRest || isCompensationReceiverWeeklyRest;
-
-  const effectiveRestStatus = getRestStatus(shift, actualRestMinutes);
-
-  const displayRestStatus = isWeeklyRest ? effectiveRestStatus : restStatus;
+    isWeeklyRest && effectiveRestMinutes >= REGULAR_WEEKLY_REST_MINUTES;
 
   const isWeeklyStatus = isRegularWeeklyRest || isReducedWeeklyRest;
 
-  const rowClassName = isWeeklyStatus
-    ? 'cursor-pointer bg-muted/40 hover:bg-muted/60'
-    : 'cursor-pointer';
+  const isReducedDailyRest =
+    !isWeeklyRest &&
+    effectiveRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
+    effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
 
-  const stickyCellClassName = isWeeklyStatus ? 'bg-muted' : 'bg-background';
+  const drivingMinutes = Number(shift.driving) || 0;
 
-  const weeklyRestBorderClassName = isReducedWeeklyRest
-    ? isCompensationSourceWeeklyRest
-      ? 'border-l-amber-500'
-      : 'border-l-red-500'
-    : isRegularWeeklyRest
-      ? 'border-l-green-500'
-      : 'border-l-transparent';
+  const drivingOver9Hours = drivingMinutes > 9 * 60;
+
+  const drivingOver10Hours = drivingMinutes > 10 * 60;
+
+  const shiftOver15Hours = shiftMinutes > 15 * 60;
+
+  const workingMinutes = Math.max(0, shiftMinutes - Number(shift.break));
+
+  const handlePointerDown = (event: PointerEvent<HTMLTableRowElement>) => {
+    pointerStartX.current = event.clientX;
+
+    pointerStartY.current = event.clientY;
+
+    swiping.current = false;
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLTableRowElement>) => {
+    if (pointerStartX.current === null || pointerStartY.current === null) {
+      return;
+    }
+
+    const deltaX = event.clientX - pointerStartX.current;
+
+    const deltaY = event.clientY - pointerStartY.current;
+
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      return;
+    }
+
+    if (deltaX < -30) {
+      swiping.current = true;
+
+      setSwiped(true);
+    }
+
+    if (deltaX > 30) {
+      swiping.current = true;
+
+      setSwiped(false);
+    }
+  };
+
+  const handlePointerUp = () => {
+    pointerStartX.current = null;
+
+    pointerStartY.current = null;
+  };
+
+  const handleRowClick = () => {
+    if (swiping.current) {
+      swiping.current = false;
+
+      return;
+    }
+
+    if (swiped) {
+      setSwiped(false);
+
+      return;
+    }
+
+    setDetailsOpen(true);
+  };
+
+  const handleDelete = () => {
+    setDeleteOpen(false);
+
+    setSwiped(false);
+
+    onDelete(shift);
+  };
+
+  const stickyBackground = isWeeklyStatus ? 'bg-muted' : 'bg-transparent';
+
+  const drivingClass = drivingOver10Hours
+    ? 'text-red-600 font-semibold'
+    : drivingOver9Hours
+      ? 'text-orange-600 font-semibold'
+      : '';
+
+  const shiftClass = shiftOver15Hours ? 'text-red-600 font-semibold' : '';
 
   return (
-    <TableRow className={rowClassName} onClick={() => onEdit(shift)}>
-      <TableCell
-        className={`sticky left-0 z-10 border-l-2 px-1 py-1 text-left text-sm ${weeklyRestBorderClassName} ${stickyCellClassName}`}
+    <>
+      <TableRow
+        className={[
+          'cursor-pointer select-none',
+          '[touch-action:pan-y]',
+          isWeeklyStatus ? 'bg-muted hover:bg-muted/60' : 'hover:bg-muted/40',
+        ].join(' ')}
+        onClick={handleRowClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
-        {' '}
-        <div className="flex flex-col items-start leading-tight">
-          {' '}
-          <span>{formatShiftDate(shift.date)}</span>{' '}
-          <span className="text-muted-foreground">
-            {formatTime(shift.start)}{' '}
-          </span>{' '}
-        </div>{' '}
-      </TableCell>
+        <TableCell
+          className={[
+            'w-[24%] min-w-0 border-l-2 px-1 py-2',
+            'sticky left-0 z-20',
+            stickyBackground,
+            'hover:!bg-muted/40',
+            isReducedWeeklyRest
+              ? 'border-l-red-500'
+              : isRegularWeeklyRest
+                ? 'border-l-green-500'
+                : 'border-l-transparent',
+          ].join(' ')}
+        >
+          <div className="flex flex-col items-center leading-tight">
+            <span className="text-xs font-medium">
+              {formatDate(shift.date)}
+            </span>
 
-      <TableCell className="relative px-0.5 py-1 text-left text-sm">
-        <div className="flex min-h-8 items-center justify-start pr-1">
-          {formatDurationStacked(shift.driving)}
-        </div>
+            <span className="text-xs text-muted-foreground">
+              {formatTime(shift.start)}
+            </span>
+          </div>
+        </TableCell>
 
-        {drivingStatus ? (
-          <DrivingInfo status={drivingStatus} usageAfter={drivingUsageAfter} />
-        ) : null}
-      </TableCell>
+        <TableCell className="w-[19%] min-w-0 px-1 py-2 text-center">
+          <div
+            className={`flex items-center justify-center text-xs leading-tight ${drivingClass}`}
+          >
+            {formatCompactDuration(drivingMinutes)}
+          </div>
+        </TableCell>
 
-      <TableCell className="relative px-0.5 py-1 text-left text-sm">
-        <div className="flex min-h-8 items-center justify-start pr-1">
-          {formatDurationStacked(shiftMinutes)}
-        </div>
+        <TableCell className="w-[19%] min-w-0 px-1 py-2 text-center">
+          <div
+            className={`flex items-center justify-center text-xs leading-tight ${shiftClass}`}
+          >
+            {formatCompactDuration(shiftMinutes)}
+          </div>
+        </TableCell>
 
-        {shiftStatus ? <ShiftInfo status={shiftStatus} /> : null}
-      </TableCell>
+        <TableCell className="w-[19%] min-w-0 px-1 py-2 text-center">
+          <div className="flex min-h-10 flex-col items-center justify-center leading-none">
+            <span className="text-xs font-medium">
+              {formatCompactDuration(effectiveRestMinutes)}
+            </span>
 
-      <TableCell className="px-0.5 py-1 text-left text-sm">
-        {formatDuration(shift.break)}
-      </TableCell>
+            <span
+              className={[
+                'mt-1 w-full max-w-[42px] border-t border-border/50 pt-1',
+                'text-[10px] font-semibold',
+                isWeeklyStatus
+                  ? isReducedWeeklyRest
+                    ? 'text-red-600'
+                    : 'text-green-600'
+                  : 'text-muted-foreground',
+              ].join(' ')}
+            >
+              {isWeeklyStatus ? (isReducedWeeklyRest ? 'RW' : 'W') : 'D'}
+            </span>
+          </div>
+        </TableCell>
 
-      <TableCell className="relative px-0.5 py-1 text-left text-sm">
-        <div className="flex min-h-8 items-center justify-start pr-1">
-          {formatDurationStacked(shift.rest)}
-        </div>
-
-        {displayRestStatus ? (
-          <RestInfo
-            status={displayRestStatus}
-            shiftId={shift.id}
-            usageAfter={sharedAllowanceUsedAfter}
-            reducedDailyRest={reducedDailyRest}
-            extendedShift={extendedShift}
-            compensationUsesReducedDailyRest={compensationUsesReducedDailyRest}
-            isWeeklyRest={isWeeklyRest}
-            isReducedWeeklyRest={isReducedWeeklyRest}
-            isRegularWeeklyRest={isRegularWeeklyRest}
-            weeklyRestCompensationCandidates={weeklyRestCompensationCandidates}
-            restCompensations={restCompensations}
-            isCompensatedWeeklyRest={isCompensatedWeeklyRest}
-            acceptedCompensation={acceptedCompensation}
-            onAcceptRestCompensation={onAcceptRestCompensation}
-            onDeclineRestCompensation={onDeclineRestCompensation}
-            onCancelRestCompensation={onCancelRestCompensation}
-          />
-        ) : null}
-
-        {isWeeklyStatus ? (
-          <span
+        <TableCell className="relative w-[19%] min-w-0 overflow-hidden px-1 py-2 text-center">
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
             className={[
-              'absolute z-10 inline-flex min-h-6 min-w-6 items-center justify-center rounded-sm px-1 font-bold leading-none',
-              isReducedWeeklyRest
-                ? 'right-[0.37rem] bottom-[0.1rem] text-amber-600'
-                : 'right-[0.38rem] bottom-0 text-green-700',
+              'absolute right-1 top-1/2 z-20 size-9 -translate-y-1/2',
+              'transition-opacity duration-200',
+              swiped ? 'opacity-100' : 'pointer-events-none opacity-0',
             ].join(' ')}
-            style={{
-              fontSize: '9px',
+            onClick={(event) => {
+              event.stopPropagation();
+
+              setDeleteOpen(true);
             }}
           >
-            {isReducedWeeklyRest ? 'RW' : 'W'}
-          </span>
-        ) : null}
-      </TableCell>
+            <Trash2 className="size-4" />
+          </Button>
 
-      <TableCell className="px-0.5 py-1 text-left text-sm">
-        £{shift.earn.toFixed(2)}
-      </TableCell>
+          <div
+            className={[
+              'relative z-10 flex flex-col items-center',
+              'bg-inherit leading-tight transition-transform duration-200',
+              swiped ? '-translate-x-11' : 'translate-x-0',
+            ].join(' ')}
+          >
+            <span className="text-xs font-medium">{formatDate(endDate)}</span>
 
-      <TableCell className="px-0.5 py-1 text-left text-sm">
-        {formatDurationStacked(workingMinutes)}
-      </TableCell>
+            <span className="text-xs text-muted-foreground">
+              {formatTime(shift.end)}
+            </span>
+          </div>
+        </TableCell>
+      </TableRow>
 
-      <TableCell
-        className={`sticky right-0 z-10 px-1 py-1 text-left text-sm ${stickyCellClassName}`}
-      >
-        <div className="flex flex-col items-start leading-tight">
-          <span>{formatShiftDate(endDate)}</span>
-          <span className="text-muted-foreground">{formatTime(shift.end)}</span>
-        </div>
-      </TableCell>
-    </TableRow>
+      <ShiftDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        shift={shift}
+        drivingStatus={drivingStatus}
+        shiftStatus={shiftStatus}
+        restStatus={restStatus}
+        drivingUsageAfter={drivingUsageAfter}
+        sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
+        reducedDailyRest={reducedDailyRest || isReducedDailyRest}
+        extendedShift={extendedShift}
+        weeklyRestCompensationCandidates={weeklyRestCompensationCandidates}
+        restCompensations={restCompensations}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onAcceptRestCompensation={onAcceptRestCompensation}
+        onCancelRestCompensation={onCancelRestCompensation}
+      />
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this shift?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This will permanently delete this shift from your Driver Journal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
