@@ -201,6 +201,7 @@ function DatePicker({
           className="min-w-0 flex-1 justify-start text-left font-normal"
         >
           <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
+
           <span className="truncate">{formatDate(value)}</span>
         </Button>
       </PopoverTrigger>
@@ -326,27 +327,36 @@ export function ShiftDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           className="
-    flex
-    h-[100dvh]
-    max-h-[100dvh]
-    w-full
-    max-w-full
-    flex-col
-    gap-0
-    overflow-hidden
-    rounded-none
-    p-0
-    sm:h-auto
-    sm:max-h-[90vh]
-    sm:w-[calc(100vw-2rem)]
-    sm:max-w-xl
-    sm:rounded-lg
-  "
+            flex
+            h-[100dvh]
+            max-h-[100dvh]
+            w-screen
+            max-w-none
+            flex-col
+            gap-0
+            overflow-hidden
+            rounded-none
+            p-0
+            sm:h-auto
+            sm:max-h-[90vh]
+            sm:w-[calc(100vw-2rem)]
+            sm:max-w-xl
+            sm:rounded-lg
+          "
           onOpenAutoFocus={(event) => {
             event.preventDefault();
           }}
         >
-          <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6 sm:py-4">
+          <DialogHeader
+            className="
+              shrink-0
+              border-b
+              px-4
+              py-3
+              sm:px-6
+              sm:py-4
+            "
+          >
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <Clock3 className="size-4.5 text-primary" />
@@ -370,7 +380,17 @@ export function ShiftDialog({
             onSubmit={handleSubmit}
             className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
           >
-            <div className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain">
+            <div
+              className="
+                min-h-0
+                min-w-0
+                flex-1
+                touch-pan-y
+                overflow-x-hidden
+                overflow-y-auto
+                overscroll-contain
+              "
+            >
               <div className="min-w-0 space-y-4 px-4 py-4 sm:px-6">
                 <section className="min-w-0">
                   <SectionHeader icon={CalendarDays} title="Shift times" />
@@ -546,7 +566,22 @@ export function ShiftDialog({
               </div>
             </div>
 
-            <DialogFooter className="shrink-0 flex-row items-center justify-between gap-2 border-t px-4 py-3 sm:px-6">
+            <DialogFooter
+              className="
+                shrink-0
+                flex-row
+                items-center
+                justify-between
+                gap-2
+                border-t
+                px-4
+                py-3
+                pb-[calc(0.75rem+env(safe-area-inset-bottom))]
+                sm:px-6
+                sm:py-3
+                sm:pb-3
+              "
+            >
               {isEditing ? (
                 <Button
                   type="button"
@@ -561,7 +596,7 @@ export function ShiftDialog({
                 <div />
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"

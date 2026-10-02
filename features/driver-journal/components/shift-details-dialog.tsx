@@ -40,49 +40,31 @@ import {
 
 type ShiftDetailsDialogProps = {
   open: boolean;
-
   onOpenChange: (open: boolean) => void;
-
   shift: Shift;
-
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
-
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
-
   restStatus?: ReturnType<typeof getRestStatus> | null;
-
   drivingUsageAfter?: number;
-
   sharedAllowanceUsedAfter?: number;
-
   reducedDailyRest?: boolean;
-
   extendedShift?: boolean;
-
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
-
   restCompensations?: RestCompensation[];
-
   onEdit: (shift: Shift) => void;
-
   onDelete: (shift: Shift) => void;
-
   onAcceptRestCompensation?: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
 };
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
-
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
-
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
-
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 
 function formatDate(dateString: string): string {
@@ -103,7 +85,6 @@ function formatDuration(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
 
   const hours = Math.floor(minutes / 60);
-
   const remainingMinutes = minutes % 60;
 
   return `${hours}h ${String(remainingMinutes).padStart(2, '0')}m`;
@@ -113,7 +94,6 @@ function formatHoursMinutes(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
 
   const hours = Math.floor(minutes / 60);
-
   const remainingMinutes = minutes % 60;
 
   if (remainingMinutes === 0) {
@@ -235,9 +215,7 @@ export function ShiftDetailsDialog({
   const endDate = shift.endDate || shift.date;
 
   const drivingMinutes = Number(shift.driving) || 0;
-
   const breakMinutes = Number(shift.break) || 0;
-
   const actualRestMinutes = Number(shift.rest) || 0;
 
   const workingMinutes = Math.max(0, shiftMinutes - breakMinutes);
@@ -278,9 +256,7 @@ export function ShiftDetailsDialog({
     effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
 
   const drivingOver9Hours = drivingMinutes > 9 * 60;
-
   const drivingOver10Hours = drivingMinutes > 10 * 60;
-
   const shiftOver15Hours = shiftMinutes > 15 * 60;
 
   const compensationUsesReducedDailyRest =
@@ -308,7 +284,6 @@ export function ShiftDetailsDialog({
 
   function handleEdit() {
     onOpenChange(false);
-
     onEdit(shift);
   }
 
@@ -342,24 +317,33 @@ export function ShiftDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="
-    flex
-    h-[100dvh]
-    max-h-[100dvh]
-    w-full
-    max-w-full
-    flex-col
-    gap-0
-    overflow-hidden
-    rounded-none
-    p-0
-    sm:h-auto
-    sm:max-h-[90vh]
-    sm:w-[calc(100vw-2rem)]
-    sm:max-w-xl
-    sm:rounded-lg
-  "
+          flex
+          h-[100dvh]
+          max-h-[100dvh]
+          w-screen
+          max-w-none
+          flex-col
+          gap-0
+          overflow-hidden
+          rounded-none
+          p-0
+          sm:h-auto
+          sm:max-h-[90vh]
+          sm:w-[calc(100vw-2rem)]
+          sm:max-w-xl
+          sm:rounded-lg
+        "
       >
-        <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6 sm:py-4">
+        <DialogHeader
+          className="
+            shrink-0
+            border-b
+            px-4
+            py-3
+            sm:px-6
+            sm:py-4
+          "
+        >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Clock3 className="size-4 text-primary" />
@@ -695,16 +679,32 @@ export function ShiftDetailsDialog({
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 flex-row items-center justify-between gap-2 border-t px-4 py-3 sm:px-6">
+        <DialogFooter
+          className="
+            shrink-0
+            flex-row
+            items-center
+            justify-between
+            gap-2
+            border-t
+            px-4
+            py-3
+            pb-[calc(0.75rem+env(safe-area-inset-bottom))]
+            sm:px-6
+            sm:py-3
+            sm:pb-3
+          "
+        >
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            className="min-w-0"
           >
             Close
           </Button>
 
-          <Button type="button" onClick={handleEdit} className="min-w-28">
+          <Button type="button" onClick={handleEdit} className="min-w-0">
             <Pencil className="size-4" />
             Edit shift
           </Button>
