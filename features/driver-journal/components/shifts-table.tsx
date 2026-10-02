@@ -19,20 +19,15 @@ import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
   shifts: Shift[];
-
   restCompensations: RestCompensation[];
-
   onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
-
   onEdit: (shift: Shift) => void;
-
   onDelete: (shift: Shift) => void;
 };
 
@@ -58,34 +53,7 @@ function TachographDrivingIcon() {
 }
 
 function TachographRestIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M5 4V19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M5 9H18"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18 9V19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
+  return <BedDouble className="size-5" aria-hidden="true" />;
 }
 
 export function ShiftsTable({
@@ -108,9 +76,7 @@ export function ShiftsTable({
     ].join('-');
 
     const existing = weeks.get(key) ?? [];
-
     existing.push(shift);
-
     weeks.set(key, existing);
   }
 
