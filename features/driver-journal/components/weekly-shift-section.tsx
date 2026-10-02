@@ -83,7 +83,7 @@ export function WeeklyShiftSection({
   return (
     <>
       <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
-        <TableCell colSpan={5} className="p-0">
+        <TableCell colSpan={6} className="p-0">
           <div className="border-b bg-background px-3 py-3 sm:px-4 sm:py-4">
             <div className="flex flex-col items-center gap-2">
               <div className="text-center text-sm font-semibold leading-tight sm:text-base">
@@ -215,7 +215,7 @@ export function WeeklyShiftSection({
       {sortedShifts.length === 0 ? (
         <TableRow>
           <TableCell
-            colSpan={5}
+            colSpan={6}
             className="h-20 px-2 py-4 text-center text-sm text-muted-foreground"
           >
             No shifts this week.

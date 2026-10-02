@@ -10,9 +10,11 @@ import {
 } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+
 import type { RestCompensation } from '../services/driver-journal';
 
 import { getStartOfWeek } from '../utils/dates';
+
 import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
@@ -27,7 +29,9 @@ type ShiftsTableProps = {
   ) => Promise<void>;
 
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
+
   onEdit: (shift: Shift) => void;
+
   onDelete: (shift: Shift) => void;
 };
 
@@ -51,7 +55,9 @@ export function ShiftsTable({
     ].join('-');
 
     const existing = weeks.get(key) ?? [];
+
     existing.push(shift);
+
     weeks.set(key, existing);
   }
 
@@ -95,11 +101,12 @@ export function ShiftsTable({
       <div className="sticky top-0 z-30 w-full bg-background">
         <Table className={tableClass}>
           <colgroup>
-            <col className="w-[24%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
+            <col className="w-[20%]" />
+            <col className="w-[15%]" />
+            <col className="w-[15%]" />
+            <col className="w-[15%]" />
+            <col className="w-[20%]" />
+            <col className="w-[15%]" />
           </colgroup>
 
           <TableHeader className="bg-background">
@@ -118,11 +125,13 @@ export function ShiftsTable({
               <TableHead className={headerClass}>
                 <div className="flex flex-col items-center justify-center gap-0.5">
                   <BedDouble className="size-4" />
-                  <span>Brake</span>
+                  <span>Rest</span>
                 </div>
               </TableHead>
 
               <TableHead className={headerClass}>End</TableHead>
+
+              <TableHead className={headerClass}>Actions</TableHead>
             </tr>
           </TableHeader>
         </Table>
@@ -132,11 +141,12 @@ export function ShiftsTable({
       <div className="w-full">
         <Table className={tableClass}>
           <colgroup>
-            <col className="w-[24%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
-            <col className="w-[19%]" />
+            <col className="w-[20%]" />
+            <col className="w-[15%]" />
+            <col className="w-[15%]" />
+            <col className="w-[15%]" />
+            <col className="w-[20%]" />
+            <col className="w-[15%]" />
           </colgroup>
 
           <TableBody>
