@@ -201,7 +201,6 @@ function DatePicker({
           className="min-w-0 flex-1 justify-start text-left font-normal"
         >
           <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
-
           <span className="truncate">{formatDate(value)}</span>
         </Button>
       </PopoverTrigger>
@@ -570,8 +569,9 @@ export function ShiftDialog({
               className="
                 shrink-0
                 flex-row
+                flex-wrap
                 items-center
-                justify-between
+                justify-center
                 gap-2
                 border-t
                 px-4
@@ -592,28 +592,24 @@ export function ShiftDialog({
                   <Trash2 className="size-4" />
                   Delete
                 </Button>
-              ) : (
-                <div />
-              )}
+              ) : null}
 
-              <div className="flex min-w-0 items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  className="min-w-20"
-                >
-                  Cancel
-                </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                className="min-w-20"
+              >
+                Cancel
+              </Button>
 
-                <Button
-                  type="submit"
-                  disabled={isWeeklyRestBlocked}
-                  className="min-w-28"
-                >
-                  {isEditing ? 'Save changes' : 'Add shift'}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                disabled={isWeeklyRestBlocked}
+                className="min-w-28"
+              >
+                {isEditing ? 'Save changes' : 'Add shift'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

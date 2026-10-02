@@ -83,7 +83,6 @@ function formatTime(time: string): string {
 
 function formatDuration(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
-
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
@@ -92,7 +91,6 @@ function formatDuration(minutesValue: number | string): string {
 
 function formatHoursMinutes(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
-
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
@@ -211,7 +209,6 @@ export function ShiftDetailsDialog({
   onCancelRestCompensation,
 }: ShiftDetailsDialogProps) {
   const shiftMinutes = calculateShiftMinutes(shift);
-
   const endDate = shift.endDate || shift.date;
 
   const drivingMinutes = Number(shift.driving) || 0;
@@ -683,8 +680,9 @@ export function ShiftDetailsDialog({
           className="
             shrink-0
             flex-row
+            flex-wrap
             items-center
-            justify-between
+            justify-center
             gap-2
             border-t
             px-4
@@ -699,12 +697,12 @@ export function ShiftDetailsDialog({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="min-w-0"
+            className="min-w-[90px]"
           >
             Close
           </Button>
 
-          <Button type="button" onClick={handleEdit} className="min-w-0">
+          <Button type="button" onClick={handleEdit} className="min-w-[110px]">
             <Pencil className="size-4" />
             Edit shift
           </Button>
