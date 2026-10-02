@@ -325,7 +325,23 @@ export function ShiftDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90vh] sm:max-w-xl"
+          className="
+    flex
+    h-[100dvh]
+    max-h-[100dvh]
+    w-full
+    max-w-full
+    flex-col
+    gap-0
+    overflow-hidden
+    rounded-none
+    p-0
+    sm:h-auto
+    sm:max-h-[90vh]
+    sm:w-[calc(100vw-2rem)]
+    sm:max-w-xl
+    sm:rounded-lg
+  "
           onOpenAutoFocus={(event) => {
             event.preventDefault();
           }}
@@ -572,7 +588,7 @@ export function ShiftDialog({
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete shift?</AlertDialogTitle>
 

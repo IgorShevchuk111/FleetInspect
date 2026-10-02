@@ -88,7 +88,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="FleetInspect" />
       </head>
-      <body className={`h-full ${inter.className}`}>
+      <body className={`min-h-screen flex flex-col ${inter.className}`}>
         <Header />
         <Main>{children}</Main>
         <Footer />

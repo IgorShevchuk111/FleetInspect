@@ -10,16 +10,15 @@ import {
 } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
-
 import type { RestCompensation } from '../services/driver-journal';
 
 import { getStartOfWeek } from '../utils/dates';
-
 import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
   shifts: Shift[];
   restCompensations: RestCompensation[];
+
   onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
@@ -45,10 +44,13 @@ export function ShiftsTable({
   for (const shift of shifts) {
     const weekStart = getStartOfWeek(new Date(`${shift.date}T12:00:00`));
 
-    const key = weekStart.toISOString().slice(0, 10);
+    const key = [
+      weekStart.getFullYear(),
+      String(weekStart.getMonth() + 1).padStart(2, '0'),
+      String(weekStart.getDate()).padStart(2, '0'),
+    ].join('-');
 
     const existing = weeks.get(key) ?? [];
-
     existing.push(shift);
     weeks.set(key, existing);
   }
@@ -88,9 +90,9 @@ export function ShiftsTable({
     'bg-background px-1 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground';
 
   return (
-    <div className="w-full overflow-hidden">
-      {/* FIXED HEADER */}
-      <div className="w-full overflow-hidden bg-background">
+    <div className="w-full">
+      {/* STICKY TABLE HEADER */}
+      <div className="sticky top-0 z-30 w-full bg-background">
         <Table className={tableClass}>
           <colgroup>
             <col className="w-[24%]" />
@@ -126,8 +128,8 @@ export function ShiftsTable({
         </Table>
       </div>
 
-      {/* SCROLLABLE BODY */}
-      <div className="max-h-[calc(100vh-180px)] overflow-y-auto overflow-x-hidden overscroll-contain">
+      {/* TABLE BODY */}
+      <div className="w-full">
         <Table className={tableClass}>
           <colgroup>
             <col className="w-[24%]" />

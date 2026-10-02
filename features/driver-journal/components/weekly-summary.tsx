@@ -94,26 +94,35 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
 
       <DialogContent
         className="
-          w-[calc(100%-1rem)]
-          max-w-sm
+          flex
+          h-[100dvh]
+          max-h-[100dvh]
+          w-screen
+          max-w-none
+          flex-col
+          gap-0
           overflow-hidden
+          rounded-none
           p-0
+          sm:h-auto
+          sm:max-h-[90vh]
           sm:w-full
+          sm:max-w-sm
+          sm:rounded-lg
         "
       >
-        <DialogHeader className="border-b px-5 py-4 text-left sm:px-6 sm:py-5">
+        <DialogHeader className="shrink-0 border-b px-5 py-4 text-left sm:px-6 sm:py-5">
           <DialogTitle className="text-base sm:text-lg">
             Weekly Summary
           </DialogTitle>
 
           <DialogDescription className="text-xs leading-relaxed sm:text-sm">
             {formatDateRange(currentWeekStart, currentWeekEnd)}
-
             <span className="block">Monday – Sunday</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[70vh] overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
           <div className="space-y-5">
             <section>
               <div className="divide-y rounded-lg border px-3">

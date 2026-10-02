@@ -342,17 +342,22 @@ export function ShiftDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="
-          flex
-          max-h-[calc(100dvh-1rem)]
-          w-[calc(100vw-1rem)]
-          max-w-[calc(100vw-1rem)]
-          flex-col
-          gap-0
-          overflow-hidden
-          p-0
-          sm:max-h-[90vh]
-          sm:max-w-xl
-        "
+    flex
+    h-[100dvh]
+    max-h-[100dvh]
+    w-full
+    max-w-full
+    flex-col
+    gap-0
+    overflow-hidden
+    rounded-none
+    p-0
+    sm:h-auto
+    sm:max-h-[90vh]
+    sm:w-[calc(100vw-2rem)]
+    sm:max-w-xl
+    sm:rounded-lg
+  "
       >
         <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
