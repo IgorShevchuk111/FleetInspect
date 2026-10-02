@@ -45,34 +45,52 @@ import { ShiftDetailsDialog } from './shift-details-dialog';
 
 type ShiftRowProps = {
   shift: Shift;
+
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
+
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
+
   restStatus?: ReturnType<typeof getRestStatus> | null;
+
   drivingUsageAfter?: number;
+
   sharedAllowanceUsedAfter?: number;
+
   reducedDailyRest?: boolean;
+
   extendedShift?: boolean;
+
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
+
   restCompensations?: RestCompensation[];
+
   onAcceptRestCompensation?: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
+
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
+
   onEdit: (shift: Shift) => void;
+
   onDelete: (shift: Shift) => void;
 };
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
+
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
+
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
+
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
+
 const SWIPE_DISTANCE = 64;
 
 function formatDate(dateString: string): string {
   const [, month, day] = dateString.split('-');
+
   return `${day}/${month}`;
 }
 
@@ -82,7 +100,9 @@ function formatTime(time: string): string {
 
 function formatCompactDuration(value: number | string): string {
   const minutes = Math.max(0, Math.round(Number(value) || 0));
+
   const hours = Math.floor(minutes / 60);
+
   const remaining = minutes % 60;
 
   return `${hours}h ${String(remaining).padStart(2, '0')}m`;
@@ -105,17 +125,23 @@ export function ShiftRow({
   onDelete,
 }: ShiftRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+
   const [deleteOpen, setDeleteOpen] = useState(false);
+
   const [swiped, setSwiped] = useState(false);
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuOpenRef = useRef(false);
 
   const pointerStartX = useRef<number | null>(null);
+
   const pointerStartY = useRef<number | null>(null);
+
   const swiping = useRef(false);
 
   const shiftMinutes = calculateShiftMinutes(shift);
+
   const endDate = shift.endDate || shift.date;
 
   const acceptedCompensation = restCompensations.find(
@@ -159,15 +185,20 @@ export function ShiftRow({
     effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
 
   const drivingMinutes = Number(shift.driving) || 0;
+
   const drivingOver9Hours = drivingMinutes > 9 * 60;
+
   const drivingOver10Hours = drivingMinutes > 10 * 60;
+
   const shiftOver15Hours = shiftMinutes > 15 * 60;
 
   const workingMinutes = Math.max(0, shiftMinutes - Number(shift.break || 0));
 
   const handlePointerDown = (event: PointerEvent<HTMLTableRowElement>) => {
     pointerStartX.current = event.clientX;
+
     pointerStartY.current = event.clientY;
+
     swiping.current = false;
   };
 
@@ -180,17 +211,10 @@ export function ShiftRow({
 
     const deltaY = event.clientY - pointerStartY.current;
 
-    /*
-     * Ignore vertical movement so normal page scrolling
-     * continues to work.
-     */
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
       return;
     }
 
-    /*
-     * Do not start swipe from interactive elements.
-     */
     const target = event.target as HTMLElement;
 
     if (
@@ -203,33 +227,31 @@ export function ShiftRow({
 
     if (deltaX < -SWIPE_DISTANCE / 2) {
       swiping.current = true;
+
       setSwiped(true);
+
       return;
     }
 
     if (deltaX > SWIPE_DISTANCE / 2) {
       swiping.current = true;
+
       setSwiped(false);
     }
   };
 
   const handlePointerUp = () => {
     pointerStartX.current = null;
+
     pointerStartY.current = null;
   };
 
   const handleRowClick = (event: MouseEvent<HTMLTableRowElement>) => {
-    /*
-     * On mobile, Radix can close the dropdown and then
-     * the same pointer event can reach the table row.
-     *
-     * Use the ref because it is updated synchronously.
-     * This prevents the outside click from opening
-     * Shift Details.
-     */
     if (menuOpenRef.current) {
       menuOpenRef.current = false;
+
       setMenuOpen(false);
+
       return;
     }
 
@@ -245,11 +267,13 @@ export function ShiftRow({
 
     if (swiping.current) {
       swiping.current = false;
+
       return;
     }
 
     if (swiped) {
       setSwiped(false);
+
       return;
     }
 
@@ -258,29 +282,41 @@ export function ShiftRow({
 
   const handleViewDetails = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDetailsOpen(true);
   };
 
   const handleEdit = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDetailsOpen(false);
+
     onEdit(shift);
   };
 
   const handleDeleteRequest = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDeleteOpen(true);
   };
 
   const handleDelete = () => {
     setDeleteOpen(false);
+
     setSwiped(false);
+
     onDelete(shift);
   };
 
@@ -334,6 +370,7 @@ export function ShiftRow({
                 }}
                 onClick={(event) => {
                   event.stopPropagation();
+
                   handleDeleteRequest();
                 }}
               >
@@ -357,7 +394,7 @@ export function ShiftRow({
               <div
                 className={[
                   'min-w-0 border-r border-border/30',
-                  'border-l-2 px-1 py-2',
+                  'border-l-2 px-0.5 py-1.5',
                   isReducedWeeklyRest
                     ? 'border-l-red-500'
                     : isRegularWeeklyRest
@@ -366,22 +403,22 @@ export function ShiftRow({
                 ].join(' ')}
               >
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-xs font-medium">
+                  <span className="text-[13px] font-medium">
                     {formatDate(shift.date)}
                   </span>
 
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[13px] text-muted-foreground">
                     {formatTime(shift.start)}
                   </span>
                 </div>
               </div>
 
               {/* DRIVING */}
-              <div className="min-w-0 border-r border-border/30 px-1 py-2 text-center">
+              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div
                   className={[
                     'flex items-center justify-center',
-                    'text-xs leading-tight',
+                    'text-[13px] leading-tight',
                     drivingClass,
                   ].join(' ')}
                 >
@@ -390,11 +427,11 @@ export function ShiftRow({
               </div>
 
               {/* SHIFT */}
-              <div className="min-w-0 border-r border-border/30 px-1 py-2 text-center">
+              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div
                   className={[
                     'flex items-center justify-center',
-                    'text-xs leading-tight',
+                    'text-[13px] leading-tight',
                     shiftClass,
                   ].join(' ')}
                 >
@@ -403,17 +440,17 @@ export function ShiftRow({
               </div>
 
               {/* REST */}
-              <div className="min-w-0 border-r border-border/30 px-1 py-2 text-center">
-                <div className="flex min-h-10 flex-col items-center justify-center leading-none">
-                  <span className="text-xs font-medium">
+              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
+                <div className="flex min-h-9 flex-col items-center justify-center leading-none">
+                  <span className="text-[13px] font-medium">
                     {formatCompactDuration(effectiveRestMinutes)}
                   </span>
 
                   <span
                     className={[
-                      'mt-1 w-full max-w-[42px]',
-                      'border-t border-border/50 pt-1',
-                      'text-[10px] font-semibold',
+                      'mt-0.5 w-full max-w-[42px]',
+                      'border-t border-border/50 pt-0.5',
+                      'text-[11px] font-semibold',
                       isWeeklyStatus
                         ? isReducedWeeklyRest
                           ? 'text-red-600'
@@ -427,13 +464,13 @@ export function ShiftRow({
               </div>
 
               {/* END */}
-              <div className="min-w-0 border-r border-border/30 px-1 py-2 text-center">
+              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-xs font-medium">
+                  <span className="text-[13px] font-medium">
                     {formatDate(endDate)}
                   </span>
 
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[13px] text-muted-foreground">
                     {formatTime(shift.end)}
                   </span>
                 </div>
@@ -441,7 +478,7 @@ export function ShiftRow({
 
               {/* ACTIONS */}
               <div
-                className="min-w-0 px-1 py-2 text-center"
+                className="min-w-0 px-0.5 py-1.5 text-center"
                 onClick={(event) => {
                   event.stopPropagation();
                 }}
@@ -451,6 +488,7 @@ export function ShiftRow({
                     open={menuOpen}
                     onOpenChange={(open) => {
                       menuOpenRef.current = open;
+
                       setMenuOpen(open);
                     }}
                   >

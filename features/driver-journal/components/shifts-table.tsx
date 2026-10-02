@@ -1,6 +1,6 @@
 'use client';
 
-import { BedDouble, CircleGauge } from 'lucide-react';
+import { BedDouble } from 'lucide-react';
 
 import {
   Table,
@@ -19,6 +19,7 @@ import { WeeklyShiftSection } from './weekly-shift-section';
 
 type ShiftsTableProps = {
   shifts: Shift[];
+
   restCompensations: RestCompensation[];
 
   onAcceptRestCompensation: (
@@ -34,6 +35,58 @@ type ShiftsTableProps = {
 
   onDelete: (shift: Shift) => void;
 };
+
+function TachographDrivingIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-5"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M5.5 16.5L9.8 13.3M18.5 16.5L14.2 13.3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function TachographRestIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-5"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 4V19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M5 9H18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18 9V19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export function ShiftsTable({
   shifts,
@@ -82,7 +135,7 @@ export function ShiftsTable({
     table-fixed
     border-separate
     border-spacing-0
-    text-sm
+    text-[13px]
     [&_tbody_tr]:border-b
     [&_tbody_td]:border-r
     [&_tbody_td]:border-border/30
@@ -92,13 +145,22 @@ export function ShiftsTable({
     [&_thead_th:last-child]:border-r-0
   `;
 
-  const headerClass =
-    'bg-background px-1 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground';
+  const headerClass = `
+    bg-muted/70
+    px-0.5
+    py-2
+    text-center
+    text-xs
+    font-semibold
+    uppercase
+    tracking-wide
+    text-foreground
+  `;
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       {/* STICKY TABLE HEADER */}
-      <div className="sticky top-0 z-30 w-full bg-background">
+      <div className="sticky top-0 z-30 w-full min-w-0 bg-background shadow-sm">
         <Table className={tableClass}>
           <colgroup>
             <col className="w-[20%]" />
@@ -107,15 +169,16 @@ export function ShiftsTable({
             <col className="w-[15%]" />
             <col className="w-[20%]" />
             <col className="w-[15%]" />
+            <col className="w-0" />
           </colgroup>
 
-          <TableHeader className="bg-background">
-            <tr className="border-b bg-background">
+          <TableHeader className="bg-muted/70">
+            <tr className="border-b border-border/60 bg-muted/70">
               <TableHead className={headerClass}>Start</TableHead>
 
               <TableHead className={headerClass}>
                 <div className="flex flex-col items-center justify-center gap-0.5">
-                  <CircleGauge className="size-4" />
+                  <TachographDrivingIcon />
                   <span>Driving</span>
                 </div>
               </TableHead>
@@ -124,7 +187,7 @@ export function ShiftsTable({
 
               <TableHead className={headerClass}>
                 <div className="flex flex-col items-center justify-center gap-0.5">
-                  <BedDouble className="size-4" />
+                  <TachographRestIcon />
                   <span>Rest</span>
                 </div>
               </TableHead>
@@ -138,7 +201,7 @@ export function ShiftsTable({
       </div>
 
       {/* TABLE BODY */}
-      <div className="w-full">
+      <div className="w-full min-w-0 overflow-x-hidden">
         <Table className={tableClass}>
           <colgroup>
             <col className="w-[20%]" />
@@ -147,6 +210,7 @@ export function ShiftsTable({
             <col className="w-[15%]" />
             <col className="w-[20%]" />
             <col className="w-[15%]" />
+            <col className="w-0" />
           </colgroup>
 
           <TableBody>
