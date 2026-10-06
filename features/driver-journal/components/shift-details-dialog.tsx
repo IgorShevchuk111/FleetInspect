@@ -40,32 +40,64 @@ import {
 
 type ShiftDetailsDialogProps = {
   open: boolean;
+
   onOpenChange: (open: boolean) => void;
+
   shift: Shift;
+
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
+
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
+
   restStatus?: ReturnType<typeof getRestStatus> | null;
+
   drivingUsageAfter?: number;
+
   sharedAllowanceUsedAfter?: number;
+
+  extendedShiftUsageAfter?: number;
+
   reducedDailyRest?: boolean;
+
   extendedShift?: boolean;
+
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
+
   restCompensations?: RestCompensation[];
+
   onEdit: (shift: Shift) => void;
+
   onDelete: (shift: Shift) => void;
+
   onAcceptRestCompensation?: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
+
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
 };
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
+
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
+
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
+
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
+
+const DAILY_DRIVING_LIMIT_MINUTES = 9 * 60;
+
+const EXTENDED_DAILY_DRIVING_LIMIT_MINUTES = 10 * 60;
+
+const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
+
+const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
+
+const MAX_EXTENDED_DRIVING_DAYS = 2;
+
+const MAX_EXTENDED_SHIFTS = 3;
 
 function formatDate(dateString: string): string {
   const [year, month, day] = dateString.split('-');
@@ -83,7 +115,9 @@ function formatTime(time: string): string {
 
 function formatDuration(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
+
   const hours = Math.floor(minutes / 60);
+
   const remainingMinutes = minutes % 60;
 
   return `${hours}h ${String(remainingMinutes).padStart(2, '0')}m`;
@@ -91,7 +125,9 @@ function formatDuration(minutesValue: number | string): string {
 
 function formatHoursMinutes(minutesValue: number | string): string {
   const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
+
   const hours = Math.floor(minutes / 60);
+
   const remainingMinutes = minutes % 60;
 
   if (remainingMinutes === 0) {
@@ -199,6 +235,7 @@ export function ShiftDetailsDialog({
   shift,
   drivingUsageAfter = 0,
   sharedAllowanceUsedAfter = 0,
+  extendedShiftUsageAfter = 0,
   reducedDailyRest = false,
   extendedShift = false,
   weeklyRestCompensationCandidates = [],
@@ -209,10 +246,13 @@ export function ShiftDetailsDialog({
   onCancelRestCompensation,
 }: ShiftDetailsDialogProps) {
   const shiftMinutes = calculateShiftMinutes(shift);
+
   const endDate = shift.endDate || shift.date;
 
   const drivingMinutes = Number(shift.driving) || 0;
+
   const breakMinutes = Number(shift.break) || 0;
+
   const actualRestMinutes = Number(shift.rest) || 0;
 
   const workingMinutes = Math.max(0, shiftMinutes - breakMinutes);
@@ -252,9 +292,12 @@ export function ShiftDetailsDialog({
     effectiveRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
     effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
 
-  const drivingOver9Hours = drivingMinutes > 9 * 60;
-  const drivingOver10Hours = drivingMinutes > 10 * 60;
-  const shiftOver15Hours = shiftMinutes > 15 * 60;
+  const drivingOver9Hours = drivingMinutes > DAILY_DRIVING_LIMIT_MINUTES;
+
+  const drivingOver10Hours =
+    drivingMinutes > EXTENDED_DAILY_DRIVING_LIMIT_MINUTES;
+
+  const shiftOver15Hours = shiftMinutes > MAX_SHIFT_SPREAD_MINUTES;
 
   const compensationUsesReducedDailyRest =
     Boolean(acceptedCompensationForShift) &&
@@ -279,8 +322,49 @@ export function ShiftDetailsDialog({
       compensation.compensation_shift_id === shift.id,
   );
 
+  /*
+   * The usage values include the current shift.
+   *
+   * For the maximum available on THIS shift,
+   * we need to know how many allowances had
+   * already been used before this shift.
+   */
+
+  const currentShiftUsesExtendedDriving = drivingOver9Hours;
+
+  const drivingUsageBefore = Math.max(
+    0,
+    drivingUsageAfter - (currentShiftUsesExtendedDriving ? 1 : 0),
+  );
+
+  const drivingMaximum =
+    drivingUsageBefore < MAX_EXTENDED_DRIVING_DAYS
+      ? EXTENDED_DAILY_DRIVING_LIMIT_MINUTES
+      : DAILY_DRIVING_LIMIT_MINUTES;
+
+  const currentShiftUsesExtendedShift = extendedShift;
+
+  const extendedShiftUsageBefore = Math.max(
+    0,
+    extendedShiftUsageAfter - (currentShiftUsesExtendedShift ? 1 : 0),
+  );
+
+  const shiftMaximum =
+    extendedShiftUsageBefore < MAX_EXTENDED_SHIFTS
+      ? MAX_SHIFT_SPREAD_MINUTES
+      : REGULAR_SHIFT_SPREAD_MINUTES;
+
+  /*
+   * Once a shift has both start and end,
+   * it is a completed shift. In that case
+   * we show the actual allowance usage and
+   * do not show "Max today".
+   */
+  const hasCompletedShift = Boolean(shift.start && shift.end);
+
   function handleEdit() {
     onOpenChange(false);
+
     onEdit(shift);
   }
 
@@ -307,8 +391,6 @@ export function ShiftDetailsDialog({
 
     await onCancelRestCompensation(compensationId);
   }
-
-  const drivingLimit = drivingOver10Hours ? '10h' : '9h';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -378,7 +460,8 @@ export function ShiftDetailsDialog({
                 value={
                   <div className="flex flex-col items-end">
                     <span>
-                      {formatDuration(drivingMinutes)} / {drivingLimit}
+                      {formatDuration(drivingMinutes)} /{' '}
+                      {formatDuration(drivingMaximum)}
                     </span>
 
                     {drivingOver9Hours ? (
@@ -392,6 +475,14 @@ export function ShiftDetailsDialog({
                         {drivingOver10Hours
                           ? `Over maximum · ${drivingUsageAfter}/2 used`
                           : `Extended day used ${drivingUsageAfter}/2`}
+                      </span>
+                    ) : null}
+
+                    {!hasCompletedShift ? (
+                      <span className="mt-0.5 text-[10px] font-normal leading-relaxed text-muted-foreground">
+                        Max today: {formatDuration(drivingMaximum)} · Extended
+                        days {drivingUsageAfter}/{MAX_EXTENDED_DRIVING_DAYS}{' '}
+                        used
                       </span>
                     ) : null}
                   </div>
@@ -409,7 +500,10 @@ export function ShiftDetailsDialog({
                 label="Shift"
                 value={
                   <div className="flex flex-col items-end">
-                    <span>{formatDuration(shiftMinutes)} / 15h</span>
+                    <span>
+                      {formatDuration(shiftMinutes)} /{' '}
+                      {formatDuration(shiftMaximum)}
+                    </span>
 
                     {extendedShift ? (
                       <span
@@ -420,12 +514,20 @@ export function ShiftDetailsDialog({
                         }
                       >
                         {shiftOver15Hours
-                          ? `Over maximum · ${sharedAllowanceUsedAfter}/3 used`
-                          : `Extended shift used ${sharedAllowanceUsedAfter}/3`}
+                          ? `Over maximum · ${extendedShiftUsageAfter}/3 used`
+                          : `Extended shift used ${extendedShiftUsageAfter}/3`}
                       </span>
                     ) : shiftOver15Hours ? (
                       <span className="text-[10px] text-red-600">
                         Over maximum
+                      </span>
+                    ) : null}
+
+                    {!hasCompletedShift ? (
+                      <span className="mt-0.5 text-[10px] font-normal leading-relaxed text-muted-foreground">
+                        Max today: {formatDuration(shiftMaximum)} · Extended
+                        shifts {extendedShiftUsageAfter}/{MAX_EXTENDED_SHIFTS}{' '}
+                        used
                       </span>
                     ) : null}
                   </div>

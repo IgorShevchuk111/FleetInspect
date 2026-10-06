@@ -10,6 +10,7 @@ import { calculateWeeklySummary } from '../utils/weekly-summary';
 
 import {
   buildExtendedDrivingUsage,
+  buildExtendedShiftUsage,
   buildSharedAllowanceUsage,
   normalizeDrivingMinutes,
 } from '../utils/compliance-usage';
@@ -32,17 +33,14 @@ type WeeklyShiftSectionProps = {
   shifts: Shift[];
   allShifts: Shift[];
   restCompensations: RestCompensation[];
-
   onEdit: (shift: Shift) => void;
   onDelete: (shift: Shift) => void;
-
   onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
 };
 
@@ -75,7 +73,9 @@ export function WeeklyShiftSection({
     restCompensations,
   );
 
-  const extendedDrivingUsage = buildExtendedDrivingUsage(shifts);
+  const extendedDrivingUsage = buildExtendedDrivingUsage(allShifts);
+
+  const extendedShiftUsage = buildExtendedShiftUsage(allShifts);
 
   const weeklyRestCompensationCandidates =
     buildWeeklyRestCompensationCandidates(allShifts, restCompensations);
@@ -149,7 +149,7 @@ export function WeeklyShiftSection({
         const sharedAllowanceUsedAfter =
           baseSharedAllowanceUsedAfter + (compensationAddsAllowance ? 1 : 0);
 
-        const currentShiftUsesAllowance = reducedDailyRest || extendedShift;
+        const currentShiftUsesAllowance = reducedDailyRest;
 
         const sharedAllowanceUsedBefore = Math.max(
           0,
@@ -160,8 +160,9 @@ export function WeeklyShiftSection({
 
         const drivingUsageAfter = extendedDrivingUsage.get(shift.id) ?? 0;
 
-        const extendedDriving =
-          drivingMinutes > 9 * 60 && drivingMinutes <= 10 * 60;
+        const extendedShiftUsageAfter = extendedShiftUsage.get(shift.id) ?? 0;
+
+        const extendedDriving = drivingMinutes > 9 * 60;
 
         const drivingUsageBefore = Math.max(
           0,
@@ -200,6 +201,7 @@ export function WeeklyShiftSection({
             restStatus={restStatus}
             drivingUsageAfter={drivingUsageAfter}
             sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
+            extendedShiftUsageAfter={extendedShiftUsageAfter}
             reducedDailyRest={reducedDailyRest}
             extendedShift={extendedShift}
             weeklyRestCompensationCandidates={candidatesForShift}

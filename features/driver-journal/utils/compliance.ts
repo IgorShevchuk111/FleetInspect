@@ -1,6 +1,5 @@
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
-
 import {
     calculateShiftMinutes,
     getShiftsForWeek,
@@ -20,6 +19,7 @@ const MINIMUM_REDUCED_WEEKLY_REST = 24 * 60;
 
 const REGULAR_SHIFT_SPREAD = 13 * 60;
 const MAX_SHIFT_SPREAD = 15 * 60;
+const MAX_EXTENDED_SHIFTS = 3;
 
 export function countExtendedDrivingDays(
     shifts: Shift[],
@@ -36,17 +36,39 @@ export function countExtendedDrivingDays(
     ).length;
 }
 
+export function countExtendedShifts(
+    shifts: Shift[],
+    weekStart?: Date,
+): number {
+    const relevantShifts = weekStart
+        ? getShiftsForWeek(shifts, weekStart)
+        : shifts;
+
+    return relevantShifts.filter((shift) => {
+        const shiftMinutes = calculateShiftMinutes(shift);
+
+
+        return (
+            shiftMinutes > REGULAR_SHIFT_SPREAD &&
+            shiftMinutes <= MAX_SHIFT_SPREAD
+        );
+
+
+    }).length;
+}
+
 /**
- * A shift over 13 hours requires reduced daily rest
- * in order to remain within the 15-hour maximum spread.
- *
- * A reduced daily rest is also any daily rest from
- * 9 hours up to, but not including, 11 hours.
- *
- * Both situations use the SAME allowance.
- *
- * If both apply to the same shift, they count only once.
- */
+
+* A shift over 13 hours requires reduced daily rest
+* in order to remain within the 15-hour maximum spread.
+*
+* A reduced daily rest is also any daily rest from
+* 9 hours up to, but not including, 11 hours.
+*
+* Both situations use the SAME allowance.
+*
+* If both apply to the same shift, they count only once.
+  */
 function usesReducedDailyRestAllowance(
     shift: Shift,
 ): boolean {
@@ -75,6 +97,7 @@ export function calculateDailyRestCompliance(
     for (const shift of sorted) {
         const rest = Number(shift.rest) || 0;
 
+
         if (
             shift.restType === 'weekly' &&
             rest >= MINIMUM_REDUCED_WEEKLY_REST
@@ -86,6 +109,8 @@ export function calculateDailyRestCompliance(
         if (usesReducedDailyRestAllowance(shift)) {
             reducedUsed += 1;
         }
+
+
     }
 
     return {
@@ -115,9 +140,7 @@ export function calculateWeeklyRestCompliance(
     shifts: Shift[],
     compensations: RestCompensation[] = [],
 ) {
-    const weeklyRestShifts = sortShiftsChronologically(
-        shifts,
-    ).filter(
+    const weeklyRestShifts = sortShiftsChronologically(shifts).filter(
         (shift) => shift.restType === 'weekly',
     );
 
@@ -126,6 +149,7 @@ export function calculateWeeklyRestCompliance(
 
     for (const shift of weeklyRestShifts) {
         const status = getWeeklyRestStatus(shift.rest);
+
 
         if (status !== 'reduced') {
             continue;
@@ -141,8 +165,7 @@ export function calculateWeeklyRestCompliance(
         const compensationTaken = compensations
             .filter(
                 (compensation) =>
-                    compensation.reduced_weekly_rest_shift_id ===
-                    shift.id &&
+                    compensation.reduced_weekly_rest_shift_id === shift.id &&
                     compensation.decision === 'accepted',
             )
             .reduce(
@@ -150,9 +173,7 @@ export function calculateWeeklyRestCompliance(
                     total +
                     Math.max(
                         0,
-                        Number(
-                            compensation.compensation_minutes,
-                        ) || 0,
+                        Number(compensation.compensation_minutes) || 0,
                     ),
                 0,
             );
@@ -161,6 +182,8 @@ export function calculateWeeklyRestCompliance(
             0,
             compensationOwed - compensationTaken,
         );
+
+
     }
 
     return {
@@ -171,4 +194,5 @@ export function calculateWeeklyRestCompliance(
 
 export {
     MAX_EXTENDED_DRIVING_DAYS,
+    MAX_EXTENDED_SHIFTS,
 };

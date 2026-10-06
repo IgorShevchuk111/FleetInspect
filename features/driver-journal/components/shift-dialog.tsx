@@ -59,6 +59,13 @@ import type {
 } from '@/features/driver-journal/types/ driver-journal';
 
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
+
+import { countExtendedDrivingDays } from '@/features/driver-journal/utils/compliance';
+
+import { buildExtendedShiftUsage } from '@/features/driver-journal/utils/compliance-usage';
+
+import { getStartOfWeek } from '@/features/driver-journal/utils/dates';
+
 import { getWeeklyRestValidation } from '@/features/driver-journal/utils/weekly-rest-rules';
 
 import { DurationInputField } from './duration-input';
@@ -71,6 +78,15 @@ type ShiftDialogProps = {
   onSubmit: (data: ShiftFormData) => void;
   onDelete?: () => void;
 };
+
+const DAILY_DRIVING_LIMIT = 9 * 60;
+const EXTENDED_DAILY_DRIVING_LIMIT = 10 * 60;
+
+const REGULAR_SHIFT_SPREAD = 13 * 60;
+const MAX_SHIFT_SPREAD = 15 * 60;
+
+const MAX_EXTENDED_DRIVING_DAYS = 2;
+const MAX_EXTENDED_SHIFTS = 3;
 
 function getCurrentTime() {
   const now = new Date();
@@ -161,6 +177,118 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function formatDateTime(value: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(value);
+}
+
+function getDateTime(date: string, time: string) {
+  if (!date || !time) {
+    return undefined;
+  }
+
+  const value = new Date(`${date}T${time}`);
+
+  if (Number.isNaN(value.getTime())) {
+    return undefined;
+  }
+
+  return value;
+}
+
+function getFormShiftMinutes(
+  startDate: string,
+  startTime: string,
+  endDate: string,
+  endTime: string,
+) {
+  if (!startDate || !startTime || !endDate || !endTime) {
+    return 0;
+  }
+
+  const start = getDateTime(startDate, startTime);
+  const end = getDateTime(endDate, endTime);
+
+  if (!start || !end) {
+    return 0;
+  }
+
+  return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
+}
+
+function getPreviousCompletedShift(
+  shifts: Shift[],
+  currentDate: string,
+  currentStart: string,
+  editingShiftId?: string,
+) {
+  const currentStartDateTime = getDateTime(currentDate, currentStart);
+
+  if (!currentStartDateTime) {
+    return null;
+  }
+
+  let previousShift: Shift | null = null;
+  let previousEndDateTime: Date | undefined;
+
+  for (const currentShift of shifts) {
+    if (editingShiftId && currentShift.id === editingShiftId) {
+      continue;
+    }
+
+    if (!currentShift.end) {
+      continue;
+    }
+
+    const endDate = currentShift.endDate ?? currentShift.date;
+
+    const shiftEndDateTime = getDateTime(endDate, currentShift.end);
+
+    if (!shiftEndDateTime) {
+      continue;
+    }
+
+    if (shiftEndDateTime >= currentStartDateTime) {
+      continue;
+    }
+
+    if (!previousEndDateTime || shiftEndDateTime > previousEndDateTime) {
+      previousEndDateTime = shiftEndDateTime;
+      previousShift = currentShift;
+    }
+  }
+
+  if (!previousShift || !previousEndDateTime) {
+    return null;
+  }
+
+  const restMinutes = Math.max(
+    0,
+    Math.round(
+      (currentStartDateTime.getTime() - previousEndDateTime.getTime()) / 60000,
+    ),
+  );
+
+  return {
+    shift: previousShift,
+    endDate: previousShift.endDate ?? previousShift.date,
+    endTime: previousShift.end,
+    endDateTime: previousEndDateTime,
+    restMinutes,
+  };
+}
+
+function formatRestDuration(minutes: number) {
+  const duration = minutesToDuration(minutes);
+
+  return `${duration.hours}h ${duration.minutes}m`;
+}
+
 function SectionHeader({
   icon: Icon,
   title,
@@ -183,26 +311,27 @@ function DatePicker({
   id,
   value,
   onChange,
+  disabled = false,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+
   const selectedDate = dateStringToDate(value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          id={id}
-          type="button"
-          variant="outline"
-          className="min-w-0 flex-1 justify-start text-left font-normal"
-        >
-          <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">{formatDate(value)}</span>
-        </Button>
+      <PopoverTrigger
+        id={id}
+        disabled={disabled}
+        className="inline-flex min-w-0 flex-1 items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-left text-sm font-normal shadow-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
+      >
+        <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
+
+        <span className="truncate">{formatDate(value)}</span>
       </PopoverTrigger>
 
       <PopoverContent align="start" className="w-auto p-0">
@@ -235,7 +364,12 @@ export function ShiftDialog({
   onDelete,
 }: ShiftDialogProps) {
   const [form, setForm] = useState<ShiftFormData>(getInitialForm());
+
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  const [isRestTypeDialogOpen, setIsRestTypeDialogOpen] = useState(false);
+
+  const [hasSelectedRestType, setHasSelectedRestType] = useState(false);
 
   const isEditing = Boolean(shift);
 
@@ -246,10 +380,15 @@ export function ShiftDialog({
 
     if (shift) {
       setForm(getShiftForm(shift));
+      setHasSelectedRestType(true);
+      setIsRestTypeDialogOpen(false);
+
       return;
     }
 
     setForm(getInitialForm());
+    setHasSelectedRestType(false);
+    setIsRestTypeDialogOpen(false);
   }, [open, shift]);
 
   const weeklyRestValidation =
@@ -259,6 +398,106 @@ export function ShiftDialog({
           valid: true,
           isReduced: false,
         };
+
+  const previousCompletedShift = !isEditing
+    ? getPreviousCompletedShift(shifts, form.date, form.start)
+    : null;
+
+  const canEnterRestOfShift = isEditing || hasSelectedRestType;
+
+  /*
+   * Driving allowance:
+   *
+   * This uses the fixed Monday-Sunday week.
+   */
+  const selectedDate = dateStringToDate(form.date) ?? new Date();
+
+  const currentWeekStart = getStartOfWeek(selectedDate);
+
+  const extendedDrivingDaysUsed = countExtendedDrivingDays(
+    shifts,
+    currentWeekStart,
+  );
+
+  const drivingMaximum =
+    extendedDrivingDaysUsed < MAX_EXTENDED_DRIVING_DAYS
+      ? EXTENDED_DAILY_DRIVING_LIMIT
+      : DAILY_DRIVING_LIMIT;
+
+  /*
+   * Extended-shift allowance:
+   *
+   * This is deliberately NOT based on Monday-Sunday.
+   *
+   * It uses the new compliance-usage logic where
+   * extended shifts reset after a qualifying weekly rest.
+   *
+   * Only shifts before the current shift are included.
+   */
+  const candidateStartDateTime = getDateTime(form.date, form.start);
+
+  const shiftsBeforeCurrentShift = candidateStartDateTime
+    ? shifts.filter((currentShift) => {
+        if (currentShift.id === shift?.id) {
+          return false;
+        }
+
+        const currentShiftStartDateTime = getDateTime(
+          currentShift.date,
+          currentShift.start,
+        );
+
+        if (!currentShiftStartDateTime) {
+          return false;
+        }
+
+        return currentShiftStartDateTime < candidateStartDateTime;
+      })
+    : [];
+
+  const extendedShiftUsage = buildExtendedShiftUsage(shiftsBeforeCurrentShift);
+
+  const previousShiftsChronological = [...shiftsBeforeCurrentShift].sort(
+    (a, b) => {
+      const dateA = getDateTime(a.date, a.start)?.getTime() ?? 0;
+
+      const dateB = getDateTime(b.date, b.start)?.getTime() ?? 0;
+
+      return dateA - dateB;
+    },
+  );
+
+  const lastPreviousShift =
+    previousShiftsChronological[previousShiftsChronological.length - 1];
+
+  const previousExtendedShiftsUsed = lastPreviousShift
+    ? (extendedShiftUsage.get(lastPreviousShift.id) ?? 0)
+    : 0;
+
+  const weeklyRestResetsExtendedShifts =
+    form.restType === 'weekly' && weeklyRestValidation.valid;
+
+  const extendedShiftsUsed = weeklyRestResetsExtendedShifts
+    ? 0
+    : previousExtendedShiftsUsed;
+
+  const shiftMaximum =
+    extendedShiftsUsed < MAX_EXTENDED_SHIFTS
+      ? MAX_SHIFT_SPREAD
+      : REGULAR_SHIFT_SPREAD;
+
+  const actualDrivingMinutes = form.driving.hours * 60 + form.driving.minutes;
+
+  const actualBreakMinutes = form.break.hours * 60 + form.break.minutes;
+
+  const actualShiftMinutes = getFormShiftMinutes(
+    form.date,
+    form.start,
+    form.endDate,
+    form.end,
+  );
+
+  const workingMinutes = Math.max(0, actualShiftMinutes - actualBreakMinutes);
 
   function updateField(
     field: keyof ShiftFormData,
@@ -270,8 +509,43 @@ export function ShiftDialog({
     }));
   }
 
+  function openRestTypeDialog() {
+    if (!isEditing && !hasSelectedRestType && form.date && form.start) {
+      setIsRestTypeDialogOpen(true);
+    }
+  }
+
+  function handleStartDateChange(value: string) {
+    updateField('date', value);
+
+    if (!isEditing && value && form.start) {
+      setHasSelectedRestType(false);
+      setIsRestTypeDialogOpen(true);
+    }
+  }
+
+  function handleStartTimeChange(value: string) {
+    updateField('start', value);
+
+    if (!isEditing && value && form.date) {
+      setHasSelectedRestType(false);
+      setIsRestTypeDialogOpen(true);
+    }
+  }
+
+  function handleRestTypeSelection(restType: RestType) {
+    updateField('restType', restType);
+    setHasSelectedRestType(true);
+    setIsRestTypeDialogOpen(false);
+  }
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!isEditing && !hasSelectedRestType) {
+      openRestTypeDialog();
+      return;
+    }
 
     if (form.restType === 'weekly' && !weeklyRestValidation.valid) {
       return;
@@ -282,6 +556,8 @@ export function ShiftDialog({
 
   function handleCancel() {
     setForm(getInitialForm());
+    setIsRestTypeDialogOpen(false);
+    setHasSelectedRestType(false);
     onOpenChange(false);
   }
 
@@ -306,6 +582,7 @@ export function ShiftDialog({
 
     if (inputValue === '') {
       updateField('earn', '' as unknown as number);
+
       return;
     }
 
@@ -323,7 +600,16 @@ export function ShiftDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setIsRestTypeDialogOpen(false);
+          }
+
+          onOpenChange(nextOpen);
+        }}
+      >
         <DialogContent
           className="
             flex
@@ -342,9 +628,6 @@ export function ShiftDialog({
             sm:max-w-xl
             sm:rounded-lg
           "
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-          }}
         >
           <DialogHeader
             className="
@@ -407,7 +690,7 @@ export function ShiftDialog({
                         <DatePicker
                           id="start-date"
                           value={form.date}
-                          onChange={(value) => updateField('date', value)}
+                          onChange={handleStartDateChange}
                         />
 
                         <Input
@@ -415,7 +698,7 @@ export function ShiftDialog({
                           type="time"
                           value={form.start}
                           onChange={(event) =>
-                            updateField('start', event.target.value)
+                            handleStartTimeChange(event.target.value)
                           }
                           className="w-[7.5rem]"
                         />
@@ -435,6 +718,7 @@ export function ShiftDialog({
                           id="end-date"
                           value={form.endDate}
                           onChange={(value) => updateField('endDate', value)}
+                          disabled={!canEnterRestOfShift}
                         />
 
                         <Input
@@ -444,6 +728,7 @@ export function ShiftDialog({
                           onChange={(event) =>
                             updateField('end', event.target.value)
                           }
+                          disabled={!canEnterRestOfShift}
                           className="w-[7.5rem]"
                         />
                       </div>
@@ -455,20 +740,85 @@ export function ShiftDialog({
                   <SectionHeader icon={Timer} title="Driving & break" />
 
                   <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-                    <div className="min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5">
+                    <div
+                      className={`min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5 ${
+                        !canEnterRestOfShift ? 'opacity-50' : ''
+                      }`}
+                    >
                       <DurationInputField
                         label="Driving"
                         value={form.driving}
                         onChange={(value) => updateField('driving', value)}
+                        disabled={!canEnterRestOfShift}
                       />
+
+                      {actualDrivingMinutes > 0 ? (
+                        <p className="mt-2 text-sm font-semibold tabular-nums">
+                          {formatRestDuration(actualDrivingMinutes)} /{' '}
+                          {formatRestDuration(drivingMaximum)}
+                        </p>
+                      ) : null}
+
+                      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                        Max today: {formatRestDuration(drivingMaximum)} ·
+                        Extended days {extendedDrivingDaysUsed}/
+                        {MAX_EXTENDED_DRIVING_DAYS} used
+                      </p>
                     </div>
 
-                    <div className="min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5">
+                    <div
+                      className={`min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5 ${
+                        !canEnterRestOfShift ? 'opacity-50' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">Shift</span>
+
+                        {actualShiftMinutes > 0 ? (
+                          <span className="text-sm font-semibold tabular-nums">
+                            {formatRestDuration(actualShiftMinutes)} /{' '}
+                            {formatRestDuration(shiftMaximum)}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                        Max today: {formatRestDuration(shiftMaximum)} · Extended
+                        shifts {extendedShiftsUsed}/{MAX_EXTENDED_SHIFTS} used
+                      </p>
+                    </div>
+
+                    <div
+                      className={`min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5 ${
+                        !canEnterRestOfShift ? 'opacity-50' : ''
+                      }`}
+                    >
                       <DurationInputField
                         label="Break"
                         value={form.break}
                         onChange={(value) => updateField('break', value)}
+                        disabled={!canEnterRestOfShift}
                       />
+                    </div>
+
+                    <div
+                      className={`min-w-0 rounded-lg border bg-muted/20 px-3 py-2.5 ${
+                        !canEnterRestOfShift ? 'opacity-50' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">Working</span>
+
+                        {actualShiftMinutes > 0 ? (
+                          <span className="text-sm font-semibold tabular-nums">
+                            {formatRestDuration(workingMinutes)}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Shift time minus break
+                      </p>
                     </div>
                   </div>
                 </section>
@@ -490,6 +840,7 @@ export function ShiftDialog({
                         onValueChange={(value) =>
                           updateField('restType', value as RestType)
                         }
+                        disabled={!canEnterRestOfShift}
                       >
                         <SelectTrigger
                           id="rest-type"
@@ -535,7 +886,11 @@ export function ShiftDialog({
                       ) : null}
                     </div>
 
-                    <div className="min-w-0 space-y-1.5">
+                    <div
+                      className={`min-w-0 space-y-1.5 ${
+                        !canEnterRestOfShift ? 'opacity-50' : ''
+                      }`}
+                    >
                       <Label
                         htmlFor="earn"
                         className="text-xs text-muted-foreground"
@@ -556,6 +911,7 @@ export function ShiftDialog({
                           onFocus={handleEarnFocus}
                           onBlur={handleEarnBlur}
                           onChange={handleEarnChange}
+                          disabled={!canEnterRestOfShift}
                           className="min-w-0 max-w-full pl-9"
                         />
                       </div>
@@ -605,13 +961,95 @@ export function ShiftDialog({
 
               <Button
                 type="submit"
-                disabled={isWeeklyRestBlocked}
+                disabled={
+                  isWeeklyRestBlocked || (!isEditing && !hasSelectedRestType)
+                }
                 className="min-w-28"
               >
                 {isEditing ? 'Save changes' : 'Add shift'}
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isRestTypeDialogOpen}
+        onOpenChange={(nextOpen) => {
+          setIsRestTypeDialogOpen(nextOpen);
+        }}
+      >
+        <DialogContent className="z-[100] w-[calc(100vw-2rem)] max-w-sm">
+          <DialogHeader>
+            <DialogTitle>What type of rest?</DialogTitle>
+          </DialogHeader>
+
+          {previousCompletedShift ? (
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                {formatDateTime(previousCompletedShift.endDateTime)} →
+                {form.date && form.start
+                  ? (() => {
+                      const startDateTime = getDateTime(form.date, form.start);
+
+                      return startDateTime
+                        ? ` ${formatDateTime(startDateTime)}`
+                        : '';
+                    })()
+                  : ''}
+              </p>
+
+              <p className="text-sm font-medium">
+                Rest: {formatRestDuration(previousCompletedShift.restMinutes)}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {form.date && form.start
+                ? (() => {
+                    const startDateTime = getDateTime(form.date, form.start);
+
+                    return startDateTime ? (
+                      <p className="text-sm text-muted-foreground">
+                        {formatDateTime(startDateTime)}
+                      </p>
+                    ) : null;
+                  })()
+                : null}
+
+              <p className="text-sm text-muted-foreground">
+                No previous completed shift
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={() => handleRestTypeSelection('daily')}
+            >
+              Daily rest
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleRestTypeSelection('weekly')}
+            >
+              Weekly rest
+            </Button>
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={() => setIsRestTypeDialogOpen(false)}
+          >
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
 

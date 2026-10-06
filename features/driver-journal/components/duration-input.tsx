@@ -9,14 +9,18 @@ type DurationInputFieldProps = {
   label: string;
   value: DurationInput;
   onChange: (value: DurationInput) => void;
+  disabled?: boolean;
 };
 
 export function DurationInputField({
   label,
   value,
   onChange,
+  disabled = false,
 }: DurationInputFieldProps) {
   const handleFocus = (field: 'hours' | 'minutes') => {
+    if (disabled) return;
+
     if (value[field] === 0) {
       onChange({
         ...value,
@@ -26,12 +30,13 @@ export function DurationInputField({
   };
 
   const handleChange = (field: 'hours' | 'minutes', inputValue: string) => {
+    if (disabled) return;
+
     if (inputValue === '') {
       onChange({
         ...value,
         [field]: '' as unknown as number,
       });
-
       return;
     }
 
@@ -42,6 +47,8 @@ export function DurationInputField({
   };
 
   const handleBlur = (field: 'hours' | 'minutes') => {
+    if (disabled) return;
+
     if (value[field] === ('' as unknown as number)) {
       onChange({
         ...value,
@@ -69,6 +76,7 @@ export function DurationInputField({
             min="0"
             placeholder="0"
             value={value.hours}
+            disabled={disabled}
             onFocus={() => handleFocus('hours')}
             onBlur={() => handleBlur('hours')}
             onChange={(event) => handleChange('hours', event.target.value)}
@@ -90,6 +98,7 @@ export function DurationInputField({
             max="59"
             placeholder="0"
             value={value.minutes}
+            disabled={disabled}
             onFocus={() => handleFocus('minutes')}
             onBlur={() => handleBlur('minutes')}
             onChange={(event) => handleChange('minutes', event.target.value)}

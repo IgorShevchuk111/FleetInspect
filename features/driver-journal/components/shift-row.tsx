@@ -45,34 +45,54 @@ import { ShiftDetailsDialog } from './shift-details-dialog';
 
 type ShiftRowProps = {
   shift: Shift;
+
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
+
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
+
   restStatus?: ReturnType<typeof getRestStatus> | null;
+
   drivingUsageAfter?: number;
+
   sharedAllowanceUsedAfter?: number;
+
+  extendedShiftUsageAfter?: number;
+
   reducedDailyRest?: boolean;
+
   extendedShift?: boolean;
+
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
+
   restCompensations?: RestCompensation[];
+
   onAcceptRestCompensation?: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
+
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
+
   onEdit: (shift: Shift) => void;
+
   onDelete: (shift: Shift) => void;
 };
 
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
+
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
+
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
+
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
+
 const SWIPE_DISTANCE = 64;
 
 function formatDate(dateString: string): string {
   const [, month, day] = dateString.split('-');
+
   return `${day}/${month}`;
 }
 
@@ -82,7 +102,9 @@ function formatTime(time: string): string {
 
 function formatCompactDuration(value: number | string): string {
   const minutes = Math.max(0, Math.round(Number(value) || 0));
+
   const hours = Math.floor(minutes / 60);
+
   const remaining = minutes % 60;
 
   return `${hours}h ${String(remaining).padStart(2, '0')}m`;
@@ -95,6 +117,7 @@ export function ShiftRow({
   restStatus,
   drivingUsageAfter = 0,
   sharedAllowanceUsedAfter = 0,
+  extendedShiftUsageAfter = 0,
   reducedDailyRest = false,
   extendedShift = false,
   weeklyRestCompensationCandidates = [],
@@ -105,16 +128,23 @@ export function ShiftRow({
   onDelete,
 }: ShiftRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+
   const [deleteOpen, setDeleteOpen] = useState(false);
+
   const [swiped, setSwiped] = useState(false);
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuOpenRef = useRef(false);
+
   const pointerStartX = useRef<number | null>(null);
+
   const pointerStartY = useRef<number | null>(null);
+
   const swiping = useRef(false);
 
   const shiftMinutes = calculateShiftMinutes(shift);
+
   const endDate = shift.endDate || shift.date;
 
   const acceptedCompensation = restCompensations.find(
@@ -158,15 +188,22 @@ export function ShiftRow({
     effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
 
   const drivingMinutes = Number(shift.driving) || 0;
+
   const drivingOver9Hours = drivingMinutes > 9 * 60;
+
   const drivingOver10Hours = drivingMinutes > 10 * 60;
+
   const shiftOver15Hours = shiftMinutes > 15 * 60;
 
   const workingMinutes = Math.max(0, shiftMinutes - Number(shift.break || 0));
 
+  void workingMinutes;
+
   const handlePointerDown = (event: PointerEvent<HTMLTableRowElement>) => {
     pointerStartX.current = event.clientX;
+
     pointerStartY.current = event.clientY;
+
     swiping.current = false;
   };
 
@@ -176,6 +213,7 @@ export function ShiftRow({
     }
 
     const deltaX = event.clientX - pointerStartX.current;
+
     const deltaY = event.clientY - pointerStartY.current;
 
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
@@ -194,25 +232,31 @@ export function ShiftRow({
 
     if (deltaX < -SWIPE_DISTANCE / 2) {
       swiping.current = true;
+
       setSwiped(true);
+
       return;
     }
 
     if (deltaX > SWIPE_DISTANCE / 2) {
       swiping.current = true;
+
       setSwiped(false);
     }
   };
 
   const handlePointerUp = () => {
     pointerStartX.current = null;
+
     pointerStartY.current = null;
   };
 
   const handleRowClick = (event: MouseEvent<HTMLTableRowElement>) => {
     if (menuOpenRef.current) {
       menuOpenRef.current = false;
+
       setMenuOpen(false);
+
       return;
     }
 
@@ -228,11 +272,13 @@ export function ShiftRow({
 
     if (swiping.current) {
       swiping.current = false;
+
       return;
     }
 
     if (swiped) {
       setSwiped(false);
+
       return;
     }
 
@@ -241,29 +287,41 @@ export function ShiftRow({
 
   const handleViewDetails = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDetailsOpen(true);
   };
 
   const handleEdit = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDetailsOpen(false);
+
     onEdit(shift);
   };
 
   const handleDeleteRequest = () => {
     setMenuOpen(false);
+
     menuOpenRef.current = false;
+
     setSwiped(false);
+
     setDeleteOpen(true);
   };
 
   const handleDelete = () => {
     setDeleteOpen(false);
+
     setSwiped(false);
+
     onDelete(shift);
   };
 
@@ -293,7 +351,6 @@ export function ShiftRow({
               'bg-red-400/80',
             ].join(' ')}
           >
-            {/* RED DELETE AREA */}
             <div
               className={[
                 'absolute inset-y-0 right-0 z-0',
@@ -317,6 +374,7 @@ export function ShiftRow({
                 }}
                 onClick={(event) => {
                   event.stopPropagation();
+
                   handleDeleteRequest();
                 }}
               >
@@ -324,7 +382,6 @@ export function ShiftRow({
               </Button>
             </div>
 
-            {/* MOVING CONTENT */}
             <div
               className={[
                 'relative z-10 grid w-full',
@@ -336,7 +393,6 @@ export function ShiftRow({
                   : 'bg-background hover:bg-muted',
               ].join(' ')}
             >
-              {/* START */}
               <div
                 className={[
                   'min-w-0 border-r border-border/30',
@@ -359,7 +415,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* DRIVING */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div
                   className={[
@@ -372,7 +427,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* SHIFT */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div
                   className={[
@@ -385,7 +439,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* REST */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex min-h-9 flex-col items-center justify-center leading-none">
                   <span className="text-xs font-medium">
@@ -409,7 +462,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* END */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex flex-col items-center leading-tight">
                   <span className="text-xs font-medium">
@@ -422,7 +474,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* ACTIONS */}
               <div
                 className="min-w-0 px-0.5 py-1.5 text-center"
                 onClick={(event) => {
@@ -434,6 +485,7 @@ export function ShiftRow({
                     open={menuOpen}
                     onOpenChange={(open) => {
                       menuOpenRef.current = open;
+
                       setMenuOpen(open);
                     }}
                   >
@@ -502,6 +554,7 @@ export function ShiftRow({
         shiftStatus={shiftStatus}
         restStatus={restStatus}
         drivingUsageAfter={drivingUsageAfter}
+        extendedShiftUsageAfter={extendedShiftUsageAfter}
         sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
         reducedDailyRest={reducedDailyRest || isReducedDailyRest}
         extendedShift={extendedShift}

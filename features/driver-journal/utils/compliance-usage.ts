@@ -13,8 +13,6 @@ const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
 const EXTENDED_DAILY_DRIVING_MINUTES = 9 * 60;
 
-const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
-
 const MAX_EXTENDED_DRIVING_DAYS = 2;
 
 const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
@@ -31,6 +29,7 @@ function getFixedWeekKey(dateString: string) {
     }
 
     const day = date.getDay();
+
     const mondayOffset = day === 0 ? -6 : 1 - day;
 
     date.setDate(date.getDate() + mondayOffset);
@@ -58,8 +57,6 @@ function usesSharedAllowance(
 ) {
     const rest = Number(shift.rest) || 0;
 
-    const shiftMinutes = calculateShiftMinutes(shift);
-
     const hasReducedDailyRest =
         shift.restType === 'daily' &&
         rest >= 9 * 60 &&
@@ -71,23 +68,24 @@ function usesSharedAllowance(
             restCompensations,
         );
 
-    const hasExtendedShift =
-        shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
-        shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
-
     return (
         hasReducedDailyRest ||
-        hasReducedDailyRestCompensation ||
-        hasExtendedShift
+        hasReducedDailyRestCompensation
     );
 }
 
+/**
+ * Counts reduced daily rests.
+ *
+ * The allowance resets after a qualifying weekly rest.
+ *
+ * Extended shifts are deliberately NOT included here.
+ */
 export function buildSharedAllowanceUsage(
     shifts: Shift[],
     restCompensations: RestCompensation[] = [],
 ): Map<string, number> {
-    const sortedShifts =
-        sortShiftsChronologically(shifts);
+    const sortedShifts = sortShiftsChronologically(shifts);
 
     const usageByShiftId = new Map<string, number>();
 
@@ -128,27 +126,37 @@ export function buildSharedAllowanceUsage(
     return usageByShiftId;
 }
 
+/**
+ * Counts extended driving days in each fixed week.
+ *
+ * Fixed week:
+ * Monday 00:00 -> Sunday 24:00.
+ *
+ * Any shift over 9 hours of driving consumes
+ * one extended-driving day allowance for display,
+ * including a shift already over the 10-hour maximum.
+ *
+ * Examples:
+ *
+ * 10h45 -> 1/2
+ * 9h04  -> 2/2
+ *
+ * The counter resets on Monday.
+ */
 export function buildExtendedDrivingUsage(
     shifts: Shift[],
 ): Map<string, number> {
-    const sortedShifts =
-        sortShiftsChronologically(shifts);
+    const sortedShifts = sortShiftsChronologically(shifts);
 
     const usageByShiftId = new Map<string, number>();
 
     const usageByWeek = new Map<string, number>();
 
     for (const shift of sortedShifts) {
-        const weekKey = getFixedWeekKey(
-            shift.date,
-        );
+        const weekKey = getFixedWeekKey(shift.date);
 
         if (!weekKey) {
-            usageByShiftId.set(
-                shift.id,
-                0,
-            );
-
+            usageByShiftId.set(shift.id, 0);
             continue;
         }
 
@@ -159,10 +167,7 @@ export function buildExtendedDrivingUsage(
             Number(shift.driving) || 0;
 
         const isExtendedDriving =
-            drivingMinutes >
-            EXTENDED_DAILY_DRIVING_MINUTES &&
-            drivingMinutes <=
-            MAX_DAILY_DRIVING_MINUTES;
+            drivingMinutes > EXTENDED_DAILY_DRIVING_MINUTES;
 
         if (isExtendedDriving) {
             extendedDrivingDaysUsed += 1;
@@ -176,6 +181,66 @@ export function buildExtendedDrivingUsage(
         usageByShiftId.set(
             shift.id,
             extendedDrivingDaysUsed,
+        );
+    }
+
+    return usageByShiftId;
+}
+
+/**
+ * Counts actual extended shifts.
+ *
+ * Extended shift:
+ * >13h and <=15h.
+ *
+ * Maximum:
+ * 3 extended shifts between qualifying weekly rests.
+ *
+ * The counter resets after a qualifying weekly rest.
+ *
+ * This counter is deliberately separate from
+ * the reduced daily rest allowance.
+ */
+export function buildExtendedShiftUsage(
+    shifts: Shift[],
+): Map<string, number> {
+    const sortedShifts = sortShiftsChronologically(shifts);
+
+    const usageByShiftId = new Map<string, number>();
+
+    let extendedShiftsUsed = 0;
+
+    for (const shift of sortedShifts) {
+        const rest = Number(shift.rest) || 0;
+
+        if (
+            shift.restType === 'weekly' &&
+            rest >= MINIMUM_WEEKLY_REST_MINUTES
+        ) {
+            extendedShiftsUsed = 0;
+
+            usageByShiftId.set(
+                shift.id,
+                extendedShiftsUsed,
+            );
+
+            continue;
+        }
+
+        const shiftMinutes =
+            calculateShiftMinutes(shift);
+
+        const isExtendedShift =
+            shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
+            shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
+
+        if (isExtendedShift) {
+            extendedShiftsUsed += 1;
+        }
+
+        usageByShiftId.set(
+            shift.id,
+            extendedShiftsUsed,
         );
     }
 
