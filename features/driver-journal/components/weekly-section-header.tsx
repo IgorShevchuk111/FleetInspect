@@ -1,10 +1,12 @@
 import { TableCell, TableRow } from '@/components/ui/table';
+import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { WeeklySummary } from './weekly-summary';
+import { WeeklySummary } from '@/features/driver-journal/components/weekly-summary';
 
 type WeeklySectionHeaderProps = {
   weekStart: Date;
   shiftCount: number;
+  allShifts: Shift[];
   summary: {
     driving: number;
     working: number;
@@ -19,6 +21,7 @@ type WeeklySectionHeaderProps = {
 export function WeeklySectionHeader({
   weekStart,
   shiftCount,
+  allShifts,
   summary,
   formatWeek,
 }: WeeklySectionHeaderProps) {
@@ -52,7 +55,11 @@ export function WeeklySectionHeader({
                 {shiftCount} {shiftCount === 1 ? 'shift' : 'shifts'}
               </span>
 
-              <WeeklySummary weekStart={weekStart} summary={summary} />
+              <WeeklySummary
+                allShifts={allShifts}
+                weekStart={weekStart}
+                summary={summary}
+              />
             </div>
           </div>
         </div>

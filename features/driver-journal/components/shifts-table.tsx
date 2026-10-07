@@ -7,12 +7,12 @@ import {
   TableBody,
   TableHead,
   TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
-
 import { getStartOfWeek } from '../utils/dates';
 
 import { WeeklyShiftSection } from './weekly-shift-section';
@@ -29,6 +29,12 @@ type ShiftsTableProps = {
   onCancelRestCompensation: (compensationId: string) => Promise<void>;
   onEdit: (shift: Shift) => void;
   onDelete: (shift: Shift) => void;
+};
+
+type WeekGroup = {
+  key: string;
+  weekStart: Date;
+  shifts: Shift[];
 };
 
 function TachographDrivingIcon() {
@@ -52,8 +58,76 @@ function TachographDrivingIcon() {
   );
 }
 
-function TachographRestIcon() {
-  return <BedDouble className="size-5" aria-hidden="true" />;
+function getWeekKey(weekStart: Date) {
+  return [
+    weekStart.getFullYear(),
+    String(weekStart.getMonth() + 1).padStart(2, '0'),
+    String(weekStart.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+function groupShiftsByWeek(shifts: Shift[]): WeekGroup[] {
+  const weeks = new Map<string, WeekGroup>();
+
+  for (const shift of shifts) {
+    const weekStart = getStartOfWeek(new Date(`${shift.date}T12:00:00`));
+
+    const key = getWeekKey(weekStart);
+    const existing = weeks.get(key);
+
+    if (existing) {
+      existing.shifts.push(shift);
+      continue;
+    }
+
+    weeks.set(key, {
+      key,
+      weekStart,
+      shifts: [shift],
+    });
+  }
+
+  return Array.from(weeks.values()).sort((a, b) => b.key.localeCompare(a.key));
+}
+
+const tableClass = `
+  w-full
+  table-fixed
+  border-separate
+  border-spacing-0
+  text-[13px]
+  [&_tbody_tr]:border-b
+  [&_tbody_td]:border-r
+  [&_tbody_td]:border-border/30
+  [&_tbody_td:last-child]:border-r-0
+  [&_thead_th]:border-r
+  [&_thead_th]:border-border/30
+  [&_thead_th:last-child]:border-r-0
+`;
+
+const headerClass = `
+  bg-muted/70
+  px-0.5
+  py-2
+  text-center
+  text-xs
+  font-semibold
+  uppercase
+  tracking-wide
+  text-foreground
+`;
+
+function TableColumns() {
+  return (
+    <colgroup>
+      <col className="w-[20%]" />
+      <col className="w-[15%]" />
+      <col className="w-[15%]" />
+      <col className="w-[15%]" />
+      <col className="w-[20%]" />
+      <col className="w-[15%]" />
+    </colgroup>
+  );
 }
 
 export function ShiftsTable({
@@ -64,29 +138,7 @@ export function ShiftsTable({
   onEdit,
   onDelete,
 }: ShiftsTableProps) {
-  const weeks = new Map<string, Shift[]>();
-
-  for (const shift of shifts) {
-    const weekStart = getStartOfWeek(new Date(`${shift.date}T12:00:00`));
-
-    const key = [
-      weekStart.getFullYear(),
-      String(weekStart.getMonth() + 1).padStart(2, '0'),
-      String(weekStart.getDate()).padStart(2, '0'),
-    ].join('-');
-
-    const existing = weeks.get(key) ?? [];
-    existing.push(shift);
-    weeks.set(key, existing);
-  }
-
-  const sortedWeeks = Array.from(weeks.entries())
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([key, weekShifts]) => ({
-      key,
-      weekStart: new Date(`${key}T12:00:00`),
-      shifts: weekShifts,
-    }));
+  const sortedWeeks = groupShiftsByWeek(shifts);
 
   if (sortedWeeks.length === 0) {
     return (
@@ -96,50 +148,14 @@ export function ShiftsTable({
     );
   }
 
-  const tableClass = `
-    w-full
-    table-fixed
-    border-separate
-    border-spacing-0
-    text-[13px]
-    [&_tbody_tr]:border-b
-    [&_tbody_td]:border-r
-    [&_tbody_td]:border-border/30
-    [&_tbody_td:last-child]:border-r-0
-    [&_thead_th]:border-r
-    [&_thead_th]:border-border/30
-    [&_thead_th:last-child]:border-r-0
-  `;
-
-  const headerClass = `
-    bg-muted/70
-    px-0.5
-    py-2
-    text-center
-    text-xs
-    font-semibold
-    uppercase
-    tracking-wide
-    text-foreground
-  `;
-
   return (
     <div className="w-full min-w-0">
-      {/* STICKY TABLE HEADER */}
       <div className="sticky top-0 z-30 w-full min-w-0 bg-background shadow-sm">
         <Table className={tableClass}>
-          <colgroup>
-            <col className="w-[20%]" />
-            <col className="w-[15%]" />
-            <col className="w-[15%]" />
-            <col className="w-[15%]" />
-            <col className="w-[20%]" />
-            <col className="w-[15%]" />
-            <col className="w-0" />
-          </colgroup>
+          <TableColumns />
 
           <TableHeader className="bg-muted/70">
-            <tr className="border-b border-border/60 bg-muted/70">
+            <TableRow className="border-b border-border/60 bg-muted/70">
               <TableHead className={headerClass}>Start</TableHead>
 
               <TableHead className={headerClass}>
@@ -153,7 +169,7 @@ export function ShiftsTable({
 
               <TableHead className={headerClass}>
                 <div className="flex flex-col items-center justify-center gap-0.5">
-                  <TachographRestIcon />
+                  <BedDouble className="size-5" aria-hidden="true" />
                   <span>Rest</span>
                 </div>
               </TableHead>
@@ -161,30 +177,21 @@ export function ShiftsTable({
               <TableHead className={headerClass}>End</TableHead>
 
               <TableHead className={headerClass}>Actions</TableHead>
-            </tr>
+            </TableRow>
           </TableHeader>
         </Table>
       </div>
 
-      {/* TABLE BODY */}
       <div className="w-full min-w-0 overflow-x-hidden">
         <Table className={tableClass}>
-          <colgroup>
-            <col className="w-[20%]" />
-            <col className="w-[15%]" />
-            <col className="w-[15%]" />
-            <col className="w-[15%]" />
-            <col className="w-[20%]" />
-            <col className="w-[15%]" />
-            <col className="w-0" />
-          </colgroup>
+          <TableColumns />
 
           <TableBody>
-            {sortedWeeks.map(({ key, weekStart, shifts: weekShifts }) => (
+            {sortedWeeks.map((week) => (
               <WeeklyShiftSection
-                key={key}
-                weekStart={weekStart}
-                shifts={weekShifts}
+                key={week.key}
+                weekStart={week.weekStart}
+                shifts={week.shifts}
                 allShifts={shifts}
                 restCompensations={restCompensations}
                 onAcceptRestCompensation={onAcceptRestCompensation}

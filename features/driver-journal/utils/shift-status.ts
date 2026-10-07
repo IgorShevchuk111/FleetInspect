@@ -1,11 +1,11 @@
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
-import { calculateShiftMinutes } from '../utils/shifts';
+import { calculateShiftMinutes } from './shifts';
 import {
     MAX_EXTENDED_DRIVING_DAYS,
-    MAX_SHARED_ALLOWANCE,
+    MAX_EXTENDED_SHIFTS,
     normalizeDrivingMinutes,
-} from '../utils/compliance-usage';
+} from './compliance-usage';
 
 const REDUCED_DAILY_REST_MINUTES = 9 * 60;
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
@@ -19,13 +19,8 @@ const MAX_DAILY_DRIVING_MINUTES = 10 * 60;
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
-function getMaxEndTime(
-    shift: Shift,
-    minutes: number,
-) {
-    const startDate = new Date(
-        `${shift.date}T${shift.start}`,
-    );
+function getMaxEndTime(shift: Shift, minutes: number) {
+    const startDate = new Date(`${shift.date}T${shift.start}`);
 
     if (Number.isNaN(startDate.getTime())) {
         return null;
@@ -64,7 +59,7 @@ export function isReducedDailyRest(shift: Shift) {
 export function getShiftStatus(
     shift: Shift,
     shiftMinutes: number,
-    sharedAllowanceUsedBeforeShift: number,
+    extendedShiftsUsedBefore: number,
 ) {
     const regularMaxEnd = getMaxEndTime(
         shift,
@@ -86,10 +81,7 @@ export function getShiftStatus(
     }
 
     if (shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES) {
-        if (
-            sharedAllowanceUsedBeforeShift >=
-            MAX_SHARED_ALLOWANCE
-        ) {
+        if (extendedShiftsUsedBefore >= MAX_EXTENDED_SHIFTS) {
             return {
                 label: 'Extended · Not allowed',
                 className: 'text-red-600 dark:text-red-400',
@@ -108,7 +100,7 @@ export function getShiftStatus(
         label: regularMaxEnd
             ? `Regular · max ${regularMaxEnd}`
             : 'Regular · max 13h',
-        className: 'text-green-600 dark:text-green-400',
+        className: '',
     };
 }
 
@@ -116,9 +108,7 @@ export function getDrivingStatus(
     drivingMinutes: number,
     extendedDrivingDaysUsedBefore: number,
 ) {
-    const minutes = normalizeDrivingMinutes(
-        drivingMinutes,
-    );
+    const minutes = normalizeDrivingMinutes(drivingMinutes);
 
     if (minutes > MAX_DAILY_DRIVING_MINUTES) {
         return {
@@ -130,10 +120,7 @@ export function getDrivingStatus(
     }
 
     if (minutes > EXTENDED_DAILY_DRIVING_MINUTES) {
-        if (
-            extendedDrivingDaysUsedBefore >=
-            MAX_EXTENDED_DRIVING_DAYS
-        ) {
+        if (extendedDrivingDaysUsedBefore >= MAX_EXTENDED_DRIVING_DAYS) {
             return {
                 label: 'Extended driving · Not allowed',
                 className: 'text-red-600 dark:text-red-400',

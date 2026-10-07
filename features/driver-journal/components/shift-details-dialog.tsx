@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-
 import {
   Dialog,
   DialogContent,
@@ -23,50 +22,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
-
-import { calculateShiftMinutes } from '../utils/shifts';
-
+import { formatDuration } from '../utils/duration';
+import { getShiftDetailsData } from '../utils/shift-details';
 import type { WeeklyRestCompensationCandidate } from '../utils/weekly-rest-compensation';
-
 import {
   getDrivingStatus,
   getRestStatus,
   getShiftStatus,
-} from './shift-status';
+} from '@/features/driver-journal/utils/shift-status';
 
 type ShiftDetailsDialogProps = {
   open: boolean;
-
   onOpenChange: (open: boolean) => void;
-
   shift: Shift;
 
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
-
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
-
   restStatus?: ReturnType<typeof getRestStatus> | null;
 
   drivingUsageAfter?: number;
-
   sharedAllowanceUsedAfter?: number;
-
   extendedShiftUsageAfter?: number;
 
   reducedDailyRest?: boolean;
-
   extendedShift?: boolean;
 
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
-
   restCompensations?: RestCompensation[];
 
   onEdit: (shift: Shift) => void;
-
   onDelete: (shift: Shift) => void;
 
   onAcceptRestCompensation?: (
@@ -79,66 +66,42 @@ type ShiftDetailsDialogProps = {
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
 };
 
-const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;
-
-const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
-
-const REGULAR_DAILY_REST_MINUTES = 11 * 60;
-
-const REDUCED_DAILY_REST_MINUTES = 9 * 60;
-
-const DAILY_DRIVING_LIMIT_MINUTES = 9 * 60;
-
-const EXTENDED_DAILY_DRIVING_LIMIT_MINUTES = 10 * 60;
-
-const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
-
-const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
-
-const MAX_EXTENDED_DRIVING_DAYS = 2;
-
-const MAX_EXTENDED_SHIFTS = 3;
-
-function formatDate(dateString: string): string {
-  const [year, month, day] = dateString.split('-');
+function formatDate(value: string) {
+  const [year, month, day] = value.split('-');
 
   if (!year || !month || !day) {
-    return dateString;
+    return value;
   }
 
   return `${day}/${month}/${year}`;
 }
 
-function formatTime(time: string): string {
-  return time ? time.slice(0, 5) : '';
+function formatTime(value: string | null | undefined) {
+  return value?.slice(0, 5) ?? '';
 }
 
-function formatDuration(minutesValue: number | string): string {
-  const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
-
-  const hours = Math.floor(minutes / 60);
-
-  const remainingMinutes = minutes % 60;
-
-  return `${hours}h ${String(remainingMinutes).padStart(2, '0')}m`;
-}
-
-function formatHoursMinutes(minutesValue: number | string): string {
-  const minutes = Math.max(0, Math.round(Number(minutesValue) || 0));
-
-  const hours = Math.floor(minutes / 60);
-
-  const remainingMinutes = minutes % 60;
-
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-
-  return `${hours}h ${remainingMinutes}m`;
-}
-
-function formatMoney(value: number | string): string {
+function formatMoney(value: number | string | null | undefined) {
   return `£${(Number(value) || 0).toFixed(2)}`;
+}
+
+function DetailRow({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className="flex min-h-9 items-center justify-between gap-4 border-b border-border/50 py-1 last:border-b-0">
+      <span className="text-xs text-muted-foreground">{label}</span>
+
+      <div className={`text-right text-sm font-medium ${className ?? ''}`}>
+        {value}
+      </div>
+    </div>
+  );
 }
 
 function Section({
@@ -151,43 +114,28 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="border-t pt-3 first:border-t-0 first:pt-0">
-      <div className="mb-2 flex items-center gap-2">
-        <Icon className="size-4 shrink-0 text-muted-foreground" />
+    <section className="space-y-2 border-t pt-4 first:border-t-0 first:pt-0">
+      <div className="flex items-center gap-2">
+        <Icon className="size-4 text-muted-foreground" />
 
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {title}
         </h3>
       </div>
 
-      {children}
+      <div>{children}</div>
     </section>
   );
 }
 
-function DetailRow({
-  label,
-  value,
-  valueClassName = '',
+function StatusHint({
+  children,
+  className = 'text-muted-foreground',
 }: {
-  label: string;
-  value: ReactNode;
-  valueClassName?: string;
+  children: ReactNode;
+  className?: string;
 }) {
-  return (
-    <div className="flex min-h-9 items-center justify-between gap-4 border-b border-border/50 last:border-b-0">
-      <span className="min-w-0 text-xs text-muted-foreground">{label}</span>
-
-      <span
-        className={[
-          'min-w-0 text-right text-sm font-medium',
-          valueClassName,
-        ].join(' ')}
-      >
-        {value}
-      </span>
-    </div>
-  );
+  return <span className={`text-[10px] ${className}`}>{children}</span>;
 }
 
 function CompensationOption({
@@ -198,33 +146,34 @@ function CompensationOption({
   onAccept?: () => void;
 }) {
   return (
-    <div className="border-t border-border/50 py-2.5 first:border-t-0">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs font-medium">
-            {option.restType === 'weekly' ? 'Weekly rest' : 'Daily rest'}
-          </div>
-
-          <div className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
-            {formatHoursMinutes(option.dailyRestMinutes)} rest after{' '}
-            {formatHoursMinutes(option.compensationMinutes)} compensation.
-          </div>
-
-          {option.usesReducedDailyRest ? (
-            <div className="mt-1 text-[11px] text-amber-600">
-              Uses reduced daily rest.
-            </div>
-          ) : null}
+    <div className="flex items-center justify-between gap-3 border-t py-2 first:border-t-0">
+      <div className="min-w-0">
+        <div className="text-xs font-medium">
+          {option.restType === 'weekly' ? 'Weekly rest' : 'Daily rest'}
         </div>
 
-        <div className="flex shrink-0 gap-1.5">
-          {onAccept ? (
-            <Button type="button" size="sm" className="h-8" onClick={onAccept}>
-              Accept
-            </Button>
-          ) : null}
+        <div className="text-[11px] text-muted-foreground">
+          {formatDuration(option.dailyRestMinutes)} rest ·{' '}
+          {formatDuration(option.compensationMinutes)} compensation
         </div>
+
+        {option.usesReducedDailyRest && (
+          <StatusHint className="text-amber-600">
+            Uses reduced daily rest
+          </StatusHint>
+        )}
       </div>
+
+      {onAccept && (
+        <Button
+          type="button"
+          size="sm"
+          className="h-8 shrink-0"
+          onClick={onAccept}
+        >
+          Accept
+        </Button>
+      )}
     </div>
   );
 }
@@ -233,6 +182,9 @@ export function ShiftDetailsDialog({
   open,
   onOpenChange,
   shift,
+  drivingStatus,
+  shiftStatus,
+  restStatus,
   drivingUsageAfter = 0,
   sharedAllowanceUsedAfter = 0,
   extendedShiftUsageAfter = 0,
@@ -241,206 +193,88 @@ export function ShiftDetailsDialog({
   weeklyRestCompensationCandidates = [],
   restCompensations = [],
   onEdit,
-  onDelete: _onDelete,
   onAcceptRestCompensation,
   onCancelRestCompensation,
 }: ShiftDetailsDialogProps) {
-  const shiftMinutes = calculateShiftMinutes(shift);
+  const details = getShiftDetailsData(shift, {
+    drivingUsageAfter,
+    extendedShiftUsageAfter,
+    extendedShift,
+    weeklyRestCompensationCandidates,
+    restCompensations,
+  });
 
-  const endDate = shift.endDate || shift.date;
-
-  const drivingMinutes = Number(shift.driving) || 0;
-
-  const breakMinutes = Number(shift.break) || 0;
-
-  const actualRestMinutes = Number(shift.rest) || 0;
-
-  const workingMinutes = Math.max(0, shiftMinutes - breakMinutes);
-
-  const isWeeklyRest = shift.restType === 'weekly';
+  const {
+    shiftMinutes,
+    drivingMinutes,
+    breakMinutes,
+    restMinutes,
+    workingMinutes,
+    endDate,
+    isWeeklyRest,
+    isReducedWeeklyRest,
+    isRegularWeeklyRest,
+    isReducedDailyRest,
+    effectiveRestMinutes,
+    compensationMinutes,
+    drivingOver9Hours,
+    drivingOver10Hours,
+    shiftOver15Hours,
+    drivingUsageBefore,
+    extendedShiftUsageBefore,
+    drivingMaximumMinutes,
+    shiftMaximumMinutes,
+    compensationReceiver,
+    compensationSource,
+    candidates,
+    savedCompensations,
+  } = details;
 
   const acceptedCompensation = restCompensations.find(
     (compensation) =>
       compensation.decision === 'accepted' &&
-      (compensation.compensation_shift_id === shift.id ||
-        compensation.reduced_weekly_rest_shift_id === shift.id),
-  );
-
-  const acceptedCompensationForShift =
-    acceptedCompensation?.compensation_shift_id === shift.id
-      ? acceptedCompensation
-      : undefined;
-
-  const compensationMinutes = Number(
-    acceptedCompensationForShift?.compensation_minutes ?? 0,
-  );
-
-  const effectiveRestMinutes = isWeeklyRest
-    ? actualRestMinutes
-    : Math.max(0, actualRestMinutes - compensationMinutes);
-
-  const isReducedWeeklyRest =
-    isWeeklyRest &&
-    effectiveRestMinutes >= MINIMUM_WEEKLY_REST_MINUTES &&
-    effectiveRestMinutes < REGULAR_WEEKLY_REST_MINUTES;
-
-  const isRegularWeeklyRest =
-    isWeeklyRest && effectiveRestMinutes >= REGULAR_WEEKLY_REST_MINUTES;
-
-  const isReducedDailyRest =
-    !isWeeklyRest &&
-    effectiveRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
-    effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
-
-  const drivingOver9Hours = drivingMinutes > DAILY_DRIVING_LIMIT_MINUTES;
-
-  const drivingOver10Hours =
-    drivingMinutes > EXTENDED_DAILY_DRIVING_LIMIT_MINUTES;
-
-  const shiftOver15Hours = shiftMinutes > MAX_SHIFT_SPREAD_MINUTES;
-
-  const compensationUsesReducedDailyRest =
-    Boolean(acceptedCompensationForShift) &&
-    !isWeeklyRest &&
-    effectiveRestMinutes >= REDUCED_DAILY_REST_MINUTES &&
-    effectiveRestMinutes < REGULAR_DAILY_REST_MINUTES;
-
-  const isCompensationSource =
-    isWeeklyRest &&
-    isReducedWeeklyRest &&
-    acceptedCompensation?.reduced_weekly_rest_shift_id === shift.id;
-
-  const isCompensationReceiver = Boolean(acceptedCompensationForShift);
-
-  const matchingCandidates = weeklyRestCompensationCandidates.filter(
-    (candidate) => candidate.shiftId === shift.id,
-  );
-
-  const savedCompensations = restCompensations.filter(
-    (compensation) =>
-      compensation.reduced_weekly_rest_shift_id === shift.id ||
       compensation.compensation_shift_id === shift.id,
   );
 
-  /*
-   * The usage values include the current shift.
-   *
-   * For the maximum available on THIS shift,
-   * we need to know how many allowances had
-   * already been used before this shift.
-   */
-
-  const currentShiftUsesExtendedDriving = drivingOver9Hours;
-
-  const drivingUsageBefore = Math.max(
-    0,
-    drivingUsageAfter - (currentShiftUsesExtendedDriving ? 1 : 0),
-  );
-
-  const drivingMaximum =
-    drivingUsageBefore < MAX_EXTENDED_DRIVING_DAYS
-      ? EXTENDED_DAILY_DRIVING_LIMIT_MINUTES
-      : DAILY_DRIVING_LIMIT_MINUTES;
-
-  const currentShiftUsesExtendedShift = extendedShift;
-
-  const extendedShiftUsageBefore = Math.max(
-    0,
-    extendedShiftUsageAfter - (currentShiftUsesExtendedShift ? 1 : 0),
-  );
-
-  const shiftMaximum =
-    extendedShiftUsageBefore < MAX_EXTENDED_SHIFTS
-      ? MAX_SHIFT_SPREAD_MINUTES
-      : REGULAR_SHIFT_SPREAD_MINUTES;
-
-  /*
-   * Once a shift has both start and end,
-   * it is a completed shift. In that case
-   * we show the actual allowance usage and
-   * do not show "Max today".
-   */
-  const hasCompletedShift = Boolean(shift.start && shift.end);
-
-  function handleEdit() {
+  const handleEdit = () => {
     onOpenChange(false);
-
     onEdit(shift);
-  }
+  };
 
-  async function handleAccept(
+  const handleAccept = async (
     candidate: WeeklyRestCompensationCandidate,
     option: WeeklyRestCompensationCandidate['options'][number],
-  ) {
-    if (!onAcceptRestCompensation) {
-      return;
-    }
-
-    await onAcceptRestCompensation(
+  ) => {
+    await onAcceptRestCompensation?.(
       candidate.reducedWeeklyRestShiftId,
       candidate.shiftId,
       option.dailyRestMinutes,
       option.compensationMinutes,
     );
-  }
-
-  async function handleCancel(compensationId: string) {
-    if (!onCancelRestCompensation) {
-      return;
-    }
-
-    await onCancelRestCompensation(compensationId);
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="
-          flex
-          h-[100dvh]
-          max-h-[100dvh]
-          w-screen
-          max-w-none
-          flex-col
-          gap-0
-          overflow-hidden
-          rounded-none
-          p-0
-          sm:h-auto
-          sm:max-h-[90vh]
-          sm:w-[calc(100vw-2rem)]
-          sm:max-w-xl
-          sm:rounded-lg
-        "
-      >
-        <DialogHeader
-          className="
-            shrink-0
-            border-b
-            px-4
-            py-3
-            sm:px-6
-            sm:py-4
-          "
-        >
-          <div className="flex min-w-0 items-center gap-3">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:max-w-xl sm:rounded-lg">
+        <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Clock3 className="size-4 text-primary" />
             </div>
 
             <div className="min-w-0">
-              <DialogTitle className="text-lg">Shift details</DialogTitle>
+              <DialogTitle>Shift details</DialogTitle>
 
-              <DialogDescription className="mt-0.5 text-xs">
-                {formatDate(shift.date)} · {formatTime(shift.start)}
+              <DialogDescription className="text-xs">
+                {formatDate(shift.date)} {formatTime(shift.start)}
                 {' → '}
-                {formatDate(endDate)} · {formatTime(shift.end)}
+                {formatDate(endDate)} {formatTime(shift.end)}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="space-y-4 px-4 py-4 sm:px-6">
             <Section icon={CalendarDays} title="Shift times">
               <DetailRow
@@ -461,38 +295,28 @@ export function ShiftDetailsDialog({
                   <div className="flex flex-col items-end">
                     <span>
                       {formatDuration(drivingMinutes)} /{' '}
-                      {formatDuration(drivingMaximum)}
+                      {formatDuration(drivingMaximumMinutes)}
                     </span>
 
-                    {drivingOver9Hours ? (
-                      <span
-                        className={
-                          drivingOver10Hours
-                            ? 'text-[10px] text-red-600'
-                            : 'text-[10px] text-amber-600'
-                        }
-                      >
-                        {drivingOver10Hours
-                          ? `Over maximum · ${drivingUsageAfter}/2 used`
-                          : `Extended day used ${drivingUsageAfter}/2`}
-                      </span>
-                    ) : null}
+                    {drivingOver10Hours && (
+                      <StatusHint className="text-red-600">
+                        Over maximum · {drivingUsageAfter}/2 extended days used
+                      </StatusHint>
+                    )}
 
-                    {!hasCompletedShift ? (
-                      <span className="mt-0.5 text-[10px] font-normal leading-relaxed text-muted-foreground">
-                        Max today: {formatDuration(drivingMaximum)} · Extended
-                        days {drivingUsageAfter}/{MAX_EXTENDED_DRIVING_DAYS}{' '}
-                        used
-                      </span>
-                    ) : null}
+                    {drivingOver9Hours && !drivingOver10Hours && (
+                      <StatusHint className="text-amber-600">
+                        Extended day {drivingUsageAfter}/2 used
+                      </StatusHint>
+                    )}
                   </div>
                 }
-                valueClassName={
+                className={
                   drivingOver10Hours
                     ? 'text-red-600'
                     : drivingOver9Hours
                       ? 'text-amber-600'
-                      : ''
+                      : undefined
                 }
               />
 
@@ -502,37 +326,23 @@ export function ShiftDetailsDialog({
                   <div className="flex flex-col items-end">
                     <span>
                       {formatDuration(shiftMinutes)} /{' '}
-                      {formatDuration(shiftMaximum)}
+                      {formatDuration(shiftMaximumMinutes)}
                     </span>
 
-                    {extendedShift ? (
-                      <span
+                    {extendedShift && (
+                      <StatusHint
                         className={
-                          shiftOver15Hours
-                            ? 'text-[10px] text-red-600'
-                            : 'text-[10px] text-amber-600'
+                          shiftOver15Hours ? 'text-red-600' : 'text-amber-600'
                         }
                       >
                         {shiftOver15Hours
                           ? `Over maximum · ${extendedShiftUsageAfter}/3 used`
-                          : `Extended shift used ${extendedShiftUsageAfter}/3`}
-                      </span>
-                    ) : shiftOver15Hours ? (
-                      <span className="text-[10px] text-red-600">
-                        Over maximum
-                      </span>
-                    ) : null}
-
-                    {!hasCompletedShift ? (
-                      <span className="mt-0.5 text-[10px] font-normal leading-relaxed text-muted-foreground">
-                        Max today: {formatDuration(shiftMaximum)} · Extended
-                        shifts {extendedShiftUsageAfter}/{MAX_EXTENDED_SHIFTS}{' '}
-                        used
-                      </span>
-                    ) : null}
+                          : `Extended shift ${extendedShiftUsageAfter}/3 used`}
+                      </StatusHint>
+                    )}
                   </div>
                 }
-                valueClassName={shiftOver15Hours ? 'text-red-600' : ''}
+                className={shiftOver15Hours ? 'text-red-600' : undefined}
               />
 
               <DetailRow label="Break" value={formatDuration(breakMinutes)} />
@@ -541,6 +351,22 @@ export function ShiftDetailsDialog({
                 label="Working"
                 value={formatDuration(workingMinutes)}
               />
+
+              {shiftStatus && (
+                <DetailRow
+                  label="Status"
+                  value={shiftStatus.label}
+                  className={shiftStatus.className}
+                />
+              )}
+
+              {drivingStatus && (
+                <DetailRow
+                  label="Driving status"
+                  value={drivingStatus.label}
+                  className={drivingStatus.className}
+                />
+              )}
             </Section>
 
             <Section icon={Moon} title="Rest">
@@ -548,155 +374,123 @@ export function ShiftDetailsDialog({
                 label="Rest"
                 value={
                   <div className="flex flex-col items-end">
-                    <span>{formatHoursMinutes(effectiveRestMinutes)}</span>
+                    <span>{formatDuration(effectiveRestMinutes)}</span>
 
-                    <span className="text-[10px] text-muted-foreground">
+                    <StatusHint>
                       {isWeeklyRest
                         ? isReducedWeeklyRest
                           ? 'Reduced weekly'
-                          : isRegularWeeklyRest
-                            ? 'Weekly'
-                            : 'Weekly'
+                          : 'Regular weekly'
                         : isReducedDailyRest
                           ? 'Reduced daily'
-                          : 'Daily'}
-                    </span>
+                          : 'Regular daily'}
+                    </StatusHint>
                   </div>
                 }
-                valueClassName={
+                className={
                   isReducedWeeklyRest || isReducedDailyRest
                     ? 'text-amber-600'
-                    : isRegularWeeklyRest ||
-                        (!isWeeklyRest &&
-                          effectiveRestMinutes >= REGULAR_DAILY_REST_MINUTES)
+                    : isRegularWeeklyRest
                       ? 'text-green-600'
-                      : ''
+                      : undefined
                 }
               />
 
-              {isReducedDailyRest ? (
+              {shift.restType === 'daily' && reducedDailyRest && (
                 <DetailRow
-                  label="Allowance"
+                  label="Reduced daily rests"
                   value={`${sharedAllowanceUsedAfter}/3 used`}
-                  valueClassName="text-amber-600"
+                  className="text-amber-600"
                 />
-              ) : null}
+              )}
 
-              {isReducedWeeklyRest ? (
+              {restStatus && (
                 <DetailRow
-                  label="Weekly rest"
-                  value="Reduced"
-                  valueClassName="text-amber-600"
+                  label="Status"
+                  value={restStatus.label}
+                  className={restStatus.className}
                 />
-              ) : null}
+              )}
             </Section>
 
             <Section icon={Banknote} title="Earnings">
               <DetailRow
                 label="Earn"
                 value={formatMoney(shift.earn)}
-                valueClassName="text-green-600"
+                className="text-green-600"
               />
             </Section>
 
-            {acceptedCompensationForShift ? (
-              <Section icon={BedDouble} title="Compensation">
+            {compensationReceiver && (
+              <Section icon={CheckCircle2} title="Compensation">
                 <DetailRow
                   label="Compensation"
-                  value={formatHoursMinutes(compensationMinutes)}
-                  valueClassName="text-green-600"
+                  value={formatDuration(compensationMinutes)}
+                  className="text-green-600"
                 />
 
                 <DetailRow
                   label="Original rest"
-                  value={formatHoursMinutes(actualRestMinutes)}
+                  value={formatDuration(restMinutes)}
                 />
 
                 <DetailRow
-                  label="Remaining rest"
-                  value={formatHoursMinutes(effectiveRestMinutes)}
-                />
-
-                <DetailRow
-                  label="Rest after compensation"
-                  value={
-                    compensationUsesReducedDailyRest
-                      ? 'Reduced daily rest'
-                      : isRegularWeeklyRest
-                        ? 'Regular weekly rest'
-                        : formatHoursMinutes(effectiveRestMinutes)
-                  }
-                  valueClassName={
-                    compensationUsesReducedDailyRest
-                      ? 'text-amber-600'
-                      : 'text-green-600'
-                  }
+                  label="Effective rest"
+                  value={formatDuration(effectiveRestMinutes)}
                 />
               </Section>
-            ) : null}
+            )}
 
-            {isCompensationSource ? (
-              <Section icon={BedDouble} title="Weekly rest compensation">
+            {compensationSource && (
+              <Section icon={CheckCircle2} title="Weekly rest compensation">
                 <DetailRow
                   label="Status"
                   value="Accepted"
-                  valueClassName="text-green-600"
+                  className="text-green-600"
                 />
 
-                {acceptedCompensation?.compensation_minutes ? (
+                {acceptedCompensation && (
                   <DetailRow
                     label="Compensation"
-                    value={formatHoursMinutes(
+                    value={formatDuration(
                       Number(acceptedCompensation.compensation_minutes),
                     )}
                   />
-                ) : null}
+                )}
               </Section>
-            ) : null}
+            )}
 
-            {isCompensationReceiver ? (
-              <Section icon={BedDouble} title="Weekly rest compensation">
-                <DetailRow
-                  label="Status"
-                  value="Compensation received"
-                  valueClassName="text-green-600"
-                />
-              </Section>
-            ) : null}
-
-            {matchingCandidates.length > 0 ? (
+            {candidates.length > 0 && (
               <Section icon={BedDouble} title="Available compensation">
-                <div className="divide-y rounded-md border">
-                  {matchingCandidates.map((candidate) => (
+                <div className="rounded-md border">
+                  {candidates.map((candidate) => (
                     <div
                       key={`${candidate.reducedWeeklyRestShiftId}-${candidate.shiftId}`}
                       className="p-3"
                     >
-                      <div className="space-y-1.5 text-xs">
-                        <DetailRow
-                          label="Reduced weekly rest"
-                          value={formatHoursMinutes(
-                            candidate.reducedWeeklyRestMinutes,
-                          )}
-                        />
+                      <DetailRow
+                        label="Reduced weekly rest"
+                        value={formatDuration(
+                          candidate.reducedWeeklyRestMinutes,
+                        )}
+                      />
 
-                        <DetailRow
-                          label="Required compensation"
-                          value={formatHoursMinutes(
-                            candidate.requiredCompensationMinutes,
-                          )}
-                        />
+                      <DetailRow
+                        label="Required compensation"
+                        value={formatDuration(
+                          candidate.requiredCompensationMinutes,
+                        )}
+                      />
 
-                        <DetailRow
-                          label="Deadline"
-                          value={formatDate(candidate.deadline)}
-                        />
-                      </div>
+                      <DetailRow
+                        label="Deadline"
+                        value={formatDate(candidate.deadline)}
+                      />
 
-                      <div className="mt-2">
-                        {candidate.options.map((option, optionIndex) => (
+                      <div className="pt-2">
+                        {candidate.options.map((option, index) => (
                           <CompensationOption
-                            key={`${candidate.shiftId}-${optionIndex}`}
+                            key={`${candidate.shiftId}-${index}`}
                             option={option}
                             onAccept={
                               onAcceptRestCompensation
@@ -710,101 +504,87 @@ export function ShiftDetailsDialog({
                   ))}
                 </div>
               </Section>
-            ) : null}
+            )}
 
-            {savedCompensations.length > 0 ? (
+            {savedCompensations.length > 0 && (
               <Section icon={CheckCircle2} title="Saved compensation">
-                <div className="divide-y rounded-md border">
+                <div className="rounded-md border">
                   {savedCompensations.map((compensation) => {
-                    const savedMinutes = Number(
+                    const minutes = Number(
                       compensation.compensation_minutes ?? 0,
                     );
 
-                    const isAccepted = compensation.decision === 'accepted';
-
-                    const isDeclined = compensation.decision === 'declined';
+                    const accepted = compensation.decision === 'accepted';
+                    const declined = compensation.decision === 'declined';
 
                     return (
-                      <div key={compensation.id} className="p-3">
+                      <div
+                        key={compensation.id}
+                        className="border-b p-3 last:border-b-0"
+                      >
                         <div className="flex items-center justify-between gap-3">
-                          <div className="text-xs font-medium">
-                            {isAccepted
+                          <span className="text-xs font-medium">
+                            {accepted
                               ? 'Accepted'
-                              : isDeclined
+                              : declined
                                 ? 'Declined'
                                 : 'Pending'}
-                          </div>
+                          </span>
 
-                          <div
-                            className={[
-                              'text-xs font-medium',
-                              isAccepted
-                                ? 'text-green-600'
-                                : isDeclined
-                                  ? 'text-red-600'
-                                  : 'text-amber-600',
-                            ].join(' ')}
+                          <span
+                            className={
+                              accepted
+                                ? 'text-xs font-medium text-green-600'
+                                : declined
+                                  ? 'text-xs font-medium text-red-600'
+                                  : 'text-xs font-medium text-amber-600'
+                            }
                           >
-                            {formatHoursMinutes(savedMinutes)}
-                          </div>
+                            {formatDuration(minutes)}
+                          </span>
                         </div>
 
-                        {compensation.daily_rest_minutes != null ? (
+                        {compensation.daily_rest_minutes != null && (
                           <div className="mt-1 text-[11px] text-muted-foreground">
                             Daily rest:{' '}
-                            {formatHoursMinutes(
+                            {formatDuration(
                               Number(compensation.daily_rest_minutes),
                             )}
                           </div>
-                        ) : null}
+                        )}
 
-                        {isAccepted && onCancelRestCompensation ? (
+                        {accepted && onCancelRestCompensation && (
                           <Button
                             type="button"
                             size="sm"
                             variant="outline"
                             className="mt-2 h-8"
-                            onClick={() => handleCancel(compensation.id)}
+                            onClick={() =>
+                              onCancelRestCompensation(compensation.id)
+                            }
                           >
                             Cancel decision
                           </Button>
-                        ) : null}
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </Section>
-            ) : null}
+            )}
           </div>
         </div>
 
-        <DialogFooter
-          className="
-            shrink-0
-            flex-row
-            flex-wrap
-            items-center
-            justify-center
-            gap-2
-            border-t
-            px-4
-            py-3
-            pb-[calc(0.75rem+env(safe-area-inset-bottom))]
-            sm:px-6
-            sm:py-3
-            sm:pb-3
-          "
-        >
+        <DialogFooter className="shrink-0 flex-row justify-center gap-2 border-t px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="min-w-[90px]"
           >
             Close
           </Button>
 
-          <Button type="button" onClick={handleEdit} className="min-w-[110px]">
+          <Button type="button" onClick={handleEdit}>
             <Pencil className="size-4" />
             Edit shift
           </Button>

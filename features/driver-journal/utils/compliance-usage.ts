@@ -8,6 +8,7 @@ import {
 } from './shifts';
 
 const MAX_SHARED_ALLOWANCE = 3;
+const MAX_EXTENDED_SHIFTS = 3;
 
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
@@ -261,5 +262,6 @@ export function normalizeDrivingMinutes(
 
 export {
     MAX_SHARED_ALLOWANCE,
+    MAX_EXTENDED_SHIFTS,
     MAX_EXTENDED_DRIVING_DAYS,
 };
