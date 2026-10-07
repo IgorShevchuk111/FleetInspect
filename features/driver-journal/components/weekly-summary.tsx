@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -13,8 +13,22 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+
 import { getEndOfWeek, getStartOfWeek } from '../utils/dates';
 import { formatDuration } from '../utils/duration';
+import {
+  buildExtendedDrivingUsage,
+  buildExtendedShiftUsage,
+  normalizeDrivingMinutes,
+} from '../utils/compliance-usage';
+
+const DAILY_DRIVING_LIMIT_MINUTES = 9 * 60;
+const EXTENDED_DAILY_DRIVING_LIMIT_MINUTES = 10 * 60;
+const REGULAR_SHIFT_SPREAD_MINUTES = 13 * 60;
+const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
+const MAX_EXTENDED_DRIVING_DAYS = 2;
+const MAX_EXTENDED_SHIFTS = 3;
 
 type WeeklySummaryData = {
   driving: number;
@@ -28,6 +42,7 @@ type WeeklySummaryData = {
 type WeeklySummaryProps = {
   summary: WeeklySummaryData;
   weekStart: Date;
+  allShifts: Shift[];
 };
 
 type SummaryRowProps = {
@@ -72,9 +87,89 @@ function PeriodLabel({ children }: { children: ReactNode }) {
   return <p className="mt-0.5 text-xs text-muted-foreground">{children}</p>;
 }
 
-export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
+function getShiftStartDateTime(shift: Shift) {
+  if (!shift.date || !shift.start) {
+    return null;
+  }
+
+  const date = new Date(`${shift.date}T${shift.start}`);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getShiftEndDateTime(shift: Shift) {
+  if (!shift.end) {
+    return null;
+  }
+
+  const endDate = shift.endDate || shift.date;
+
+  if (!endDate) {
+    return null;
+  }
+
+  const date = new Date(`${endDate}T${shift.end}`);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getShiftElapsedMinutes(shift: Shift, now: Date) {
+  const start = getShiftStartDateTime(shift);
+
+  if (!start) {
+    return 0;
+  }
+
+  const end = getShiftEndDateTime(shift) ?? now;
+
+  const minutes = Math.floor((end.getTime() - start.getTime()) / 60000);
+
+  return Math.max(0, minutes);
+}
+
+function getDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function getLatestShift(shifts: Shift[]) {
+  return [...shifts]
+    .sort((a, b) => {
+      const dateA = getShiftStartDateTime(a)?.getTime() ?? 0;
+      const dateB = getShiftStartDateTime(b)?.getTime() ?? 0;
+
+      return dateB - dateA;
+    })
+    .at(0);
+}
+
+export function WeeklySummary({
+  summary,
+  weekStart,
+  allShifts,
+}: WeeklySummaryProps) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
+
   const currentWeekStart = getStartOfWeek(weekStart);
   const currentWeekEnd = getEndOfWeek(weekStart);
+
+  const actualCurrentWeekStart = getStartOfWeek(now);
+
+  const isCurrentWeek =
+    currentWeekStart.getTime() === actualCurrentWeekStart.getTime();
 
   const twoWeekStart = new Date(currentWeekStart);
   twoWeekStart.setDate(twoWeekStart.getDate() - 7);
@@ -83,6 +178,50 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
   seventeenWeekStart.setDate(seventeenWeekStart.getDate() - 16 * 7);
 
   const yearStart = new Date(currentWeekEnd.getFullYear(), 0, 1);
+
+  const todayKey = getDateKey(now);
+
+  const todayShifts = isCurrentWeek
+    ? allShifts.filter((shift) => shift.date === todayKey)
+    : [];
+
+  const activeTodayShift =
+    todayShifts.find((shift) => !shift.end) ?? getLatestShift(todayShifts);
+
+  const todayDrivingMinutes = todayShifts.reduce(
+    (total, shift) => total + normalizeDrivingMinutes(shift.driving),
+    0,
+  );
+
+  const extendedDrivingUsage = buildExtendedDrivingUsage(allShifts);
+
+  const todayExtendedDrivingDaysUsed = todayShifts.reduce(
+    (maximumUsed, shift) =>
+      Math.max(maximumUsed, extendedDrivingUsage.get(shift.id) ?? 0),
+    0,
+  );
+
+  const drivingMaximum =
+    todayExtendedDrivingDaysUsed < MAX_EXTENDED_DRIVING_DAYS
+      ? EXTENDED_DAILY_DRIVING_LIMIT_MINUTES
+      : DAILY_DRIVING_LIMIT_MINUTES;
+
+  const extendedShiftUsage = buildExtendedShiftUsage(allShifts);
+
+  const latestTodayShift = getLatestShift(todayShifts);
+
+  const extendedShiftsUsed = latestTodayShift
+    ? (extendedShiftUsage.get(latestTodayShift.id) ?? 0)
+    : 0;
+
+  const shiftMaximum =
+    extendedShiftsUsed < MAX_EXTENDED_SHIFTS
+      ? MAX_SHIFT_SPREAD_MINUTES
+      : REGULAR_SHIFT_SPREAD_MINUTES;
+
+  const todayShiftMinutes = activeTodayShift
+    ? getShiftElapsedMinutes(activeTodayShift, now)
+    : 0;
 
   return (
     <Dialog>
@@ -124,7 +263,56 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
           <div className="space-y-5">
+            {isCurrentWeek && todayShifts.length > 0 ? (
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">
+                  Today&apos;s limits
+                </h3>
+
+                <div className="divide-y rounded-lg border px-3">
+                  <SummaryRow
+                    label="Driving"
+                    value={`${formatDuration(
+                      todayDrivingMinutes,
+                    )} / ${formatDuration(drivingMaximum)}`}
+                    prominent
+                  />
+
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span className="text-xs text-muted-foreground">
+                      Extended days
+                    </span>
+
+                    <span className="shrink-0 text-xs font-medium tabular-nums">
+                      {todayExtendedDrivingDaysUsed}/{MAX_EXTENDED_DRIVING_DAYS}{' '}
+                      used
+                    </span>
+                  </div>
+
+                  <SummaryRow
+                    label="Shift"
+                    value={`${formatDuration(
+                      todayShiftMinutes,
+                    )} / ${formatDuration(shiftMaximum)}`}
+                    prominent
+                  />
+
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span className="text-xs text-muted-foreground">
+                      Extended shifts
+                    </span>
+
+                    <span className="shrink-0 text-xs font-medium tabular-nums">
+                      {extendedShiftsUsed}/{MAX_EXTENDED_SHIFTS} used
+                    </span>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
             <section>
+              <h3 className="mb-2 text-sm font-semibold">This week</h3>
+
               <div className="divide-y rounded-lg border px-3">
                 <SummaryRow
                   label="Driving"

@@ -62,7 +62,6 @@ export function WeeklyShiftSection({
 
   const sortedShifts = [...shifts].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start}`).getTime();
-
     const dateB = new Date(`${b.date}T${b.start}`).getTime();
 
     return dateB - dateA;
@@ -85,17 +84,21 @@ export function WeeklyShiftSection({
       <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
         <TableCell colSpan={6} className="p-0">
           <div className="border-b bg-background px-3 py-3 sm:px-4 sm:py-4">
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center">
               <div className="text-center text-sm font-semibold leading-tight sm:text-base">
                 Week: {formatWeek(weekStart)}
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="mt-1 flex items-center justify-center gap-3">
                 <div className="text-xs text-muted-foreground">
                   {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
                 </div>
 
-                <WeeklySummary weekStart={weekStart} summary={weeklySummary} />
+                <WeeklySummary
+                  weekStart={weekStart}
+                  summary={weeklySummary}
+                  allShifts={allShifts}
+                />
               </div>
             </div>
           </div>
