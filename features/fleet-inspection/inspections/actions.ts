@@ -21,17 +21,7 @@ export async function createUpdateInspection(formData: FormData, id?: string) {
             throw new Error('Failed to get user ID from session');
         }
 
-        // Check if user exists, but don't create if they don't exist
-        // Just use the ID from the session
-        const { data: existingUser, error: checkError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', userId)
-            .single();
 
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found"
-            // Don't throw error, just log it and continue
-        }
 
         // Convert FormData to a regular object and log it
         const formDataObj = Object.fromEntries(formData.entries());

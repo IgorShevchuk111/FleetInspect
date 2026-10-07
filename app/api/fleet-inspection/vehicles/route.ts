@@ -3,6 +3,19 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
     try {
+        const supabase = await createClient();
+
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 },
+            );
+        }
+
         const searchParams = request.nextUrl.searchParams;
         const search = searchParams.get('search')?.trim() || '';
 
@@ -10,9 +23,6 @@ export async function GET(request: NextRequest) {
             return NextResponse.json([]);
         }
 
-        const supabase = await createClient();
-
-        // exact match first
         const { data: exact, error: exactError } = await supabase
             .from('vehicles')
             .select('*')
@@ -24,7 +34,6 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(exact);
         }
 
-        // fallback partial match
         const { data, error } = await supabase
             .from('vehicles')
             .select('*')
@@ -39,26 +48,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(
             { error: 'Failed to search vehicles' },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
-
-// import { findVehicle } from '@/lib/data_servis';
-// import { NextRequest, NextResponse } from 'next/server';
-
-// export async function GET(request: NextRequest) {
-//     try {
-//         const searchParams = request.nextUrl.searchParams;
-//         const search = searchParams.get('search') || '';
-
-//         const vehicles = await findVehicle(search);
-//         return NextResponse.json(vehicles);
-//     } catch (error) {
-//         return NextResponse.json(
-//             { error: 'Failed to search vehicles. Please try again.' },
-//             { status: 500 }
-//         );
-//     }
-// } 
-

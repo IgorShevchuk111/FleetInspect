@@ -510,15 +510,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      upsert_user: {
-        Args: {
-          user_email: string
-          user_full_name?: string
-          user_id: string
-          user_role?: string
-        }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

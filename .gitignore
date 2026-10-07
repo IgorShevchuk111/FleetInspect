@@ -36,3 +36,6 @@ yarn-error.log*
 next-env.d.ts
 
 supabase/.temp/
+
+# Local FleetInspect project context
+docs/FLEETINSPECT_PROJECT_CONTEXT.md
