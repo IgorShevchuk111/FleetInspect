@@ -22,47 +22,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
-
-import type { RestCompensation } from '../services/driver-journal';
-import { formatDuration } from '../utils/duration';
-import { getShiftDetailsData } from '../utils/shift-details';
-import type { WeeklyRestCompensationCandidate } from '../utils/weekly-rest-compensation';
+import { formatDuration } from '@/features/driver-journal/utils/duration';
+import { getShiftDetailsData } from '@/features/driver-journal/utils/shift-details';
 import {
   getDrivingStatus,
   getRestStatus,
   getShiftStatus,
 } from '@/features/driver-journal/utils/shift-status';
+import type { WeeklyRestCompensationCandidate } from '@/features/driver-journal/utils/weekly-rest-compensation';
 
 type ShiftDetailsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   shift: Shift;
-
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
   restStatus?: ReturnType<typeof getRestStatus> | null;
-
   drivingUsageAfter?: number;
   sharedAllowanceUsedAfter?: number;
   extendedShiftUsageAfter?: number;
-
   reducedDailyRest?: boolean;
   extendedShift?: boolean;
-
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
   restCompensations?: RestCompensation[];
-
   onEdit: (shift: Shift) => void;
   onDelete: (shift: Shift) => void;
-
   onAcceptRestCompensation?: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
   ) => Promise<void>;
-
   onCancelRestCompensation?: (compensationId: string) => Promise<void>;
 };
 
@@ -298,15 +290,19 @@ export function ShiftDetailsDialog({
                       {formatDuration(drivingMaximumMinutes)}
                     </span>
 
-                    {drivingOver10Hours && (
+                    {drivingOver10Hours ? (
                       <StatusHint className="text-red-600">
                         Over maximum · {drivingUsageAfter}/2 extended days used
                       </StatusHint>
-                    )}
-
-                    {drivingOver9Hours && !drivingOver10Hours && (
-                      <StatusHint className="text-amber-600">
-                        Extended day {drivingUsageAfter}/2 used
+                    ) : (
+                      <StatusHint
+                        className={
+                          drivingOver9Hours
+                            ? 'text-amber-600'
+                            : 'text-muted-foreground'
+                        }
+                      >
+                        Extended days {drivingUsageAfter}/2 used
                       </StatusHint>
                     )}
                   </div>
@@ -329,15 +325,20 @@ export function ShiftDetailsDialog({
                       {formatDuration(shiftMaximumMinutes)}
                     </span>
 
-                    {extendedShift && (
+                    {shiftOver15Hours ? (
+                      <StatusHint className="text-red-600">
+                        Over maximum · {extendedShiftUsageAfter}/3 extended
+                        shifts used
+                      </StatusHint>
+                    ) : (
                       <StatusHint
                         className={
-                          shiftOver15Hours ? 'text-red-600' : 'text-amber-600'
+                          extendedShift
+                            ? 'text-amber-600'
+                            : 'text-muted-foreground'
                         }
                       >
-                        {shiftOver15Hours
-                          ? `Over maximum · ${extendedShiftUsageAfter}/3 used`
-                          : `Extended shift ${extendedShiftUsageAfter}/3 used`}
+                        Extended shifts {extendedShiftUsageAfter}/3 used
                       </StatusHint>
                     )}
                   </div>
@@ -513,7 +514,6 @@ export function ShiftDetailsDialog({
                     const minutes = Number(
                       compensation.compensation_minutes ?? 0,
                     );
-
                     const accepted = compensation.decision === 'accepted';
                     const declined = compensation.decision === 'declined';
 

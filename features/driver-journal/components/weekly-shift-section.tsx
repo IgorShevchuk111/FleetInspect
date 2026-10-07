@@ -61,11 +61,7 @@ export function WeeklyShiftSection({
                   {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
                 </div>
 
-                <WeeklySummary
-                  weekStart={weekStart}
-                  summary={weeklySummary}
-                  allShifts={allShifts}
-                />
+                <WeeklySummary weekStart={weekStart} summary={weeklySummary} />
               </div>
             </div>
           </div>

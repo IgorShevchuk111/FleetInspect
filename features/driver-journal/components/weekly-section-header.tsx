@@ -55,11 +55,7 @@ export function WeeklySectionHeader({
                 {shiftCount} {shiftCount === 1 ? 'shift' : 'shifts'}
               </span>
 
-              <WeeklySummary
-                allShifts={allShifts}
-                weekStart={weekStart}
-                summary={summary}
-              />
+              <WeeklySummary weekStart={weekStart} summary={summary} />
             </div>
           </div>
         </div>
