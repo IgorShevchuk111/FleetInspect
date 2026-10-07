@@ -1,4 +1,3 @@
-
 import type { Shift } from '@/features/driver-journal/types/ driver-journal';
 
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
@@ -10,12 +9,17 @@ type WeeklyRestValidation = {
     message?: string;
 };
 
-function getDateTime(date: string, time: string): number | null {
+function getDateTime(
+    date: string,
+    time: string,
+): number | null {
     if (!date || !time) {
         return null;
     }
 
-    const value = new Date(`${date}T${time}`);
+    const value = new Date(
+        `${date}T${time}`,
+    );
 
     if (Number.isNaN(value.getTime())) {
         return null;
@@ -24,35 +28,48 @@ function getDateTime(date: string, time: string): number | null {
     return value.getTime();
 }
 
-function getShiftStart(shift: Shift): number | null {
-    return getDateTime(shift.date, shift.start);
+function getShiftStart(
+    shift: Shift,
+): number | null {
+    return getDateTime(
+        shift.date,
+        shift.start,
+    );
 }
 
-function getShiftEnd(shift: Shift): number | null {
+function getShiftEnd(
+    shift: Shift,
+): number | null {
     if (!shift.end) {
         return null;
     }
 
-    return getDateTime(shift.endDate || shift.date, shift.end);
+    return getDateTime(
+        shift.endDate || shift.date,
+        shift.end,
+    );
 }
 
 /**
- * Calculates the actual rest immediately before
- * the current Weekly Rest start.
- */
+
+* Calculates the actual rest immediately before
+* the current Weekly Rest start.
+*
+* Returns null when there is no previous completed shift.
+  */
 function getCurrentRestMinutes(
     shifts: Shift[],
     currentDate: string,
     currentStartTime: string,
     editingShiftId?: string,
-): number {
+): number | null {
     const currentStart = getDateTime(
         currentDate,
         currentStartTime,
     );
 
     if (currentStart === null) {
-        return 0;
+        return null;
     }
 
     let latestPreviousEnd: number | null = null;
@@ -62,9 +79,13 @@ function getCurrentRestMinutes(
             continue;
         }
 
+
         const shiftEnd = getShiftEnd(shift);
 
-        if (shiftEnd === null || shiftEnd >= currentStart) {
+        if (
+            shiftEnd === null ||
+            shiftEnd >= currentStart
+        ) {
             continue;
         }
 
@@ -74,10 +95,12 @@ function getCurrentRestMinutes(
         ) {
             latestPreviousEnd = shiftEnd;
         }
+
+
     }
 
     if (latestPreviousEnd === null) {
-        return 0;
+        return null;
     }
 
     return Math.max(
@@ -89,9 +112,10 @@ function getCurrentRestMinutes(
 }
 
 /**
- * Finds the most recent Weekly Rest before
- * the current Weekly Rest.
- */
+
+* Finds the most recent Weekly Rest before
+* the current Weekly Rest.
+  */
 function getLastWeeklyRest(
     shifts: Shift[],
     currentDate: string,
@@ -115,13 +139,17 @@ function getLastWeeklyRest(
             continue;
         }
 
+
         if (shift.restType !== 'weekly') {
             continue;
         }
 
         const shiftStart = getShiftStart(shift);
 
-        if (shiftStart === null || shiftStart >= currentStart) {
+        if (
+            shiftStart === null ||
+            shiftStart >= currentStart
+        ) {
             continue;
         }
 
@@ -132,6 +160,8 @@ function getLastWeeklyRest(
             lastWeeklyRest = shift;
             lastWeeklyRestStart = shiftStart;
         }
+
+
     }
 
     return lastWeeklyRest;
@@ -157,17 +187,36 @@ export function getWeeklyRestValidation(
         editingShiftId,
     );
 
+    /**
+    
+    * There is no previous completed shift.
+    *
+    * This is the first shift/rest entry, so there is
+    * no previous rest period to validate.
+      */
+    if (currentRest === null) {
+        return {
+            valid: true,
+            isReduced: false,
+        };
+    }
+
     // Less than 24 hours is never a valid Weekly Rest.
-    if (currentRest < MINIMUM_WEEKLY_REST_MINUTES) {
+    if (
+        currentRest < MINIMUM_WEEKLY_REST_MINUTES
+    ) {
         return {
             valid: false,
             isReduced: false,
-            message: 'Weekly rest must be at least 24 hours.',
+            message:
+                'Weekly rest must be at least 24 hours.',
         };
     }
 
     // 45 hours or more is always a Regular Weekly Rest.
-    if (currentRest >= REGULAR_WEEKLY_REST_MINUTES) {
+    if (
+        currentRest >= REGULAR_WEEKLY_REST_MINUTES
+    ) {
         return {
             valid: true,
             isReduced: false,
@@ -191,8 +240,10 @@ export function getWeeklyRestValidation(
     }
 
     const previousWasReduced =
-        lastWeeklyRest.rest >= MINIMUM_WEEKLY_REST_MINUTES &&
-        lastWeeklyRest.rest < REGULAR_WEEKLY_REST_MINUTES;
+        lastWeeklyRest.rest >=
+        MINIMUM_WEEKLY_REST_MINUTES &&
+        lastWeeklyRest.rest <
+        REGULAR_WEEKLY_REST_MINUTES;
 
     // Reduced → Reduced is not allowed.
     if (previousWasReduced) {

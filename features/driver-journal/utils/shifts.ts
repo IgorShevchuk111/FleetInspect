@@ -1,6 +1,13 @@
-import type { JournalTotals, Shift } from '@/features/driver-journal/types/ driver-journal';
+import type {
+    JournalTotals,
+    Shift,
+} from '@/features/driver-journal/types/ driver-journal';
 
-import { getEndOfWeek, getStartOfWeek, parseDateTime } from './dates';
+import {
+    getEndOfWeek,
+    getStartOfWeek,
+    parseDateTime,
+} from '@/features/driver-journal/utils/dates';
 
 export function calculateShiftMinutes(shift: Shift): number;
 
@@ -91,6 +98,7 @@ export function calculateShiftTotals(
             totals.working += calculateWorkingMinutes(shift);
             totals.earn += shift.earn;
 
+
             return totals;
         },
         {
@@ -101,6 +109,8 @@ export function calculateShiftTotals(
             working: 0,
             earn: 0,
         },
+
+
     );
 }
 
@@ -116,11 +126,14 @@ export function getShiftsForWeek(
             return false;
         }
 
+
         const date = new Date(
-            `${shift.date}T00:00:00`,
+            `${shift.date} T00:00:00`,
         );
 
         return date >= start && date <= end;
+
+
     });
 }
 
@@ -133,11 +146,102 @@ export function sortShiftsChronologically(
             a.start,
         );
 
+
         const dateB = parseDateTime(
             b.date,
             b.start,
         );
 
         return dateA.getTime() - dateB.getTime();
+
+
     });
+}
+
+function getShiftStartDateTime(
+    shift: Shift,
+): number | null {
+    if (!shift.date || !shift.start) {
+        return null;
+    }
+
+    const value = new Date(
+        `${shift.date}T${shift.start}`,
+    );
+
+    if (Number.isNaN(value.getTime())) {
+        return null;
+    }
+
+    return value.getTime();
+}
+
+export function getPreviousShift(
+    shifts: Shift[],
+    currentDate: string,
+    currentStartTime: string,
+    editingShiftId?: string,
+): Shift | null {
+    if (!currentDate || !currentStartTime) {
+        return null;
+    }
+
+    const currentStart = new Date(
+        `${currentDate}T${currentStartTime}`,
+    ).getTime();
+
+    if (Number.isNaN(currentStart)) {
+        return null;
+    }
+
+    let previousShift: Shift | null = null;
+    let previousStart: number | null = null;
+
+    for (const shift of shifts) {
+        if (shift.id === editingShiftId) {
+            continue;
+        }
+
+
+        const shiftStart = getShiftStartDateTime(shift);
+
+        if (
+            shiftStart === null ||
+            shiftStart >= currentStart
+        ) {
+            continue;
+        }
+
+        if (
+            previousStart === null ||
+            shiftStart > previousStart
+        ) {
+            previousShift = shift;
+            previousStart = shiftStart;
+        }
+
+
+    }
+
+    return previousShift;
+}
+
+export function getPreviousCompletedShift(
+    shifts: Shift[],
+    currentDate: string,
+    currentStartTime: string,
+    editingShiftId?: string,
+): Shift | null {
+    const previousShift = getPreviousShift(
+        shifts,
+        currentDate,
+        currentStartTime,
+        editingShiftId,
+    );
+
+    if (!previousShift || !previousShift.end) {
+        return null;
+    }
+
+    return previousShift;
 }
