@@ -1,8 +1,11 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { requireAppEntitlement } from '@/lib/auth/permissions';
 
 export async function searchVehicles(query: string) {
+    await requireAppEntitlement('fleet_inspection');
+
     const q = query.trim().toUpperCase();
 
     if (q.length < 3) return [];

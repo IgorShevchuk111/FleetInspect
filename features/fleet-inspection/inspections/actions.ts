@@ -1,11 +1,13 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
+import { requireAppEntitlement } from "@/lib/auth/permissions";
 import { uploadImage } from "./storage";
 import { revalidatePath } from 'next/cache';
 
 export async function createUpdateInspection(formData: FormData, id?: string) {
     try {
+        await requireAppEntitlement('fleet_inspection');
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
