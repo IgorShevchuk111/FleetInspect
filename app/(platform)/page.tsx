@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { ArrowRight, ClipboardCheck, Dumbbell, Map, Truck } from 'lucide-react';
+
+import { ArrowRight, ClipboardCheck, Map, Truck } from 'lucide-react';
 
 import { getUser } from '@/lib/auth/auth';
+import { createClient } from '@/lib/supabase/server';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -15,6 +17,7 @@ import {
 const apps = [
   {
     name: 'Fleet Inspection',
+    entitlement: 'fleet_inspection',
     description: 'Vehicle inspections, defects, photos and reports.',
     href: '/fleet-inspection/inspection',
     icon: Truck,
@@ -28,15 +31,10 @@ const apps = [
   },
   {
     name: 'Route Planner',
+    entitlement: 'route_planner',
     description: 'Plan and manage your driving routes efficiently.',
-    href: '/routes',
+    href: '/route-planner/map',
     icon: Map,
-  },
-  {
-    name: 'Fitness',
-    description: 'Track workouts, nutrition and your progress.',
-    href: '/fitness',
-    icon: Dumbbell,
   },
 ];
 
@@ -62,6 +60,23 @@ export default async function HomePage({
   const appName = params.app
     ? (appNames[params.app] ?? 'this application')
     : 'this application';
+
+  let accessibleApps = apps;
+
+  if (user) {
+    const supabase = await createClient();
+
+    const { data } = await supabase
+      .from('user_entitlements')
+      .select('app')
+      .eq('user_id', user.id);
+
+    const entitlements = new Set(data?.map((item) => item.app) ?? []);
+
+    accessibleApps = apps.filter(
+      (app) => !app.entitlement || entitlements.has(app.entitlement),
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
@@ -89,7 +104,7 @@ export default async function HomePage({
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {apps.map((app) => {
+        {accessibleApps.map((app) => {
           const Icon = app.icon;
 
           return (

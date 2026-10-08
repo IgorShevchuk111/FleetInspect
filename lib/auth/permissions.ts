@@ -7,6 +7,18 @@ export type AppEntitlement =
     | 'driver_journal'
     | 'route_planner';
 
+export async function requireAuthentication() {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+}
+
 export async function requireAppEntitlement(
     app: AppEntitlement,
 ) {
