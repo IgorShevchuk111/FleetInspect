@@ -27,7 +27,6 @@ import { useSignOut } from '@/lib/auth/hooks/useSignOut';
 const publicNavigation: any[] = [];
 
 const privateNavigation = [
-  // { name: 'Dashboard', href: '/' },
   { name: 'Inspections', href: '/fleet-inspection/inspections' },
   { name: 'Timesheets', href: '/fleet-inspection/timesheets' },
   { name: 'Reports', href: '/fleet-inspection/reports' },
@@ -44,12 +43,24 @@ export default function Header() {
   const supabase = createClient();
 
   const [session, setSession] = useState<any>(null);
+  const [entitlements, setEntitlements] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
+
       setSession(data.session);
+
+      if (data.session) {
+        const { data: entitlementData } = await supabase
+          .from('user_entitlements')
+          .select('app')
+          .eq('user_id', data.session.user.id);
+
+        setEntitlements(entitlementData?.map((item) => item.app) ?? []);
+      }
+
       setLoading(false);
     };
 
@@ -70,19 +81,24 @@ export default function Header() {
 
   const userRole = session?.user?.user_metadata?.role || 'user';
   const isAdmin = userRole === 'admin';
+  const hasFleetInspection = entitlements.includes('fleet_inspection');
 
   const navigationItems = session
-    ? [...privateNavigation, ...(isAdmin ? adminNavigation : [])]
+    ? [
+        ...(hasFleetInspection ? privateNavigation : []),
+        ...(hasFleetInspection && isAdmin ? adminNavigation : []),
+      ]
     : publicNavigation;
 
   return (
     <Disclosure
       as="nav"
-      className="bg-white shadow-sm dark:bg-background relative z-50"
+      className="relative z-50 bg-white shadow-sm dark:bg-background"
     >
       {({ open }) => (
         <>
           <div className="h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600" />
+
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 justify-between">
               <div className="flex">
@@ -99,7 +115,7 @@ export default function Header() {
                         key={item.name}
                         href={item.href}
                         className={cn(
-                          'inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200',
+                          'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors duration-200',
                           isActive
                             ? 'border-primary text-foreground'
                             : 'border-transparent text-muted-foreground hover:text-foreground',
@@ -128,11 +144,11 @@ export default function Header() {
                       leaveFrom="opacity-100 scale-100"
                       leaveTo="opacity-0 scale-95"
                     >
-                      <MenuItems className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md p-1">
+                      <MenuItems className="absolute right-0 mt-2 w-48 rounded-md bg-white p-1 shadow-lg">
                         <MenuItem>
                           <Link
                             href="/profile"
-                            className="block px-4 py-2 text-sm rounded-md hover:bg-gray-100"
+                            className="block rounded-md px-4 py-2 text-sm hover:bg-gray-100"
                           >
                             Your Profile
                           </Link>
@@ -141,7 +157,7 @@ export default function Header() {
                         <MenuItem>
                           <button
                             onClick={signOut}
-                            className="block w-full text-left px-4 py-2 text-sm rounded-md hover:bg-gray-100"
+                            className="block w-full rounded-md px-4 py-2 text-left text-sm hover:bg-gray-100"
                           >
                             Sign out
                           </button>
@@ -174,7 +190,7 @@ export default function Header() {
             </div>
           </div>
 
-          <DisclosurePanel className="sm:hidden bg-white border-t">
+          <DisclosurePanel className="border-t bg-white sm:hidden">
             <div className="space-y-1 py-2">
               {navigationItems.map((item) => (
                 <DisclosureButton
