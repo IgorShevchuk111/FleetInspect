@@ -2,11 +2,13 @@
 
 import { useEffect } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 export default function Error({
   error,
   reset,
 }: {
-  error: Error;
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   useEffect(() => {
@@ -14,16 +16,14 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="flex justify-center items-center flex-col gap-6 mt-6">
-      <h1 className="text-3xl font-semibold">Something went wrong!</h1>
-      <p className="text-lg">Something unexpected happened.</p>
+    <main className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4 text-center">
+      <h1 className="text-2xl font-semibold">Something went wrong</h1>
 
-      <button
-        className="inline-block bg-accent-500 text-primary-800 px-6 py-3 text-lg"
-        onClick={reset}
-      >
-        Try again
-      </button>
+      <p className="text-muted-foreground">
+        Something unexpected happened. Please try again.
+      </p>
+
+      <Button onClick={reset}>Try again</Button>
     </main>
   );
 }
