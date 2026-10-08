@@ -3,6 +3,7 @@ import { ArrowRight, ClipboardCheck, Dumbbell, Map, Truck } from 'lucide-react';
 
 import { getUser } from '@/lib/auth/auth';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Card,
   CardContent,
@@ -39,11 +40,44 @@ const apps = [
   },
 ];
 
-export default async function HomePage() {
+const appNames: Record<string, string> = {
+  fleet_inspection: 'Fleet Inspection',
+  driver_journal: 'Driver Journal',
+  route_planner: 'Route Planner',
+};
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    error?: string;
+    app?: string;
+  }>;
+}) {
   const user = await getUser();
+  const params = await searchParams;
+
+  const accessDenied = params.error === 'access_denied' && params.app;
+
+  const appName = params.app
+    ? (appNames[params.app] ?? 'this application')
+    : 'this application';
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+      {accessDenied && (
+        <Alert
+          variant="destructive"
+          className="mb-8 border-red-300 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100"
+        >
+          <AlertTitle>Access restricted</AlertTitle>
+          <AlertDescription>
+            You don&apos;t currently have access to {appName}. Please contact
+            your administrator if you think you should have access.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="mb-12 max-w-2xl">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           Your tools. One workspace.
