@@ -481,6 +481,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_entitlements: {
+        Row: {
+          app: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          app: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          app?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicles: {
         Row: {
           created_at: string
