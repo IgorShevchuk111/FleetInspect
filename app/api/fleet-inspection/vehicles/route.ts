@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { requireAppEntitlement } from '@/lib/auth/permissions';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
     try {
+        await requireAppEntitlement('fleet_inspection');
+
         const supabase = await createClient();
-
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 },
-            );
-        }
 
         const searchParams = request.nextUrl.searchParams;
         const search = searchParams.get('search')?.trim() || '';
