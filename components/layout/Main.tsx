@@ -6,8 +6,8 @@ type MainProps = {
 
 export default function Main({ children }: MainProps) {
   return (
-    <main className="relative flex-1">
-      <div className="relative">{children}</div>
+    <main className="relative flex flex-1 flex-col">
+      <div className="relative flex flex-1 flex-col">{children}</div>
     </main>
   );
 }

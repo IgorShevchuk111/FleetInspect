@@ -1,32 +1,24 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuItems,
-  MenuItem,
-  Transition,
-  MenuButton,
-} from '@headlessui/react';
-
-import {
-  Bars3Icon,
-  XMarkIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+import { LogOut, User } from 'lucide-react';
 
 import Logo from '@/components/ui/Logo';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { createClient } from '@/lib/supabase/client';
 import { useSignOut } from '@/lib/auth/hooks/useSignOut';
 
 export default function Header() {
-  const signOut = useSignOut();
   const supabase = createClient();
+  const signOut = useSignOut();
 
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -41,123 +33,87 @@ export default function Header() {
 
     getSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      },
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [supabase]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <header className="border-b border-border/60 bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Logo />
+          <div className="h-9 w-20 animate-pulse rounded-lg bg-muted" />
+        </div>
+      </header>
+    );
+  }
+
+  const email = session?.user?.email;
+  const initial = email?.charAt(0).toUpperCase() ?? 'U';
 
   return (
-    <Disclosure
-      as="nav"
-      className="relative z-50 bg-white shadow-sm dark:bg-background"
-    >
-      {({ open }) => (
-        <>
-          <div className="h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600" />
+    <header className="border-b border-border/60 bg-background/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Logo />
 
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between">
-              <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
-                  <Logo />
-                </div>
-              </div>
+        {session ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center rounded-full border border-border/70 bg-background p-1 transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {initial}
+                </span>
 
-              <div className="hidden sm:flex sm:items-center">
-                {session ? (
-                  <Menu as="div" className="relative ml-3">
-                    <MenuButton className="flex rounded-full bg-white text-sm">
-                      <UserCircleIcon className="h-8 w-8" />
-                    </MenuButton>
+                <span className="sr-only">Open account menu</span>
+              </button>
+            </DropdownMenuTrigger>
 
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 scale-95"
-                      enterTo="opacity-100 scale-100"
-                      leave="transition ease-in duration-75"
-                      leaveFrom="opacity-100 scale-100"
-                      leaveTo="opacity-0 scale-95"
-                    >
-                      <MenuItems className="absolute right-0 mt-2 w-48 rounded-md bg-white p-1 shadow-lg">
-                        <MenuItem>
-                          <Link
-                            href="/profile"
-                            className="block rounded-md px-4 py-2 text-sm hover:bg-gray-100"
-                          >
-                            Your Profile
-                          </Link>
-                        </MenuItem>
+            <DropdownMenuContent
+              align="end"
+              className="w-64 border border-border bg-background opacity-100 shadow-xl"
+            >
+              <DropdownMenuLabel className="font-normal">
+                <p className="text-sm font-medium">Account</p>
 
-                        <MenuItem>
-                          <button
-                            onClick={signOut}
-                            className="block w-full rounded-md px-4 py-2 text-left text-sm hover:bg-gray-100"
-                          >
-                            Sign out
-                          </button>
-                        </MenuItem>
-                      </MenuItems>
-                    </Transition>
-                  </Menu>
-                ) : (
-                  <Link href="/login" className="text-primary">
-                    Sign in
-                  </Link>
+                {email && (
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {email}
+                  </p>
                 )}
-              </div>
+              </DropdownMenuLabel>
 
-              <div className="-mr-2 flex items-center sm:hidden">
-                {session ? (
-                  <DisclosureButton className="p-2">
-                    {open ? (
-                      <XMarkIcon className="h-6 w-6" />
-                    ) : (
-                      <Bars3Icon className="h-6 w-6" />
-                    )}
-                  </DisclosureButton>
-                ) : (
-                  <Link href="/login" className="text-sm">
-                    Sign in
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
+              <DropdownMenuSeparator />
 
-          <DisclosurePanel className="border-t bg-white sm:hidden">
-            <div className="space-y-1 py-2">
-              {session && (
-                <>
-                  <DisclosureButton
-                    as={Link}
-                    href="/profile"
-                    className="block px-4 py-2"
-                  >
-                    Profile
-                  </DisclosureButton>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
 
-                  <DisclosureButton
-                    as="button"
-                    onClick={signOut}
-                    className="block px-4 py-2"
-                  >
-                    Sign out
-                  </DisclosureButton>
-                </>
-              )}
-            </div>
-          </DisclosurePanel>
-        </>
-      )}
-    </Disclosure>
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link
+            href="/login"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    </header>
   );
 }

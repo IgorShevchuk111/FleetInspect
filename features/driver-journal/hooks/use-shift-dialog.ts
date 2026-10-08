@@ -34,15 +34,6 @@ const MAX_SHIFT_SPREAD = 15 * 60;
 const MAX_EXTENDED_DRIVING_DAYS = 2;
 const MAX_EXTENDED_SHIFTS = 3;
 
-function getCurrentTime() {
-    const now = new Date();
-
-    return [
-        String(now.getHours()).padStart(2, '0'),
-        String(now.getMinutes()).padStart(2, '0'),
-    ].join(':');
-}
-
 function getTodayDate() {
     const today = new Date();
 
@@ -58,7 +49,7 @@ function getInitialForm(): ShiftFormData {
 
     return {
         date: today,
-        start: getCurrentTime(),
+        start: '',
         driving: {
             hours: 0,
             minutes: 0,

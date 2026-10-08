@@ -1,20 +1,26 @@
 'use client';
 
 import { useTransition } from 'react';
+
+import { LogOut } from 'lucide-react';
+
 import { useSignOut } from '@/lib/auth/hooks/useSignOut';
 
-function SignOutButton() {
+import { Button } from '@/components/ui/button';
+
+export default function SignOutButton() {
   const signOut = useSignOut();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div
-      className="px-4 py-2 text-muted-foreground hover:bg-primary-50 rounded-md cursor-pointer"
+    <Button
+      type="button"
+      variant="outline"
+      disabled={isPending}
       onClick={() => startTransition(() => signOut())}
     >
+      <LogOut />
       {isPending ? 'Signing out...' : 'Sign out'}
-    </div>
+    </Button>
   );
 }
-
-export default SignOutButton;
