@@ -124,8 +124,8 @@ function TableColumns() {
       <col className="w-[15%]" />
       <col className="w-[15%]" />
       <col className="w-[15%]" />
-      <col className="w-[20%]" />
       <col className="w-[15%]" />
+      <col className="w-[20%]" />
     </colgroup>
   );
 }
