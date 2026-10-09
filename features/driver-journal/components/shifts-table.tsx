@@ -1,6 +1,6 @@
 'use client';
 
-import { BedDouble } from 'lucide-react';
+import { BedDouble, Clock, Ellipsis, Flag, Timer } from 'lucide-react';
 
 import {
   Table,
@@ -71,7 +71,6 @@ function groupShiftsByWeek(shifts: Shift[]): WeekGroup[] {
 
   for (const shift of shifts) {
     const weekStart = getStartOfWeek(new Date(`${shift.date}T12:00:00`));
-
     const key = getWeekKey(weekStart);
     const existing = weeks.get(key);
 
@@ -90,23 +89,13 @@ function groupShiftsByWeek(shifts: Shift[]): WeekGroup[] {
   return Array.from(weeks.values()).sort((a, b) => b.key.localeCompare(a.key));
 }
 
-const tableClass = `
-  w-full
+const tableClass = `  w-full
   table-fixed
   border-separate
   border-spacing-0
-  text-[13px]
-  [&_tbody_tr]:border-b
-  [&_tbody_td]:border-r
-  [&_tbody_td]:border-border/30
-  [&_tbody_td:last-child]:border-r-0
-  [&_thead_th]:border-r
-  [&_thead_th]:border-border/30
-  [&_thead_th:last-child]:border-r-0
-`;
+  text-[13px]   [&_tbody_tr]:border-b   [&_tbody_td]:border-r   [&_tbody_td]:border-border/30   [&_tbody_td:last-child]:border-r-0   [&_thead_th]:border-r   [&_thead_th]:border-border/30   [&_thead_th:last-child]:border-r-0`;
 
-const headerClass = `
-  bg-muted/70
+const headerClass = `  bg-muted/70
   px-0.5
   py-2
   text-center
@@ -114,19 +103,32 @@ const headerClass = `
   font-semibold
   uppercase
   tracking-wide
-  text-foreground
-`;
+  text-foreground`;
 
 function TableColumns() {
   return (
     <colgroup>
       <col className="w-[20%]" />
-      <col className="w-[15%]" />
-      <col className="w-[15%]" />
-      <col className="w-[15%]" />
-      <col className="w-[15%]" />
       <col className="w-[20%]" />
+      <col className="w-[15%]" />
+      <col className="w-[15%]" />
+      <col className="w-[15%]" />
+      <col className="w-[15%]" />
     </colgroup>
+  );
+}
+
+function HeaderContent({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-0.5">
+      {icon} <span>{label}</span>
+    </div>
   );
 }
 
@@ -153,35 +155,53 @@ export function ShiftsTable({
       <div className="sticky top-0 z-30 w-full min-w-0 bg-background shadow-sm">
         <Table className={tableClass}>
           <TableColumns />
-
           <TableHeader className="bg-muted/70">
             <TableRow className="border-b border-border/60 bg-muted/70">
-              <TableHead className={headerClass}>Start</TableHead>
-
               <TableHead className={headerClass}>
-                <div className="flex flex-col items-center justify-center gap-0.5">
-                  <TachographDrivingIcon />
-                  <span>Driving</span>
-                </div>
+                <HeaderContent
+                  icon={<Clock className="size-5" aria-hidden="true" />}
+                  label="Start"
+                />
               </TableHead>
 
-              <TableHead className={headerClass}>Shift</TableHead>
-
               <TableHead className={headerClass}>
-                <div className="flex flex-col items-center justify-center gap-0.5">
-                  <BedDouble className="size-5" aria-hidden="true" />
-                  <span>Rest</span>
-                </div>
+                <HeaderContent
+                  icon={<TachographDrivingIcon />}
+                  label="Driving"
+                />
               </TableHead>
 
-              <TableHead className={headerClass}>End</TableHead>
+              <TableHead className={headerClass}>
+                <HeaderContent
+                  icon={<Timer className="size-5" aria-hidden="true" />}
+                  label="Shift"
+                />
+              </TableHead>
 
-              <TableHead className={headerClass}>Actions</TableHead>
+              <TableHead className={headerClass}>
+                <HeaderContent
+                  icon={<BedDouble className="size-5" aria-hidden="true" />}
+                  label="Rest"
+                />
+              </TableHead>
+
+              <TableHead className={headerClass}>
+                <HeaderContent
+                  icon={<Flag className="size-5" aria-hidden="true" />}
+                  label="End"
+                />
+              </TableHead>
+
+              <TableHead className={headerClass}>
+                <HeaderContent
+                  icon={<Ellipsis className="size-5" aria-hidden="true" />}
+                  label="Actions"
+                />
+              </TableHead>
             </TableRow>
           </TableHeader>
         </Table>
       </div>
-
       <div className="w-full min-w-0 overflow-x-hidden">
         <Table className={tableClass}>
           <TableColumns />
