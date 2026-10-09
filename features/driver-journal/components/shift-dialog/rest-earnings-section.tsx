@@ -39,11 +39,13 @@ type RestEarningsSectionProps = {
 function SectionHeader() {
   return (
     <div className="mb-3 flex min-w-0 items-center gap-2">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
-        <Moon className="size-3.5 text-muted-foreground" />
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
+        <Moon aria-hidden="true" className="size-4 text-muted-foreground" />
       </div>
 
-      <span className="text-sm font-medium">Rest & earnings</span>
+      <h3 className="text-sm font-medium leading-heading">
+        Rest &amp; earnings
+      </h3>
     </div>
   );
 }
@@ -59,13 +61,34 @@ export function RestEarningsSection({
   onEarnChange,
   onEarnBlur,
 }: RestEarningsSectionProps) {
+  const showWeeklyRestUnavailable =
+    form.restType === 'weekly' && !previousCompletedShift;
+
+  const showReducedWeeklyRest =
+    form.restType === 'weekly' &&
+    Boolean(previousCompletedShift) &&
+    weeklyRestValidation.valid &&
+    weeklyRestValidation.isReduced;
+
+  const showRegularWeeklyRest =
+    form.restType === 'weekly' &&
+    Boolean(previousCompletedShift) &&
+    weeklyRestValidation.valid &&
+    !weeklyRestValidation.isReduced;
+
+  const showWeeklyRestBlocked =
+    form.restType === 'weekly' && isWeeklyRestBlocked;
+
   return (
-    <section className="min-w-0 border-t pt-4">
+    <section className="min-w-0 border-t border-border pt-4">
       <SectionHeader />
 
-      <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div className="min-w-0 space-y-1.5">
-          <Label htmlFor="rest-type" className="text-xs text-muted-foreground">
+          <Label
+            htmlFor="rest-type"
+            className="text-caption text-muted-foreground"
+          >
             Rest type
           </Label>
 
@@ -89,37 +112,31 @@ export function RestEarningsSection({
             </SelectContent>
           </Select>
 
-          {form.restType === 'weekly' && !previousCompletedShift ? (
-            <p className="text-xs text-muted-foreground">
+          {showWeeklyRestUnavailable && (
+            <p className="text-caption leading-body text-muted-foreground">
               No previous completed shift. Rest duration cannot be calculated
               yet.
             </p>
-          ) : null}
+          )}
 
-          {form.restType === 'weekly' &&
-          previousCompletedShift &&
-          weeklyRestValidation.valid &&
-          weeklyRestValidation.isReduced ? (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+          {showReducedWeeklyRest && (
+            <p className="text-caption leading-body text-warning">
               Reduced weekly rest: 24–44h 59m. Your next weekly rest must be
               regular.
             </p>
-          ) : null}
+          )}
 
-          {form.restType === 'weekly' &&
-          previousCompletedShift &&
-          weeklyRestValidation.valid &&
-          !weeklyRestValidation.isReduced ? (
-            <p className="text-xs text-green-600 dark:text-green-400">
+          {showRegularWeeklyRest && (
+            <p className="text-caption leading-body text-success">
               Regular weekly rest: 45 hours or more.
             </p>
-          ) : null}
+          )}
 
-          {form.restType === 'weekly' && isWeeklyRestBlocked ? (
-            <p className="text-xs font-medium text-red-600 dark:text-red-400">
+          {showWeeklyRestBlocked && (
+            <p className="text-caption font-medium leading-body text-danger">
               {weeklyRestValidation.message}
             </p>
-          ) : null}
+          )}
         </div>
 
         <div
@@ -127,12 +144,15 @@ export function RestEarningsSection({
             !canEnterRestOfShift ? 'opacity-50' : ''
           }`}
         >
-          <Label htmlFor="earn" className="text-xs text-muted-foreground">
+          <Label htmlFor="earn" className="text-caption text-muted-foreground">
             Earn (£)
           </Label>
 
           <div className="relative min-w-0">
-            <Banknote className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Banknote
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            />
 
             <Input
               id="earn"

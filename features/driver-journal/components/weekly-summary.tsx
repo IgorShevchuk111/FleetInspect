@@ -70,7 +70,11 @@ function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
 }
 
 function PeriodLabel({ children }: { children: ReactNode }) {
-  return <p className="mt-0.5 text-xs text-muted-foreground">{children}</p>;
+  return (
+    <p className="mt-0.5 text-caption leading-body text-muted-foreground">
+      {children}
+    </p>
+  );
 }
 
 export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {

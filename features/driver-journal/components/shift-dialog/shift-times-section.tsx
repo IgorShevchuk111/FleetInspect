@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CalendarDays } from 'lucide-react';
 
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarDays } from 'lucide-react';
 
 import type { ShiftFormData } from '@/features/driver-journal/types/ driver-journal';
 
@@ -20,6 +20,7 @@ type ShiftTimesSectionProps = {
   canEnterRestOfShift: boolean;
   onStartDateChange: (value: string) => void;
   onStartTimeChange: (value: string) => void;
+  onStartTimeBlur: () => void;
   onEndDateChange: (value: string) => void;
   onEndTimeChange: (value: string) => void;
 };
@@ -79,18 +80,20 @@ function DatePicker({
       <PopoverTrigger
         id={id}
         disabled={disabled}
+        aria-label={`${id === 'start-date' ? 'Start' : 'End'} date: ${formatDate(value)}`}
         className="
           inline-flex
+          h-10
           min-w-0
-          flex-1
+          w-full
           items-center
           justify-start
+          gap-2
           rounded-md
           border
           border-input
           bg-background
           px-3
-          py-2
           text-left
           text-sm
           font-normal
@@ -106,7 +109,10 @@ function DatePicker({
           disabled:opacity-50
         "
       >
-        <CalendarDays className="mr-2 size-4 shrink-0 text-muted-foreground" />
+        <CalendarDays
+          aria-hidden="true"
+          className="size-4 shrink-0 text-muted-foreground"
+        />
         <span className="truncate">{formatDate(value)}</span>
       </PopoverTrigger>
 
@@ -134,11 +140,14 @@ function DatePicker({
 function SectionHeader() {
   return (
     <div className="mb-3 flex min-w-0 items-center gap-2">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
-        <CalendarDays className="size-3.5 text-muted-foreground" />
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
+        <CalendarDays
+          aria-hidden="true"
+          className="size-4 text-muted-foreground"
+        />
       </div>
 
-      <span className="text-sm font-medium">Shift times</span>
+      <h3 className="text-sm font-medium leading-heading">Shift times</h3>
     </div>
   );
 }
@@ -151,18 +160,22 @@ export function ShiftTimesSection({
   onStartTimeChange,
   onEndDateChange,
   onEndTimeChange,
+  onStartTimeBlur,
 }: ShiftTimesSectionProps) {
   return (
     <section className="min-w-0">
       <SectionHeader />
 
-      <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <div className="min-w-0 space-y-1.5">
-          <Label htmlFor="start-date" className="text-xs text-muted-foreground">
+          <Label
+            htmlFor="start-date"
+            className="text-caption text-muted-foreground"
+          >
             Start
           </Label>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
             <DatePicker
               id="start-date"
               value={form.date}
@@ -174,17 +187,22 @@ export function ShiftTimesSection({
               type="time"
               value={form.start}
               onChange={(event) => onStartTimeChange(event.target.value)}
-              className="w-[7.5rem]"
+              onBlur={onStartTimeBlur}
+              aria-label="Start time"
+              className="w-full min-w-0"
             />
           </div>
         </div>
 
         <div className="min-w-0 space-y-1.5">
-          <Label htmlFor="end-date" className="text-xs text-muted-foreground">
+          <Label
+            htmlFor="end-date"
+            className="text-caption text-muted-foreground"
+          >
             End
           </Label>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
             <DatePicker
               id="end-date"
               value={form.endDate}
@@ -198,17 +216,18 @@ export function ShiftTimesSection({
               value={form.end}
               onChange={(event) => onEndTimeChange(event.target.value)}
               disabled={!canEnterRestOfShift}
-              className="w-[7.5rem]"
+              aria-label="End time"
+              className="w-full min-w-0"
             />
           </div>
         </div>
       </div>
 
-      {hasUnfinishedPreviousShift ? (
-        <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+      {hasUnfinishedPreviousShift && (
+        <p className="mt-2 text-sm font-medium leading-body text-danger">
           You must finish your previous shift before adding a new shift.
         </p>
-      ) : null}
+      )}
     </section>
   );
 }

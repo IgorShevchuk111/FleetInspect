@@ -15,6 +15,14 @@
 
     --primary: 214 89% 52%; /* #1876F2 */
     --primary-hover: 214 89% 46%; /* #1B69D0 */
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: var(--foreground);
+    --accent: var(--muted);
+    --accent-foreground: var(--foreground);
+    --destructive: var(--danger);
+    --destructive-foreground: 0 0% 100%;
+    --input: var(--border);
+    --ring: var(--primary);
 
     --success: 110 60% 45%; /* #45B82E */
     --warning: 45 95% 55%; /* #F9C31F */
@@ -22,6 +30,16 @@
 
     --border: 220 10% 85%; /* #D5D8DD */
     --radius: 0.5rem;
+
+    /* Typography */
+    --font-size-caption: 0.75rem;
+    --font-size-secondary: 0.875rem;
+    --font-size-body: 1rem;
+    --font-size-heading: 1.125rem;
+    --font-size-page-title: 1.5rem;
+
+    --line-height-body: 1.5;
+    --line-height-heading: 1.25;
   }
 
   .dark {
@@ -36,6 +54,14 @@
 
     --primary: 214 89% 60%; /* #3B82F6 */
     --primary-hover: 214 89% 55%; /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: var(--foreground);
+    --accent: var(--muted);
+    --accent-foreground: var(--foreground);
+    --destructive: var(--danger);
+    --destructive-foreground: 0 0% 100%;
+    --input: var(--border);
+    --ring: var(--primary);
 
     --success: 110 60% 50%; /* #4CAF50 */
     --warning: 45 95% 60%; /* #F5C400 */

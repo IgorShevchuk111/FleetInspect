@@ -239,13 +239,13 @@ export function ShiftRow({
         style={{ touchAction: 'pan-y' }}
       >
         <TableCell colSpan={6} className="p-0">
-          <div className="relative isolate w-full overflow-hidden bg-red-400/80">
+          <div className="relative isolate w-full overflow-hidden bg-danger/80">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               aria-label="Delete shift"
-              className="absolute inset-y-0 right-0 z-0 size-16 rounded-none bg-red-400/80 text-black hover:bg-red-500/80"
+              className="absolute inset-y-0 right-0 z-0 size-16 rounded-none bg-danger/80 text-black hover:bg-danger"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation();
@@ -275,10 +275,10 @@ export function ShiftRow({
                 )}
               >
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-xs font-medium">
+                  <span className="text-caption font-medium">
                     {formatDate(shift.date)}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-caption text-muted-foreground">
                     {formatTime(shift.start)}
                   </span>
                 </div>
@@ -299,7 +299,7 @@ export function ShiftRow({
                 className={cn(
                   'min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center',
                   shiftStatus?.className,
-                  !shiftStatus && extendedShift && 'text-orange-600',
+                  !shiftStatus && extendedShift && 'text-warning',
                 )}
               >
                 {formatDuration(shiftMinutes)}
@@ -308,7 +308,7 @@ export function ShiftRow({
               {/* Rest */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex min-h-9 flex-col items-center justify-center leading-none">
-                  <span className="text-xs font-medium">
+                  <span className="text-caption font-medium">
                     {formatDuration(effectiveRestMinutes)}
                   </span>
 
@@ -316,9 +316,9 @@ export function ShiftRow({
                     className={cn(
                       'mt-0.5 w-full max-w-[42px] border-t border-border/50 pt-0.5 text-[10px] font-semibold',
                       isReducedWeeklyRest
-                        ? 'text-red-600'
+                        ? 'text-danger'
                         : isRegularWeeklyRest
-                          ? 'text-green-600'
+                          ? 'text-success'
                           : 'text-muted-foreground',
                     )}
                   >
@@ -328,15 +328,13 @@ export function ShiftRow({
               </div>
 
               {/* End */}
-              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
-                <div className="flex flex-col items-center leading-tight">
-                  <span className="text-xs font-medium">
-                    {formatDate(endDate)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTime(shift.end)}
-                  </span>
-                </div>
+              <div className="flex flex-col items-center leading-tight">
+                <span className="text-caption font-medium">
+                  {formatDate(endDate)}
+                </span>
+                <span className="text-caption text-muted-foreground">
+                  {formatTime(shift.end)}
+                </span>
               </div>
 
               {/* Actions */}

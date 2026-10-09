@@ -320,23 +320,10 @@ export function useShiftDialog({
 
     function handleStartTimeChange(value: string) {
         updateField('start', value);
+    }
 
-        if (!isEditing && value && form.date) {
-            setHasSelectedRestType(false);
-
-            const nextPreviousShift = getPreviousShift(
-                shifts,
-                form.date,
-                value,
-            );
-
-            if (nextPreviousShift && !nextPreviousShift.end) {
-                setIsRestTypeDialogOpen(false);
-                return;
-            }
-
-            setIsRestTypeDialogOpen(true);
-        }
+    function handleStartTimeBlur() {
+        openRestTypeDialog();
     }
 
     function handleEndDateChange(value: string) {
@@ -453,6 +440,7 @@ export function useShiftDialog({
         setIsDeleteConfirmOpen,
         handleStartDateChange,
         handleStartTimeChange,
+        handleStartTimeBlur,
         handleEndDateChange,
         handleEndTimeChange,
         handleDrivingChange,

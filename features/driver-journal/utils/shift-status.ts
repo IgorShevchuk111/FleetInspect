@@ -76,7 +76,7 @@ export function getShiftStatus(
             label: extendedMaxEnd
                 ? `Over limit · max ${extendedMaxEnd}`
                 : 'Over limit · max 15h',
-            className: 'text-red-600 dark:text-red-400',
+            className: 'text-danger',
         };
     }
 
@@ -84,7 +84,7 @@ export function getShiftStatus(
         if (extendedShiftsUsedBefore >= MAX_EXTENDED_SHIFTS) {
             return {
                 label: 'Extended · Not allowed',
-                className: 'text-red-600 dark:text-red-400',
+                className: 'text-danger',
             };
         }
 
@@ -92,7 +92,7 @@ export function getShiftStatus(
             label: extendedMaxEnd
                 ? `Extended · max ${extendedMaxEnd}`
                 : 'Extended · max 15h',
-            className: 'text-orange-600 dark:text-orange-400',
+            className: 'text-warning',
         };
     }
 
@@ -113,7 +113,7 @@ export function getDrivingStatus(
     if (minutes > MAX_DAILY_DRIVING_MINUTES) {
         return {
             label: 'Over limit · Max 10h',
-            className: 'text-red-600 dark:text-red-400',
+            className: 'text-danger',
             showCounter: false,
             notAllowed: true,
         };
@@ -123,7 +123,7 @@ export function getDrivingStatus(
         if (extendedDrivingDaysUsedBefore >= MAX_EXTENDED_DRIVING_DAYS) {
             return {
                 label: 'Extended driving · Not allowed',
-                className: 'text-red-600 dark:text-red-400',
+                className: 'text-danger',
                 showCounter: true,
                 notAllowed: true,
             };
@@ -131,7 +131,7 @@ export function getDrivingStatus(
 
         return {
             label: 'Extended',
-            className: 'text-orange-600 dark:text-orange-400',
+            className: 'text-warning',
             showCounter: true,
             notAllowed: false,
         };
@@ -152,39 +152,39 @@ export function getRestStatus(
         if (rest < MINIMUM_WEEKLY_REST_MINUTES) {
             return {
                 label: 'Insufficient weekly rest',
-                className: 'text-red-600 dark:text-red-400',
+                className: 'text-danger',
             };
         }
 
         if (rest < REGULAR_WEEKLY_REST_MINUTES) {
             return {
                 label: 'Reduced weekly rest',
-                className: 'text-orange-600 dark:text-orange-400',
+                className: 'text-warning',
             };
         }
 
         return {
             label: 'Regular weekly rest',
-            className: 'text-green-600 dark:text-green-400',
+            className: 'text-success',
         };
     }
 
     if (rest < REDUCED_DAILY_REST_MINUTES) {
         return {
             label: 'Insufficient daily rest',
-            className: 'text-red-600 dark:text-red-400',
+            className: 'text-danger',
         };
     }
 
     if (rest < REGULAR_DAILY_REST_MINUTES) {
         return {
             label: 'Reduced daily rest',
-            className: 'text-orange-600 dark:text-orange-400',
+            className: 'text-warning',
         };
     }
 
     return {
         label: 'Regular daily rest',
-        className: 'text-green-600 dark:text-green-400',
+        className: 'text-success',
     };
 }

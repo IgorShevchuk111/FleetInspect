@@ -87,9 +87,11 @@ function DetailRow({
 }) {
   return (
     <div className="flex min-h-9 items-center justify-between gap-4 border-b border-border/50 py-1 last:border-b-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-caption text-muted-foreground">{label}</span>
 
-      <div className={`text-right text-sm font-medium ${className ?? ''}`}>
+      <div
+        className={`text-right text-foreground font-medium ${className ?? ''}`}
+      >
         {value}
       </div>
     </div>
@@ -110,7 +112,7 @@ function Section({
       <div className="flex items-center gap-2">
         <Icon className="size-4 text-muted-foreground" />
 
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <h3 className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
           {title}
         </h3>
       </div>
@@ -140,7 +142,7 @@ function CompensationOption({
   return (
     <div className="flex items-center justify-between gap-3 border-t py-2 first:border-t-0">
       <div className="min-w-0">
-        <div className="text-xs font-medium">
+        <div className="text-caption font-medium">
           {option.restType === 'weekly' ? 'Weekly rest' : 'Daily rest'}
         </div>
 
@@ -150,7 +152,7 @@ function CompensationOption({
         </div>
 
         {option.usesReducedDailyRest && (
-          <StatusHint className="text-amber-600">
+          <StatusHint className="text-warning">
             Uses reduced daily rest
           </StatusHint>
         )}
@@ -257,7 +259,7 @@ export function ShiftDetailsDialog({
             <div className="min-w-0">
               <DialogTitle>Shift details</DialogTitle>
 
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-caption leading-body">
                 {formatDate(shift.date)} {formatTime(shift.start)}
                 {' → '}
                 {formatDate(endDate)} {formatTime(shift.end)}
@@ -291,14 +293,14 @@ export function ShiftDetailsDialog({
                     </span>
 
                     {drivingOver10Hours ? (
-                      <StatusHint className="text-red-600">
+                      <StatusHint className="text-danger">
                         Over maximum · {drivingUsageAfter}/2 extended days used
                       </StatusHint>
                     ) : (
                       <StatusHint
                         className={
                           drivingOver9Hours
-                            ? 'text-amber-600'
+                            ? 'text-warning'
                             : 'text-muted-foreground'
                         }
                       >
@@ -309,9 +311,9 @@ export function ShiftDetailsDialog({
                 }
                 className={
                   drivingOver10Hours
-                    ? 'text-red-600'
+                    ? 'text-danger'
                     : drivingOver9Hours
-                      ? 'text-amber-600'
+                      ? 'text-warning'
                       : undefined
                 }
               />
@@ -326,7 +328,7 @@ export function ShiftDetailsDialog({
                     </span>
 
                     {shiftOver15Hours ? (
-                      <StatusHint className="text-red-600">
+                      <StatusHint className="text-danger">
                         Over maximum · {extendedShiftUsageAfter}/3 extended
                         shifts used
                       </StatusHint>
@@ -334,7 +336,7 @@ export function ShiftDetailsDialog({
                       <StatusHint
                         className={
                           extendedShift
-                            ? 'text-amber-600'
+                            ? 'text-warning'
                             : 'text-muted-foreground'
                         }
                       >
@@ -343,7 +345,7 @@ export function ShiftDetailsDialog({
                     )}
                   </div>
                 }
-                className={shiftOver15Hours ? 'text-red-600' : undefined}
+                className={shiftOver15Hours ? 'text-danger' : undefined}
               />
 
               <DetailRow label="Break" value={formatDuration(breakMinutes)} />
@@ -390,9 +392,9 @@ export function ShiftDetailsDialog({
                 }
                 className={
                   isReducedWeeklyRest || isReducedDailyRest
-                    ? 'text-amber-600'
+                    ? 'text-warning'
                     : isRegularWeeklyRest
-                      ? 'text-green-600'
+                      ? 'text-success'
                       : undefined
                 }
               />
@@ -401,7 +403,7 @@ export function ShiftDetailsDialog({
                 <DetailRow
                   label="Reduced daily rests"
                   value={`${sharedAllowanceUsedAfter}/3 used`}
-                  className="text-amber-600"
+                  className="text-warning"
                 />
               )}
 
@@ -418,7 +420,7 @@ export function ShiftDetailsDialog({
               <DetailRow
                 label="Earn"
                 value={formatMoney(shift.earn)}
-                className="text-green-600"
+                className="text-success"
               />
             </Section>
 
@@ -427,7 +429,7 @@ export function ShiftDetailsDialog({
                 <DetailRow
                   label="Compensation"
                   value={formatDuration(compensationMinutes)}
-                  className="text-green-600"
+                  className="text-success"
                 />
 
                 <DetailRow
@@ -447,7 +449,7 @@ export function ShiftDetailsDialog({
                 <DetailRow
                   label="Status"
                   value="Accepted"
-                  className="text-green-600"
+                  className="text-success"
                 />
 
                 {acceptedCompensation && (
@@ -523,7 +525,7 @@ export function ShiftDetailsDialog({
                         className="border-b p-3 last:border-b-0"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-xs font-medium">
+                          <span className="text-caption font-medium">
                             {accepted
                               ? 'Accepted'
                               : declined
@@ -534,10 +536,10 @@ export function ShiftDetailsDialog({
                           <span
                             className={
                               accepted
-                                ? 'text-xs font-medium text-green-600'
+                                ? 'text-xs font-medium text-success'
                                 : declined
-                                  ? 'text-xs font-medium text-red-600'
-                                  : 'text-xs font-medium text-amber-600'
+                                  ? 'text-xs font-medium text-danger'
+                                  : 'text-xs font-medium text-warning'
                             }
                           >
                             {formatDuration(minutes)}

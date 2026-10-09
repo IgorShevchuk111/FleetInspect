@@ -71,6 +71,7 @@ export function ShiftDialog({
     setIsDeleteConfirmOpen,
     handleStartDateChange,
     handleStartTimeChange,
+    handleStartTimeBlur,
     handleEndDateChange,
     handleEndTimeChange,
     handleDrivingChange,
@@ -139,11 +140,11 @@ export function ShiftDialog({
               </div>
 
               <div className="min-w-0">
-                <DialogTitle className="text-lg">
+                <DialogTitle className="text-heading leading-heading">
                   {isEditing ? 'Edit shift' : 'Add shift'}
                 </DialogTitle>
 
-                <DialogDescription className="mt-0.5 text-xs">
+                <DialogDescription className="mt-0.5 text-caption leading-body">
                   {isEditing
                     ? 'Update your driving shift details.'
                     : 'Enter your driving shift details.'}
@@ -174,6 +175,7 @@ export function ShiftDialog({
                   canEnterRestOfShift={canEnterRestOfShift}
                   onStartDateChange={handleStartDateChange}
                   onStartTimeChange={handleStartTimeChange}
+                  onStartTimeBlur={handleStartTimeBlur}
                   onEndDateChange={handleEndDateChange}
                   onEndTimeChange={handleEndTimeChange}
                 />
@@ -228,7 +230,7 @@ export function ShiftDialog({
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDeleteConfirmOpen(true)}
-                  className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                  className="text-danger hover:bg-danger/10 hover:text-danger dark:text-danger dark:hover:bg-danger/20 dark:hover:text-danger"
                 >
                   <Trash2 className="size-4" />
                   Delete
@@ -287,7 +289,7 @@ export function ShiftDialog({
 
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+              className="bg-danger text-destructive-foreground hover:bg-danger/90 dark:bg-danger dark:hover:bg-danger/90"
             >
               Delete
             </AlertDialogAction>
