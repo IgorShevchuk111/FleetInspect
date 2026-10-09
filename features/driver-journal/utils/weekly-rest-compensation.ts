@@ -1,4 +1,4 @@
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
 

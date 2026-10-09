@@ -1,4 +1,4 @@
-import type { DurationInput } from '@/features/driver-journal/types/ driver-journal';
+import type { DurationInput } from '@/features/driver-journal/types/driver-journal';
 
 export function durationToMinutes(
     duration: DurationInput,

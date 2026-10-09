@@ -51,17 +51,21 @@ function formatDateRange(start: Date, end: Date) {
 
 function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2.5">
-      <span className={prominent ? 'font-medium' : 'text-muted-foreground'}>
+    <div className="flex min-h-10 items-center justify-between gap-3 py-2">
+      <span
+        className={
+          prominent
+            ? 'text-caption leading-body font-medium text-foreground'
+            : 'text-caption leading-body text-muted-foreground'
+        }
+      >
         {label}
       </span>
 
       <span
-        className={
-          prominent
-            ? 'shrink-0 font-semibold tabular-nums'
-            : 'shrink-0 font-medium tabular-nums'
-        }
+        className={`shrink-0 text-right text-[length:var(--font-size-secondary)] leading-body tabular-nums ${
+          prominent ? 'font-semibold' : 'font-medium'
+        } text-foreground`}
       >
         {value}
       </span>
@@ -71,9 +75,33 @@ function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
 
 function PeriodLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-0.5 text-caption leading-body text-muted-foreground">
+    <p className="mt-1 text-caption leading-body text-muted-foreground">
       {children}
     </p>
+  );
+}
+
+function SummarySection({
+  title,
+  children,
+  bordered = true,
+}: {
+  title: string;
+  children: ReactNode;
+  bordered?: boolean;
+}) {
+  return (
+    <section
+      className={
+        bordered ? 'space-y-2 border-t border-border pt-4' : 'space-y-2'
+      }
+    >
+      <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
+        {title}
+      </h3>
+
+      {children}
+    </section>
   );
 }
 
@@ -97,42 +125,22 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        className="
-          flex
-          h-[100dvh]
-          max-h-[100dvh]
-          w-screen
-          max-w-none
-          flex-col
-          gap-0
-          overflow-hidden
-          rounded-none
-          p-0
-          sm:h-auto
-          sm:max-h-[90vh]
-          sm:w-full
-          sm:max-w-sm
-          sm:rounded-lg
-        "
-      >
-        <DialogHeader className="shrink-0 border-b px-5 py-4 text-left sm:px-6 sm:py-5">
-          <DialogTitle className="text-base sm:text-lg">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-lg">
+        <DialogHeader className="shrink-0 border-b border-border px-4 py-4 text-left sm:px-6">
+          <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
             Weekly Summary
           </DialogTitle>
 
-          <DialogDescription className="text-xs leading-relaxed sm:text-sm">
+          <DialogDescription className="text-caption leading-body">
             {formatDateRange(currentWeekStart, currentWeekEnd)}
             <span className="block">Monday – Sunday</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
           <div className="space-y-5">
-            <section>
-              <h3 className="mb-2 text-sm font-semibold">This week</h3>
-
-              <div className="divide-y rounded-lg border px-3">
+            <SummarySection title="This week" bordered={false}>
+              <div className="divide-y divide-border rounded-lg border border-border px-3">
                 <SummaryRow
                   label="Driving"
                   value={formatDuration(summary.driving)}
@@ -151,11 +159,9 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
                   prominent
                 />
               </div>
-            </section>
+            </SummarySection>
 
-            <section className="border-t pt-4">
-              <h3 className="mb-1 text-sm font-semibold">Driving limits</h3>
-
+            <SummarySection title="Driving limits">
               <SummaryRow
                 label="Weekly driving"
                 value={`${formatDuration(summary.driving)} / 56h`}
@@ -170,11 +176,9 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               <PeriodLabel>
                 {formatDateRange(twoWeekStart, currentWeekEnd)}
               </PeriodLabel>
-            </section>
+            </SummarySection>
 
-            <section className="border-t pt-4">
-              <h3 className="mb-1 text-sm font-semibold">Working time</h3>
-
+            <SummarySection title="Working time">
               <SummaryRow
                 label="17-week average"
                 value={`${formatDuration(
@@ -186,11 +190,9 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               <PeriodLabel>
                 {formatDateRange(seventeenWeekStart, currentWeekEnd)}
               </PeriodLabel>
-            </section>
+            </SummarySection>
 
-            <section className="border-t pt-4">
-              <h3 className="mb-1 text-sm font-semibold">Earnings</h3>
-
+            <SummarySection title="Earnings">
               <SummaryRow
                 label="Year-to-date"
                 value={`£${summary.annualEarned.toFixed(2)}`}
@@ -200,7 +202,7 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
               <PeriodLabel>
                 {formatDateRange(yearStart, currentWeekEnd)}
               </PeriodLabel>
-            </section>
+            </SummarySection>
           </div>
         </div>
       </DialogContent>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useDriverJournal } from '../hooks/use-driver-journal';
+import { useDriverJournal } from '@/features/driver-journal/hooks/use-driver-journal';
 
-import { JournalHeader } from './journal-header';
-import { ShiftDialog } from './shift-dialog';
-import { ShiftsTable } from './shifts-table';
+import { JournalHeader } from '@/features/driver-journal/components/journal-header';
+import { ShiftDialog } from '@/features/driver-journal/components/shift-dialog';
+import { ShiftsTable } from '@/features/driver-journal/components/shifts-table';
 
 export default function DriverJournalPage() {
   const {
@@ -36,10 +36,10 @@ export default function DriverJournalPage() {
   };
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col px-2 py-2 sm:px-6 sm:py-14 lg:px-8">
+    <main className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-section px-page-x py-page-y">
       <JournalHeader onAddShift={() => setIsAddShiftOpen(true)} />
 
-      <div className="flex-1">
+      <section className="min-w-0 flex-1">
         <ShiftsTable
           shifts={shifts}
           restCompensations={restCompensations}
@@ -48,7 +48,7 @@ export default function DriverJournalPage() {
           onEdit={startEditingShift}
           onDelete={handleDeleteShift}
         />
-      </div>
+      </section>
 
       <ShiftDialog
         open={isAddShiftOpen || Boolean(editingShift)}
@@ -60,6 +60,6 @@ export default function DriverJournalPage() {
         }
         onDelete={editingShift ? () => deleteShift(editingShift.id) : undefined}
       />
-    </div>
+    </main>
   );
 }

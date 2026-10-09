@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import type { ShiftFormData } from '@/features/driver-journal/types/ driver-journal';
+import type { ShiftFormData } from '@/features/driver-journal/types/driver-journal';
 
 type ShiftTimesSectionProps = {
   form: ShiftFormData;

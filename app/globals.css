@@ -4,17 +4,18 @@
 
 @layer base {
   :root {
-    --background: 210 20% 96%; /* #F3F5F7 */
-    --secondary: 220 13% 91%; /* #E6E7EB */
-    --surface: 0 0% 100%; /* #FFFFFF */
-    --card: 0 0% 99%; /* #FCFCFC */
+    /* Colors */
+    --background: 210 20% 96%;
+    --secondary: 220 13% 91%;
+    --surface: 0 0% 100%;
+    --card: 0 0% 99%;
 
-    --foreground: 0 0% 3%; /* #080808 */
-    --muted: 210 16% 93%; /* #EAEDF0 */
-    --muted-foreground: 215 5% 45%; /* #6D7779 */
+    --foreground: 0 0% 3%;
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 5% 45%;
 
-    --primary: 214 89% 52%; /* #1876F2 */
-    --primary-hover: 214 89% 46%; /* #1B69D0 */
+    --primary: 214 89% 52%;
+    --primary-hover: 214 89% 46%;
     --primary-foreground: 0 0% 100%;
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
@@ -24,12 +25,11 @@
     --input: var(--border);
     --ring: var(--primary);
 
-    --success: 110 60% 45%; /* #45B82E */
-    --warning: 45 95% 55%; /* #F9C31F */
-    --danger: 0 85% 60%; /* #F04242 */
+    --success: 110 60% 45%;
+    --warning: 45 95% 55%;
+    --danger: 0 85% 60%;
 
-    --border: 220 10% 85%; /* #D5D8DD */
-    --radius: 0.5rem;
+    --border: 220 10% 85%;
 
     /* Typography */
     --font-size-caption: 0.75rem;
@@ -40,20 +40,45 @@
 
     --line-height-body: 1.5;
     --line-height-heading: 1.25;
+
+    /* Layout spacing */
+    --space-page-x: 1rem;
+    --space-page-y: 1.5rem;
+    --space-section: 1.5rem;
+    --space-card: 1rem;
+
+    /* Control spacing and dimensions */
+    --space-control-x: 0.875rem;
+    --space-control-y: 0.5rem;
+    --height-control: 2.5rem;
+    --height-control-sm: 2.25rem;
+
+    /* Shape */
+    --radius: 0.5rem;
+    --radius-card: 0.75rem;
+    --radius-control: 0.5rem;
+
+    /* Elevation */
+    --shadow-card:
+      0 1px 2px hsl(222 47% 11% / 0.04), 0 2px 6px hsl(222 47% 11% / 0.04);
+
+    --shadow-popover:
+      0 8px 24px hsl(222 47% 11% / 0.12), 0 2px 6px hsl(222 47% 11% / 0.06);
   }
 
   .dark {
-    --background: 222 47% 7%; /* #0B0F1C */
-    --secondary: 222 20% 12%; /* #151A26 */
-    --surface: 222 20% 10%; /* #121726 */
-    --card: 222 20% 12%; /* #151A26 */
+    /* Colors */
+    --background: 222 47% 7%;
+    --secondary: 222 20% 12%;
+    --surface: 222 20% 10%;
+    --card: 222 20% 12%;
 
-    --foreground: 210 40% 98%; /* #F5F7FA */
-    --muted: 222 20% 14%; /* #191F2D */
-    --muted-foreground: 215 10% 55%; /* #7C8799 */
+    --foreground: 210 40% 98%;
+    --muted: 222 20% 14%;
+    --muted-foreground: 215 10% 55%;
 
-    --primary: 214 89% 60%; /* #3B82F6 */
-    --primary-hover: 214 89% 55%; /* #2563EB */
+    --primary: 214 89% 60%;
+    --primary-hover: 214 89% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
@@ -63,21 +88,42 @@
     --input: var(--border);
     --ring: var(--primary);
 
-    --success: 110 60% 50%; /* #4CAF50 */
-    --warning: 45 95% 60%; /* #F5C400 */
-    --danger: 0 85% 65%; /* #FF4D4D */
+    --success: 110 60% 50%;
+    --warning: 45 95% 60%;
+    --danger: 0 85% 65%;
 
-    --border: 222 15% 22%; /* #2A3242 */
+    --border: 222 15% 22%;
+
+    /* Elevation */
+    --shadow-card: 0 1px 2px hsl(0 0% 0% / 0.16), 0 2px 6px hsl(0 0% 0% / 0.12);
+
+    --shadow-popover:
+      0 8px 24px hsl(0 0% 0% / 0.3), 0 2px 6px hsl(0 0% 0% / 0.18);
   }
 
-  /* =========================
-     BASE RESET
-  ========================= */
+  /* Responsive page spacing */
+  @media (min-width: 640px) {
+    :root {
+      --space-page-x: 1.5rem;
+      --space-page-y: 2rem;
+      --space-card: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --space-page-x: 2rem;
+      --space-page-y: 2.5rem;
+      --space-section: 2rem;
+    }
+  }
+
+  /* Base styles */
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background font-sans text-foreground;
   }
 }

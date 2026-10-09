@@ -1,6 +1,6 @@
 import type { Database } from '@/types/supabase/database';
 
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import { calculateShiftMinutes } from './shifts';
 

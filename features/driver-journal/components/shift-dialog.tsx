@@ -20,17 +20,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Clock3, Trash2 } from 'lucide-react';
-
 import { DrivingBreakSection } from '@/features/driver-journal/components/shift-dialog/driving-break-section';
 import { RestEarningsSection } from '@/features/driver-journal/components/shift-dialog/rest-earnings-section';
 import { RestTypeDialog } from '@/features/driver-journal/components/shift-dialog/rest-type-dialog';
 import { ShiftTimesSection } from '@/features/driver-journal/components/shift-dialog/shift-times-section';
 import { useShiftDialog } from '@/features/driver-journal/hooks/use-shift-dialog';
-
 import type {
   Shift,
   ShiftFormData,
-} from '@/features/driver-journal/types/ driver-journal';
+} from '@/features/driver-journal/types/driver-journal';
 
 type ShiftDialogProps = {
   open: boolean;
@@ -129,18 +127,17 @@ export function ShiftDialog({
               shrink-0
               border-b
               px-4
-              py-3
+              py-4
               sm:px-6
-              sm:py-4
             "
           >
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Clock3 className="size-4.5 text-primary" />
+                <Clock3 className="size-4 text-primary" />
               </div>
 
               <div className="min-w-0">
-                <DialogTitle className="text-heading leading-heading">
+                <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
                   {isEditing ? 'Edit shift' : 'Add shift'}
                 </DialogTitle>
 
@@ -168,7 +165,7 @@ export function ShiftDialog({
                 overscroll-contain
               "
             >
-              <div className="min-w-0 space-y-4 px-4 py-4 sm:px-6">
+              <div className="min-w-0 space-y-5 px-4 py-5 sm:px-6">
                 <ShiftTimesSection
                   form={form}
                   hasUnfinishedPreviousShift={hasUnfinishedPreviousShift}
@@ -276,9 +273,11 @@ export function ShiftDialog({
       >
         <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete shift?</AlertDialogTitle>
+            <AlertDialogTitle className="text-heading leading-heading">
+              Delete shift?
+            </AlertDialogTitle>
 
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-caption leading-body">
               This action cannot be undone. This shift will be permanently
               removed from the journal.
             </AlertDialogDescription>

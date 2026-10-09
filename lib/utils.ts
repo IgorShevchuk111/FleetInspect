@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { DurationInput } from '@/features/driver-journal/types/ driver-journal';
+import type { DurationInput } from '@/features/driver-journal/types/driver-journal';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))

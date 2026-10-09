@@ -5,7 +5,7 @@ import { Timer } from 'lucide-react';
 import type {
   DurationInput,
   ShiftFormData,
-} from '@/features/driver-journal/types/ driver-journal';
+} from '@/features/driver-journal/types/driver-journal';
 
 import { DurationInputField } from '@/features/driver-journal/components/duration-input';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';

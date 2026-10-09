@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import { formatDuration } from '@/features/driver-journal/utils/duration';
 import { getShiftDetailsData } from '@/features/driver-journal/utils/shift-details';
 import {
@@ -86,11 +86,13 @@ function DetailRow({
   className?: string;
 }) {
   return (
-    <div className="flex min-h-9 items-center justify-between gap-4 border-b border-border/50 py-1 last:border-b-0">
-      <span className="text-caption text-muted-foreground">{label}</span>
+    <div className="flex min-h-10 items-center justify-between gap-3 border-b border-border/50 py-2 last:border-b-0">
+      <span className="text-caption leading-body text-muted-foreground">
+        {label}
+      </span>
 
       <div
-        className={`text-right text-foreground font-medium ${className ?? ''}`}
+        className={`text-right text-[length:var(--font-size-secondary)] leading-body font-medium text-foreground ${className ?? ''}`}
       >
         {value}
       </div>
@@ -108,11 +110,11 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-2 border-t pt-4 first:border-t-0 first:pt-0">
+    <section className="space-y-2 border-t border-border pt-4 first:border-t-0 first:pt-0">
       <div className="flex items-center gap-2">
-        <Icon className="size-4 text-muted-foreground" />
+        <Icon className="size-4 shrink-0 text-muted-foreground" />
 
-        <h3 className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+        <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
           {title}
         </h3>
       </div>
@@ -129,7 +131,9 @@ function StatusHint({
   children: ReactNode;
   className?: string;
 }) {
-  return <span className={`text-[10px] ${className}`}>{children}</span>;
+  return (
+    <span className={`text-caption leading-body ${className}`}>{children}</span>
+  );
 }
 
 function CompensationOption({
@@ -140,13 +144,13 @@ function CompensationOption({
   onAccept?: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-t py-2 first:border-t-0">
+    <div className="flex items-center justify-between gap-3 border-t border-border py-3 first:border-t-0">
       <div className="min-w-0">
         <div className="text-caption font-medium">
           {option.restType === 'weekly' ? 'Weekly rest' : 'Daily rest'}
         </div>
 
-        <div className="text-[11px] text-muted-foreground">
+        <div className="text-caption leading-body text-muted-foreground">
           {formatDuration(option.dailyRestMinutes)} rest ·{' '}
           {formatDuration(option.compensationMinutes)} compensation
         </div>
@@ -162,7 +166,7 @@ function CompensationOption({
         <Button
           type="button"
           size="sm"
-          className="h-8 shrink-0"
+          className="min-h-9 shrink-0"
           onClick={onAccept}
         >
           Accept
@@ -214,8 +218,6 @@ export function ShiftDetailsDialog({
     drivingOver9Hours,
     drivingOver10Hours,
     shiftOver15Hours,
-    drivingUsageBefore,
-    extendedShiftUsageBefore,
     drivingMaximumMinutes,
     shiftMaximumMinutes,
     compensationReceiver,
@@ -250,14 +252,16 @@ export function ShiftDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:max-w-xl sm:rounded-lg">
-        <DialogHeader className="shrink-0 border-b px-4 py-3 sm:px-6">
+        <DialogHeader className="shrink-0 border-b border-border px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Clock3 className="size-4 text-primary" />
             </div>
 
             <div className="min-w-0">
-              <DialogTitle>Shift details</DialogTitle>
+              <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
+                Shift details
+              </DialogTitle>
 
               <DialogDescription className="text-caption leading-body">
                 {formatDate(shift.date)} {formatTime(shift.start)}
@@ -268,8 +272,8 @@ export function ShiftDetailsDialog({
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="space-y-4 px-4 py-4 sm:px-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="space-y-5 px-4 py-5 sm:px-6">
             <Section icon={CalendarDays} title="Shift times">
               <DetailRow
                 label="Start"
@@ -465,7 +469,7 @@ export function ShiftDetailsDialog({
 
             {candidates.length > 0 && (
               <Section icon={BedDouble} title="Available compensation">
-                <div className="rounded-md border">
+                <div className="rounded-md border border-border">
                   {candidates.map((candidate) => (
                     <div
                       key={`${candidate.reducedWeeklyRestShiftId}-${candidate.shiftId}`}
@@ -511,7 +515,7 @@ export function ShiftDetailsDialog({
 
             {savedCompensations.length > 0 && (
               <Section icon={CheckCircle2} title="Saved compensation">
-                <div className="rounded-md border">
+                <div className="rounded-md border border-border">
                   {savedCompensations.map((compensation) => {
                     const minutes = Number(
                       compensation.compensation_minutes ?? 0,
@@ -522,7 +526,7 @@ export function ShiftDetailsDialog({
                     return (
                       <div
                         key={compensation.id}
-                        className="border-b p-3 last:border-b-0"
+                        className="border-b border-border p-3 last:border-b-0"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-caption font-medium">
@@ -536,10 +540,10 @@ export function ShiftDetailsDialog({
                           <span
                             className={
                               accepted
-                                ? 'text-xs font-medium text-success'
+                                ? 'text-caption font-medium text-success'
                                 : declined
-                                  ? 'text-xs font-medium text-danger'
-                                  : 'text-xs font-medium text-warning'
+                                  ? 'text-caption font-medium text-danger'
+                                  : 'text-caption font-medium text-warning'
                             }
                           >
                             {formatDuration(minutes)}
@@ -547,7 +551,7 @@ export function ShiftDetailsDialog({
                         </div>
 
                         {compensation.daily_rest_minutes != null && (
-                          <div className="mt-1 text-[11px] text-muted-foreground">
+                          <div className="mt-1 text-caption leading-body text-muted-foreground">
                             Daily rest:{' '}
                             {formatDuration(
                               Number(compensation.daily_rest_minutes),
@@ -560,7 +564,7 @@ export function ShiftDetailsDialog({
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="mt-2 h-8"
+                            className="mt-2 min-h-9"
                             onClick={() =>
                               onCancelRestCompensation(compensation.id)
                             }
@@ -577,16 +581,17 @@ export function ShiftDetailsDialog({
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 flex-row justify-center gap-2 border-t px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3">
+        <DialogFooter className="shrink-0 flex-row justify-center gap-2 border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3">
           <Button
             type="button"
             variant="outline"
+            className="min-h-10"
             onClick={() => onOpenChange(false)}
           >
             Close
           </Button>
 
-          <Button type="button" onClick={handleEdit}>
+          <Button type="button" className="min-h-10" onClick={handleEdit}>
             <Pencil className="size-4" />
             Edit shift
           </Button>

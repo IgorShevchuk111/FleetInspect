@@ -1,4 +1,4 @@
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import type { RestCompensation } from '../services/driver-journal';
 import type { WeeklyRestCompensationCandidate } from './weekly-rest-compensation';
 import { calculateShiftMinutes } from './shifts';

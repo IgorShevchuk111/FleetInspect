@@ -1,5 +1,5 @@
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import {
     calculateShiftMinutes,
     getShiftsForWeek,

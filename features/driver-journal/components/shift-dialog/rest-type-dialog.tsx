@@ -12,7 +12,7 @@ import type {
   RestType,
   Shift,
   ShiftFormData,
-} from '@/features/driver-journal/types/ driver-journal';
+} from '@/features/driver-journal/types/driver-journal';
 
 type RestTypeDialogProps = {
   open: boolean;

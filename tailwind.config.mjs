@@ -16,9 +16,11 @@ const tailwindConfig = {
         background: 'hsl(var(--background))',
         secondary: 'hsl(var(--secondary))',
         surface: 'hsl(var(--surface))',
+        card: 'hsl(var(--card))',
 
         foreground: 'hsl(var(--foreground))',
         muted: 'hsl(var(--muted))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
 
         primary: 'hsl(var(--primary))',
         'primary-hover': 'hsl(var(--primary-hover))',
@@ -34,14 +36,39 @@ const tailwindConfig = {
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-
         border: 'hsl(var(--border))',
+      },
+
+      spacing: {
+        'page-x': 'var(--space-page-x)',
+        'page-y': 'var(--space-page-y)',
+        section: 'var(--space-section)',
+        card: 'var(--space-card)',
+        'control-x': 'var(--space-control-x)',
+        'control-y': 'var(--space-control-y)',
+      },
+
+      height: {
+        control: 'var(--height-control)',
+        'control-sm': 'var(--height-control-sm)',
+      },
+
+      minHeight: {
+        control: 'var(--height-control)',
+        'control-sm': 'var(--height-control-sm)',
       },
 
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        card: 'var(--radius-card)',
+        control: 'var(--radius-control)',
+      },
+
+      boxShadow: {
+        card: 'var(--shadow-card)',
+        popover: 'var(--shadow-popover)',
       },
 
       fontSize: {

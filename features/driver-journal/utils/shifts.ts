@@ -1,7 +1,7 @@
 import type {
     JournalTotals,
     Shift,
-} from '@/features/driver-journal/types/ driver-journal';
+} from '@/features/driver-journal/types/driver-journal';
 
 import {
     getEndOfWeek,

@@ -1,4 +1,4 @@
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 const REGULAR_WEEKLY_REST_MINUTES = 45 * 60;

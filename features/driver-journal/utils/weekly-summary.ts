@@ -1,4 +1,4 @@
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 
 import { getEndOfWeek, getStartOfWeek } from './dates';

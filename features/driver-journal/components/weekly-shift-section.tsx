@@ -1,12 +1,10 @@
 import { TableCell, TableRow } from '@/components/ui/table';
 
-import type { Shift } from '@/features/driver-journal/types/ driver-journal';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
-
 import { formatWeek } from '../utils/dates';
 import { prepareWeeklyShiftRows } from '../utils/weekly-shift-view';
-
 import { calculateWeeklySummary } from '../utils/weekly-summary';
 
 import { ShiftRow } from './shift-row';
@@ -48,18 +46,17 @@ export function WeeklyShiftSection({
 
   return (
     <>
-      <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
+      <TableRow className="border-b border-border bg-muted/30 hover:bg-muted/30">
         <TableCell colSpan={6} className="p-0">
-          <div className="border-b bg-background px-3 py-3 sm:px-4 sm:py-4">
-            <div className="flex flex-col items-center">
-              <div className="text-center text-sm font-semibold leading-tight sm:text-base">
+          <div className="border-b border-border bg-background px-card pt-8 pb-2 sm:px-card">
+            <div className="flex flex-col items-center gap-2">
+              <h3 className="text-lg font-semibold leading-heading text-foreground">
                 Week: {formatWeek(weekStart)}
-              </div>
-
-              <div className="mt-1 flex items-center justify-center gap-3">
-                <div className="text-xs text-muted-foreground">
+              </h3>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <span className="text-sm leading-body text-foreground">
                   {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
-                </div>
+                </span>
 
                 <WeeklySummary weekStart={weekStart} summary={weeklySummary} />
               </div>
@@ -67,7 +64,6 @@ export function WeeklyShiftSection({
           </div>
         </TableCell>
       </TableRow>
-
       {rows.map((row) => (
         <ShiftRow
           key={row.shift.id}
@@ -90,17 +86,16 @@ export function WeeklyShiftSection({
           onDelete={onDelete}
         />
       ))}
-
-      {rows.length === 0 ? (
+      {rows.length === 0 && (
         <TableRow>
           <TableCell
             colSpan={6}
-            className="h-20 px-2 py-4 text-center text-sm text-muted-foreground"
+            className="h-20 px-card py-card text-center text-sm text-muted-foreground"
           >
             No shifts this week.
           </TableCell>
         </TableRow>
-      ) : null}
+      )}
     </>
   );
 }

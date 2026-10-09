@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-import type { DurationInput } from '@/features/driver-journal/types/ driver-journal';
+import type { DurationInput } from '@/features/driver-journal/types/driver-journal';
 
 type DurationInputFieldProps = {
   label: string;

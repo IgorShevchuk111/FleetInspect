@@ -16,7 +16,7 @@ import {
 import type {
     Shift,
     ShiftFormData,
-} from '@/features/driver-journal/types/ driver-journal';
+} from '@/features/driver-journal/types/driver-journal';
 
 import { durationToMinutes } from '@/features/driver-journal/utils/duration';
 import {
