@@ -108,12 +108,12 @@ const headerClass = `  bg-muted/70
 function TableColumns() {
   return (
     <colgroup>
-      <col className="w-[15%]" />
-      <col className="w-[20%]" />
-      <col className="w-[15%]" />
-      <col className="w-[15%]" />
-      <col className="w-[15%]" />
-      <col className="w-[20%]" />
+      <col className="w-[16.6667%]" />
+      <col className="w-[16.6667%]" />
+      <col className="w-[16.6667%]" />
+      <col className="w-[16.6667%]" />
+      <col className="w-[16.6667%]" />
+      <col className="w-[16.6667%]" />
     </colgroup>
   );
 }

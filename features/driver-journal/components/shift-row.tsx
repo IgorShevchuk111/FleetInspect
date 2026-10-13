@@ -257,7 +257,7 @@ export function ShiftRow({
 
             <div
               className={cn(
-                'relative z-10 grid w-full grid-cols-[20%_15%_15%_15%_20%_15%]',
+                'relative z-10 grid w-full grid-cols-[16.6667%_16.6667%_16.6667%_16.6667%_16.6667%_16.6667%]',
                 'transition-transform duration-200 ease-out',
                 swiped ? '-translate-x-16' : 'translate-x-0',
                 'bg-background hover:bg-muted',
@@ -328,13 +328,15 @@ export function ShiftRow({
               </div>
 
               {/* End */}
-              <div className="flex flex-col items-center leading-tight">
-                <span className="text-caption font-medium">
-                  {formatDate(endDate)}
-                </span>
-                <span className="text-caption text-muted-foreground">
-                  {formatTime(shift.end)}
-                </span>
+              <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5">
+                <div className="flex flex-col items-center leading-tight">
+                  <span className="text-caption font-medium">
+                    {formatDate(endDate)}
+                  </span>
+                  <span className="text-caption text-muted-foreground">
+                    {formatTime(shift.end)}
+                  </span>
+                </div>
               </div>
 
               {/* Actions */}

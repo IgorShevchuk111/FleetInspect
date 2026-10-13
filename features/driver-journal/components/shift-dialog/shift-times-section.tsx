@@ -189,7 +189,7 @@ export function ShiftTimesSection({
               onChange={(event) => onStartTimeChange(event.target.value)}
               onBlur={onStartTimeBlur}
               aria-label="Start time"
-              className="w-full min-w-0"
+              className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
             />
           </div>
         </div>
@@ -217,7 +217,7 @@ export function ShiftTimesSection({
               onChange={(event) => onEndTimeChange(event.target.value)}
               disabled={!canEnterRestOfShift}
               aria-label="End time"
-              className="w-full min-w-0"
+              className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
             />
           </div>
         </div>
