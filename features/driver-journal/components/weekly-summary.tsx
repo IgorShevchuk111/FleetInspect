@@ -31,7 +31,6 @@ type WeeklySummaryProps = {
   summary: WeeklySummaryData;
   weekStart: Date;
   sharedAllowanceUsed: number;
-  extendedDrivingDaysUsed: number;
 };
 
 type SummaryRowProps = {
