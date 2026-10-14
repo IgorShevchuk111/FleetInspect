@@ -85,7 +85,19 @@ export function RestTypeDialog({
             </p>
 
             <p className="text-sm font-medium">
-              Rest: {formatRestDuration(previousCompletedShift.rest)}
+              Rest:
+              {formatRestDuration(
+                currentStartDateTime && previousEndDateTime
+                  ? Math.max(
+                      0,
+                      Math.round(
+                        (currentStartDateTime.getTime() -
+                          previousEndDateTime.getTime()) /
+                          60000,
+                      ),
+                    )
+                  : 0,
+              )}
             </p>
           </div>
         ) : (

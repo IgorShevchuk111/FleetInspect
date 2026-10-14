@@ -51,7 +51,7 @@ function formatDateRange(start: Date, end: Date) {
 
 function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
   return (
-    <div className="flex min-h-10 items-center justify-between gap-3 py-2">
+    <div className="flex min-h-11 items-center justify-between gap-4 py-2">
       <span
         className={
           prominent
@@ -75,7 +75,7 @@ function SummaryRow({ label, value, prominent = false }: SummaryRowProps) {
 
 function PeriodLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1 text-caption leading-body text-muted-foreground">
+    <p className="text-caption leading-body text-muted-foreground">
       {children}
     </p>
   );
@@ -84,18 +84,12 @@ function PeriodLabel({ children }: { children: ReactNode }) {
 function SummarySection({
   title,
   children,
-  bordered = true,
 }: {
   title: string;
   children: ReactNode;
-  bordered?: boolean;
 }) {
   return (
-    <section
-      className={
-        bordered ? 'space-y-2 border-t border-border pt-4' : 'space-y-2'
-      }
-    >
+    <section className="space-y-3 border-t border-border pt-5">
       <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
         {title}
       </h3>
@@ -126,52 +120,33 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
       </DialogTrigger>
 
       <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-lg">
-        <DialogHeader className="shrink-0 border-b border-border px-4 py-4 text-left sm:px-6">
-          <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
+        <DialogHeader className="shrink-0 border-b border-border px-5 py-5 text-left sm:px-6">
+          <DialogTitle className="text-heading font-semibold leading-heading tracking-tight text-foreground">
             Weekly Summary
           </DialogTitle>
 
-          <DialogDescription className="text-caption leading-body">
+          <DialogDescription className="mt-1 text-caption leading-body text-muted-foreground">
             {formatDateRange(currentWeekStart, currentWeekEnd)}
-            <span className="block">Monday – Sunday</span>
+            <span className="mt-0.5 block">Monday – Sunday</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
-          <div className="space-y-5">
-            <SummarySection title="This week" bordered={false}>
-              <div className="divide-y divide-border rounded-lg border border-border px-3">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+          <div className="space-y-6">
+            <SummarySection title="Driving limits">
+              <div className="divide-y divide-border">
                 <SummaryRow
-                  label="Driving"
-                  value={formatDuration(summary.driving)}
+                  label="Weekly driving"
+                  value={`${formatDuration(summary.driving)} / 56h`}
                   prominent
                 />
 
                 <SummaryRow
-                  label="Working time"
-                  value={formatDuration(summary.working)}
-                  prominent
-                />
-
-                <SummaryRow
-                  label="Earned"
-                  value={`£${summary.earn.toFixed(2)}`}
+                  label="2-week driving"
+                  value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
                   prominent
                 />
               </div>
-            </SummarySection>
-
-            <SummarySection title="Driving limits">
-              <SummaryRow
-                label="Weekly driving"
-                value={`${formatDuration(summary.driving)} / 56h`}
-                prominent
-              />
-
-              <SummaryRow
-                label="2-week driving"
-                value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
-              />
 
               <PeriodLabel>
                 {formatDateRange(twoWeekStart, currentWeekEnd)}
@@ -179,13 +154,21 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
             </SummarySection>
 
             <SummarySection title="Working time">
-              <SummaryRow
-                label="17-week average"
-                value={`${formatDuration(
-                  Math.round(summary.average17WeekWorking),
-                )} / week`}
-                prominent
-              />
+              <div className="divide-y divide-border">
+                <SummaryRow
+                  label="This week"
+                  value={formatDuration(summary.working)}
+                  prominent
+                />
+
+                <SummaryRow
+                  label="17-week average"
+                  value={`${formatDuration(
+                    Math.round(summary.average17WeekWorking),
+                  )} / week`}
+                  prominent
+                />
+              </div>
 
               <PeriodLabel>
                 {formatDateRange(seventeenWeekStart, currentWeekEnd)}
@@ -193,11 +176,22 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
             </SummarySection>
 
             <SummarySection title="Earnings">
-              <SummaryRow
-                label="Year-to-date"
-                value={`£${summary.annualEarned.toFixed(2)}`}
-                prominent
-              />
+              <div className="divide-y divide-border">
+                <SummaryRow
+                  label="Earned this week"
+                  value={`£${summary.earn.toFixed(2)}`}
+                  prominent
+                />
+
+                <SummaryRow
+                  label="Year-to-date"
+                  value={`£${summary.annualEarned.toLocaleString('en-GB', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
+                  prominent
+                />
+              </div>
 
               <PeriodLabel>
                 {formatDateRange(yearStart, currentWeekEnd)}

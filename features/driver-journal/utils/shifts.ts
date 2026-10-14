@@ -114,6 +114,7 @@ export function calculateShiftTotals(
     );
 }
 
+
 export function getShiftsForWeek(
     shifts: Shift[],
     weekStart: Date,
@@ -126,16 +127,16 @@ export function getShiftsForWeek(
             return false;
         }
 
+        const date = new Date(`${shift.date}T00:00:00`);
 
-        const date = new Date(
-            `${shift.date} T00:00:00`,
-        );
+        if (Number.isNaN(date.getTime())) {
+            return false;
+        }
 
         return date >= start && date <= end;
-
-
     });
 }
+
 
 export function sortShiftsChronologically(
     shifts: Shift[],
