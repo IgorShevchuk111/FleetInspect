@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { InstallAppActions } from '@/features/driver-journal/components/install-app-actions';
 
 import { ArrowRight, ClipboardCheck, Map, Truck } from 'lucide-react';
 
@@ -100,34 +101,44 @@ export default async function HomePage({
             <div className="mx-auto w-full max-w-sm text-center">
               {accessibleApps.map((app) => {
                 const Icon = app.icon;
+                const shouldShowInstallOptions =
+                  !user && app.name === 'Driver Journal';
 
                 return (
-                  <Link
-                    key={app.name}
-                    href={user ? app.href : '/login'}
-                    className="group block"
-                  >
-                    <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:size-20">
-                      <Icon className="size-8 sm:size-9" strokeWidth={1.7} />
-                    </div>
+                  <div key={app.name}>
+                    <Link
+                      href={user ? app.href : '/login'}
+                      className="group block"
+                    >
+                      <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:size-20">
+                        <Icon className="size-8 sm:size-9" strokeWidth={1.7} />
+                      </div>
 
-                    <h1 className="mt-6 text-2xl font-semibold tracking-tight sm:text-3xl">
-                      {app.name}
-                    </h1>
+                      <h1 className="mt-6 text-2xl font-semibold tracking-tight sm:text-3xl">
+                        {app.name}
+                      </h1>
 
-                    <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">
-                      {app.description}
-                    </p>
+                      <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">
+                        {app.description}
+                      </p>
+                    </Link>
 
-                    <div className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                      <span>Open application</span>
+                    {shouldShowInstallOptions ? (
+                      <InstallAppActions loginHref="/login" />
+                    ) : (
+                      <Link
+                        href={user ? app.href : '/login'}
+                        className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                      >
+                        <span>Open application</span>
 
-                      <ArrowRight
-                        className="size-4 transition-transform duration-200 group-hover:translate-x-1"
-                        strokeWidth={2}
-                      />
-                    </div>
-                  </Link>
+                        <ArrowRight
+                          className="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                          strokeWidth={2}
+                        />
+                      </Link>
+                    )}
+                  </div>
                 );
               })}
             </div>
