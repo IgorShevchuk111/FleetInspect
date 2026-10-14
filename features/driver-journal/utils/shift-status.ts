@@ -1,9 +1,10 @@
+
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import { calculateShiftMinutes } from './shifts';
 import {
     MAX_EXTENDED_DRIVING_DAYS,
-    MAX_EXTENDED_SHIFTS,
+    MAX_SHARED_ALLOWANCE,
     normalizeDrivingMinutes,
 } from './compliance-usage';
 
@@ -59,7 +60,7 @@ export function isReducedDailyRest(shift: Shift) {
 export function getShiftStatus(
     shift: Shift,
     shiftMinutes: number,
-    extendedShiftsUsedBefore: number,
+    sharedAllowanceUsedBefore: number,
 ) {
     const regularMaxEnd = getMaxEndTime(
         shift,
@@ -81,7 +82,7 @@ export function getShiftStatus(
     }
 
     if (shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES) {
-        if (extendedShiftsUsedBefore >= MAX_EXTENDED_SHIFTS) {
+        if (sharedAllowanceUsedBefore >= MAX_SHARED_ALLOWANCE) {
             return {
                 label: 'Extended · Not allowed',
                 className: 'text-danger',
@@ -187,4 +188,57 @@ export function getRestStatus(
         label: 'Regular daily rest',
         className: 'text-success',
     };
+}
+
+
+export function getMaxShiftEndDateTime(
+    date: string,
+    start: string,
+    minutes: number,
+) {
+    const [year, month, day] = date.split('-').map(Number);
+    const [hours, mins] = start.split(':').map(Number);
+
+    if (
+        !year ||
+        !month ||
+        !day ||
+        !start ||
+        !Number.isFinite(hours) ||
+        !Number.isFinite(mins) ||
+        !Number.isFinite(minutes) ||
+        minutes <= 0
+    ) {
+        return null;
+    }
+
+    const startDate = new Date(
+        year,
+        month - 1,
+        day,
+        hours,
+        mins,
+    );
+
+    if (Number.isNaN(startDate.getTime())) {
+        return null;
+    }
+
+    const maxEnd = new Date(
+        startDate.getTime() + minutes * 60 * 1000,
+    );
+
+    const endDate = [
+        maxEnd.getFullYear(),
+        String(maxEnd.getMonth() + 1).padStart(2, '0'),
+        String(maxEnd.getDate()).padStart(2, '0'),
+    ].join('-');
+
+    const endTime = maxEnd.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+
+    return { date: endDate, time: endTime };
 }

@@ -1,12 +1,12 @@
-import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import type { RestCompensation } from '../services/driver-journal';
 
 import {
     buildExtendedDrivingUsage,
-    buildExtendedShiftUsage,
     buildSharedAllowanceUsage,
     normalizeDrivingMinutes,
+    usesReducedDailyRestAllowance,
 } from './compliance-usage';
 
 import { buildWeeklyRestCompensationCandidates } from './weekly-rest-compensation';
@@ -19,7 +19,10 @@ import {
     isReducedDailyRest,
 } from '@/features/driver-journal/utils/shift-status';
 
-import { calculateShiftMinutes } from './shifts';
+import {
+    calculateShiftMinutes,
+    sortShiftsChronologically,
+} from './shifts';
 
 type CompensationCandidates = ReturnType<
     typeof buildWeeklyRestCompensationCandidates
@@ -27,19 +30,17 @@ type CompensationCandidates = ReturnType<
 
 export type WeeklyShiftRowData = {
     shift: Shift;
+    startsAfterWeeklyRest: boolean;
     drivingStatus: ReturnType<typeof getDrivingStatus>;
     shiftStatus: ReturnType<typeof getShiftStatus>;
     restStatus: ReturnType<typeof getRestStatus>;
     drivingUsageAfter: number;
     sharedAllowanceUsedAfter: number;
-    extendedShiftUsageAfter: number;
     reducedDailyRest: boolean;
     extendedShift: boolean;
+    followingRestUsesAllowance: boolean;
     weeklyRestCompensationCandidates:
-    CompensationCandidates extends Map<
-        string,
-        infer Candidate
-    >
+    CompensationCandidates extends Map<string, infer Candidate>
     ? Candidate
     : never;
     restCompensations: RestCompensation[];
@@ -50,17 +51,25 @@ export function prepareWeeklyShiftRows(
     allShifts: Shift[],
     restCompensations: RestCompensation[],
 ): WeeklyShiftRowData[] {
-    const sharedAllowanceUsage =
-        buildSharedAllowanceUsage(
-            allShifts,
-            restCompensations,
-        );
+    const chronologicalShifts = sortShiftsChronologically(allShifts);
+    const firstHistoricalShiftId = chronologicalShifts[0]?.id;
+    const nextShiftById = new Map<string, Shift>();
 
-    const extendedDrivingUsage =
-        buildExtendedDrivingUsage(allShifts);
+    chronologicalShifts.forEach((shift, index) => {
+        const nextShift = chronologicalShifts[index + 1];
 
-    const extendedShiftUsage =
-        buildExtendedShiftUsage(allShifts);
+        if (nextShift) {
+            nextShiftById.set(shift.id, nextShift);
+        }
+    });
+
+    const sharedAllowanceUsage = buildSharedAllowanceUsage(
+        allShifts,
+        restCompensations,
+    );
+
+    // Extended driving remains a separate Monday–Sunday counter.
+    const extendedDrivingUsage = buildExtendedDrivingUsage(allShifts);
 
     const weeklyRestCompensationCandidates =
         buildWeeklyRestCompensationCandidates(
@@ -70,13 +79,8 @@ export function prepareWeeklyShiftRows(
 
     return [...shifts]
         .sort((a, b) => {
-            const dateA = new Date(
-                `${a.date}T${a.start}`,
-            ).getTime();
-
-            const dateB = new Date(
-                `${b.date}T${b.start}`,
-            ).getTime();
+            const dateA = new Date(`${a.date}T${a.start}`).getTime();
+            const dateB = new Date(`${b.date}T${b.start}`).getTime();
 
             return dateB - dateA;
         })
@@ -88,22 +92,17 @@ export function prepareWeeklyShiftRows(
                 shift.end,
             );
 
-            const baseSharedAllowanceUsedAfter =
+            const sharedAllowanceUsedAfter =
                 sharedAllowanceUsage.get(shift.id) ?? 0;
 
-            const baseReducedDailyRest =
-                isReducedDailyRest(shift);
+            const baseReducedDailyRest = isReducedDailyRest(shift);
+            const extendedShift = hasExtendedShift(shift);
 
-            const extendedShift =
-                hasExtendedShift(shift);
-
-            const acceptedCompensationForShift =
-                restCompensations.find(
-                    (compensation) =>
-                        compensation.compensation_shift_id ===
-                        shift.id &&
-                        compensation.decision === 'accepted',
-                );
+            const acceptedCompensationForShift = restCompensations.find(
+                (compensation) =>
+                    compensation.compensation_shift_id === shift.id &&
+                    compensation.decision === 'accepted',
+            );
 
             const effectiveRestMinutes =
                 shift.restType === 'daily'
@@ -111,8 +110,7 @@ export function prepareWeeklyShiftRows(
                         0,
                         Number(shift.rest) -
                         Number(
-                            acceptedCompensationForShift?.compensation_minutes ??
-                            0,
+                            acceptedCompensationForShift?.compensation_minutes ?? 0,
                         ),
                     )
                     : Number(shift.rest);
@@ -123,49 +121,50 @@ export function prepareWeeklyShiftRows(
                 effectiveRestMinutes >= 9 * 60 &&
                 effectiveRestMinutes < 11 * 60;
 
+            // This describes the rest shown on this row, not the allowance
+            // event attributed to this shift.
             const reducedDailyRest =
-                baseReducedDailyRest ||
-                compensationUsesReducedDailyRest;
+                baseReducedDailyRest || compensationUsesReducedDailyRest;
 
-            const compensationAddsAllowance =
-                compensationUsesReducedDailyRest &&
-                !baseReducedDailyRest;
+            const followingShift = nextShiftById.get(shift.id);
 
-            const sharedAllowanceUsedAfter =
-                baseSharedAllowanceUsedAfter +
-                (compensationAddsAllowance ? 1 : 0);
+            const followingRestUsesAllowance = followingShift
+                ? usesReducedDailyRestAllowance(
+                    followingShift,
+                    restCompensations,
+                )
+                : false;
 
             const currentShiftUsesAllowance =
-                reducedDailyRest;
+                extendedShift || followingRestUsesAllowance;
 
-            const sharedAllowanceUsedBefore =
-                Math.max(
+            // A qualifying weekly rest resets the counter for this shift.
+            const isQualifyingWeeklyRest =
+                shift.restType === 'weekly' &&
+                effectiveRestMinutes >= 24 * 60;
+
+            const sharedAllowanceUsedBefore = isQualifyingWeeklyRest
+                ? 0
+                : Math.max(
                     0,
                     sharedAllowanceUsedAfter -
                     (currentShiftUsesAllowance ? 1 : 0),
                 );
 
-            const drivingMinutes =
-                normalizeDrivingMinutes(shift.driving);
-
+            const drivingMinutes = normalizeDrivingMinutes(shift.driving);
             const drivingUsageAfter =
                 extendedDrivingUsage.get(shift.id) ?? 0;
 
-            const extendedShiftUsageAfter =
-                extendedShiftUsage.get(shift.id) ?? 0;
+            const extendedDriving = drivingMinutes > 9 * 60;
 
-            const extendedDriving =
-                drivingMinutes > 9 * 60;
-
-            const drivingUsageBefore =
-                Math.max(
-                    0,
-                    drivingUsageAfter -
-                    (extendedDriving ? 1 : 0),
-                );
+            const drivingUsageBefore = Math.max(
+                0,
+                drivingUsageAfter - (extendedDriving ? 1 : 0),
+            );
 
             return {
                 shift,
+                startsAfterWeeklyRest: shift.id === firstHistoricalShiftId,
                 drivingStatus: getDrivingStatus(
                     drivingMinutes,
                     drivingUsageBefore,
@@ -175,27 +174,19 @@ export function prepareWeeklyShiftRows(
                     shiftMinutes,
                     sharedAllowanceUsedBefore,
                 ),
-                restStatus: getRestStatus(
-                    shift,
-                    effectiveRestMinutes,
-                ),
+                restStatus: getRestStatus(shift, effectiveRestMinutes),
                 drivingUsageAfter,
                 sharedAllowanceUsedAfter,
-                extendedShiftUsageAfter,
                 reducedDailyRest,
                 extendedShift,
+                followingRestUsesAllowance,
                 weeklyRestCompensationCandidates:
-                    weeklyRestCompensationCandidates.get(
-                        shift.id,
-                    ),
-                restCompensations:
-                    restCompensations.filter(
-                        (compensation) =>
-                            compensation.reduced_weekly_rest_shift_id ===
-                            shift.id ||
-                            compensation.compensation_shift_id ===
-                            shift.id,
-                    ),
+                    weeklyRestCompensationCandidates.get(shift.id),
+                restCompensations: restCompensations.filter(
+                    (compensation) =>
+                        compensation.reduced_weekly_rest_shift_id === shift.id ||
+                        compensation.compensation_shift_id === shift.id,
+                ),
             };
         });
 }

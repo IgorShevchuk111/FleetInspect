@@ -1,3 +1,4 @@
+
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
@@ -8,7 +9,6 @@ import {
 } from './shifts';
 
 const MAX_SHARED_ALLOWANCE = 3;
-const MAX_EXTENDED_SHIFTS = 3;
 
 const MINIMUM_WEEKLY_REST_MINUTES = 24 * 60;
 
@@ -22,6 +22,11 @@ const MAX_SHIFT_SPREAD_MINUTES = 15 * 60;
 
 const REGULAR_DAILY_REST_MINUTES = 11 * 60;
 
+const MINIMUM_REDUCED_DAILY_REST_MINUTES = 9 * 60;
+
+/**
+ * Returns the Monday date for the fixed Monday–Sunday week.
+ */
 function getFixedWeekKey(dateString: string) {
     const date = new Date(`${dateString}T12:00:00`);
 
@@ -30,7 +35,6 @@ function getFixedWeekKey(dateString: string) {
     }
 
     const day = date.getDay();
-
     const mondayOffset = day === 0 ? -6 : 1 - day;
 
     date.setDate(date.getDate() + mondayOffset);
@@ -46,13 +50,20 @@ function hasAcceptedReducedDailyRestCompensation(
         (compensation) =>
             compensation.compensation_shift_id === shiftId &&
             compensation.decision === 'accepted' &&
-            Number(compensation.daily_rest_minutes) >= 9 * 60 &&
+            Number(compensation.daily_rest_minutes) >=
+            MINIMUM_REDUCED_DAILY_REST_MINUTES &&
             Number(compensation.daily_rest_minutes) <
             REGULAR_DAILY_REST_MINUTES,
     );
 }
 
-function usesSharedAllowance(
+/**
+ * Checks whether the rest recorded on this shift is a reduced daily rest.
+ *
+ * This describes the rest before this shift. When calculating shared
+ * allowance usage, that rest is attributed to the preceding shift.
+ */
+export function usesReducedDailyRestAllowance(
     shift: Shift,
     restCompensations: RestCompensation[] = [],
 ) {
@@ -60,7 +71,7 @@ function usesSharedAllowance(
 
     const hasReducedDailyRest =
         shift.restType === 'daily' &&
-        rest >= 9 * 60 &&
+        rest >= MINIMUM_REDUCED_DAILY_REST_MINUTES &&
         rest < REGULAR_DAILY_REST_MINUTES;
 
     const hasReducedDailyRestCompensation =
@@ -69,30 +80,43 @@ function usesSharedAllowance(
             restCompensations,
         );
 
+    return hasReducedDailyRest || hasReducedDailyRestCompensation;
+}
+
+function hasExtendedShiftAllowance(shift: Shift) {
+    const shiftMinutes = calculateShiftMinutes(shift);
+
     return (
-        hasReducedDailyRest ||
-        hasReducedDailyRestCompensation
+        shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
+        shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES
     );
 }
 
 /**
- * Counts reduced daily rests.
+ * Counts shared allowance usage.
  *
- * The allowance resets after a qualifying weekly rest.
+ * A shift consumes at most one use when either:
+ * - its shift duration is over 13 hours and no more than 15 hours; or
+ * - the rest recorded on the following shift is a reduced daily rest.
  *
- * Extended shifts are deliberately NOT included here.
+ * The rest is stored on the following shift, but its allowance usage
+ * belongs to the preceding shift. If both conditions apply, only one
+ * use is counted.
+ *
+ * The counter resets when a shift records a weekly rest of at least
+ * 24 hours.
  */
 export function buildSharedAllowanceUsage(
     shifts: Shift[],
     restCompensations: RestCompensation[] = [],
 ): Map<string, number> {
     const sortedShifts = sortShiftsChronologically(shifts);
-
     const usageByShiftId = new Map<string, number>();
 
     let allowanceUsed = 0;
 
-    for (const shift of sortedShifts) {
+    for (let index = 0; index < sortedShifts.length; index += 1) {
+        const shift = sortedShifts[index];
         const rest = Number(shift.rest) || 0;
 
         if (
@@ -100,57 +124,44 @@ export function buildSharedAllowanceUsage(
             rest >= MINIMUM_WEEKLY_REST_MINUTES
         ) {
             allowanceUsed = 0;
-
-            usageByShiftId.set(
-                shift.id,
-                allowanceUsed,
-            );
-
-            continue;
         }
 
-        if (
-            usesSharedAllowance(
-                shift,
+        const followingShift = sortedShifts[index + 1];
+
+        const followingRestUsesAllowance = followingShift
+            ? usesReducedDailyRestAllowance(
+                followingShift,
                 restCompensations,
             )
-        ) {
+            : false;
+
+        const currentShiftUsesAllowance =
+            hasExtendedShiftAllowance(shift) ||
+            followingRestUsesAllowance;
+
+        if (currentShiftUsesAllowance) {
             allowanceUsed += 1;
         }
 
-        usageByShiftId.set(
-            shift.id,
-            allowanceUsed,
-        );
+        usageByShiftId.set(shift.id, allowanceUsed);
     }
 
     return usageByShiftId;
 }
 
 /**
- * Counts extended driving days in each fixed week.
+ * Counts extended driving days in each fixed Monday–Sunday week.
  *
- * Fixed week:
- * Monday 00:00 -> Sunday 24:00.
+ * Any shift with more than 9 hours of driving consumes one day,
+ * including a shift that exceeds the 10-hour maximum.
  *
- * Any shift over 9 hours of driving consumes
- * one extended-driving day allowance for display,
- * including a shift already over the 10-hour maximum.
- *
- * Examples:
- *
- * 10h45 -> 1/2
- * 9h04  -> 2/2
- *
- * The counter resets on Monday.
+ * This counter is independent of the shared allowance counter.
  */
 export function buildExtendedDrivingUsage(
     shifts: Shift[],
 ): Map<string, number> {
     const sortedShifts = sortShiftsChronologically(shifts);
-
     const usageByShiftId = new Map<string, number>();
-
     const usageByWeek = new Map<string, number>();
 
     for (const shift of sortedShifts) {
@@ -161,12 +172,9 @@ export function buildExtendedDrivingUsage(
             continue;
         }
 
-        let extendedDrivingDaysUsed =
-            usageByWeek.get(weekKey) ?? 0;
+        let extendedDrivingDaysUsed = usageByWeek.get(weekKey) ?? 0;
 
-        const drivingMinutes =
-            Number(shift.driving) || 0;
-
+        const drivingMinutes = Number(shift.driving) || 0;
         const isExtendedDriving =
             drivingMinutes > EXTENDED_DAILY_DRIVING_MINUTES;
 
@@ -174,83 +182,14 @@ export function buildExtendedDrivingUsage(
             extendedDrivingDaysUsed += 1;
         }
 
-        usageByWeek.set(
-            weekKey,
-            extendedDrivingDaysUsed,
-        );
-
-        usageByShiftId.set(
-            shift.id,
-            extendedDrivingDaysUsed,
-        );
+        usageByWeek.set(weekKey, extendedDrivingDaysUsed);
+        usageByShiftId.set(shift.id, extendedDrivingDaysUsed);
     }
 
     return usageByShiftId;
 }
 
-/**
- * Counts actual extended shifts.
- *
- * Extended shift:
- * >13h and <=15h.
- *
- * Maximum:
- * 3 extended shifts between qualifying weekly rests.
- *
- * The counter resets after a qualifying weekly rest.
- *
- * This counter is deliberately separate from
- * the reduced daily rest allowance.
- */
-export function buildExtendedShiftUsage(
-    shifts: Shift[],
-): Map<string, number> {
-    const sortedShifts = sortShiftsChronologically(shifts);
-
-    const usageByShiftId = new Map<string, number>();
-
-    let extendedShiftsUsed = 0;
-
-    for (const shift of sortedShifts) {
-        const rest = Number(shift.rest) || 0;
-
-        if (
-            shift.restType === 'weekly' &&
-            rest >= MINIMUM_WEEKLY_REST_MINUTES
-        ) {
-            extendedShiftsUsed = 0;
-
-            usageByShiftId.set(
-                shift.id,
-                extendedShiftsUsed,
-            );
-
-            continue;
-        }
-
-        const shiftMinutes =
-            calculateShiftMinutes(shift);
-
-        const isExtendedShift =
-            shiftMinutes > REGULAR_SHIFT_SPREAD_MINUTES &&
-            shiftMinutes <= MAX_SHIFT_SPREAD_MINUTES;
-
-        if (isExtendedShift) {
-            extendedShiftsUsed += 1;
-        }
-
-        usageByShiftId.set(
-            shift.id,
-            extendedShiftsUsed,
-        );
-    }
-
-    return usageByShiftId;
-}
-
-export function normalizeDrivingMinutes(
-    value: number,
-) {
+export function normalizeDrivingMinutes(value: number) {
     const minutes = Number(value);
 
     if (!Number.isFinite(minutes)) {
@@ -262,6 +201,5 @@ export function normalizeDrivingMinutes(
 
 export {
     MAX_SHARED_ALLOWANCE,
-    MAX_EXTENDED_SHIFTS,
     MAX_EXTENDED_DRIVING_DAYS,
 };

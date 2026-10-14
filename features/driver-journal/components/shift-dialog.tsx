@@ -20,11 +20,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Clock3, Trash2 } from 'lucide-react';
+
 import { DrivingBreakSection } from '@/features/driver-journal/components/shift-dialog/driving-break-section';
 import { RestEarningsSection } from '@/features/driver-journal/components/shift-dialog/rest-earnings-section';
 import { RestTypeDialog } from '@/features/driver-journal/components/shift-dialog/rest-type-dialog';
 import { ShiftTimesSection } from '@/features/driver-journal/components/shift-dialog/shift-times-section';
 import { useShiftDialog } from '@/features/driver-journal/hooks/use-shift-dialog';
+import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type {
   Shift,
   ShiftFormData,
@@ -34,6 +36,7 @@ type ShiftDialogProps = {
   open: boolean;
   shift?: Shift | null;
   shifts?: Shift[];
+  restCompensations?: RestCompensation[];
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ShiftFormData) => void;
   onDelete?: () => void;
@@ -43,6 +46,7 @@ export function ShiftDialog({
   open,
   shift,
   shifts = [],
+  restCompensations = [],
   onOpenChange,
   onSubmit,
   onDelete,
@@ -56,7 +60,7 @@ export function ShiftDialog({
     previousCompletedShift,
     extendedDrivingDaysUsed,
     drivingMaximum,
-    extendedShiftsUsed,
+    sharedAllowanceUsed,
     shiftMaximum,
     actualDrivingMinutes,
     actualShiftMinutes,
@@ -86,6 +90,7 @@ export function ShiftDialog({
     open,
     shift,
     shifts,
+    restCompensations,
     onOpenChange,
     onSubmit,
     onDelete,
@@ -105,34 +110,20 @@ export function ShiftDialog({
       >
         <DialogContent
           className="
-            flex
-            h-[100dvh]
-            max-h-[100dvh]
-            w-screen
-            max-w-none
-            flex-col
-            gap-0
-            overflow-hidden
-            rounded-none
-            p-0
-            sm:h-auto
-            sm:max-h-[90vh]
-            sm:w-[calc(100vw-2rem)]
-            sm:max-w-xl
-            sm:rounded-lg
+            flex h-[100dvh] max-h-[100dvh] w-screen max-w-none
+            flex-col gap-0 overflow-hidden rounded-none p-0
+            sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-2rem)]
+            sm:max-w-xl sm:rounded-lg
           "
         >
           <DialogHeader
             className="
-              shrink-0
-              border-b
-              px-4
-              py-4
-              sm:px-6
+              shrink-0 border-b border-border
+              px-4 py-4 sm:px-6
             "
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <Clock3 className="size-4 text-primary" />
               </div>
 
@@ -141,7 +132,7 @@ export function ShiftDialog({
                   {isEditing ? 'Edit shift' : 'Add shift'}
                 </DialogTitle>
 
-                <DialogDescription className="mt-0.5 text-caption leading-body">
+                <DialogDescription className="text-caption leading-body">
                   {isEditing
                     ? 'Update your driving shift details.'
                     : 'Enter your driving shift details.'}
@@ -156,13 +147,8 @@ export function ShiftDialog({
           >
             <div
               className="
-                min-h-0
-                min-w-0
-                flex-1
-                touch-pan-y
-                overflow-x-hidden
-                overflow-y-auto
-                overscroll-contain
+                min-h-0 min-w-0 flex-1 touch-pan-y
+                overflow-x-hidden overflow-y-auto overscroll-contain
               "
             >
               <div className="min-w-0 space-y-5 px-4 py-5 sm:px-6">
@@ -170,6 +156,9 @@ export function ShiftDialog({
                   form={form}
                   hasUnfinishedPreviousShift={hasUnfinishedPreviousShift}
                   canEnterRestOfShift={canEnterRestOfShift}
+                  shiftMaximum={shiftMaximum}
+                  sharedAllowanceUsed={sharedAllowanceUsed}
+                  actualShiftMinutes={actualShiftMinutes}
                   onStartDateChange={handleStartDateChange}
                   onStartTimeChange={handleStartTimeChange}
                   onStartTimeBlur={handleStartTimeBlur}
@@ -181,12 +170,9 @@ export function ShiftDialog({
                   form={form}
                   canEnterRestOfShift={canEnterRestOfShift}
                   actualDrivingMinutes={actualDrivingMinutes}
-                  actualShiftMinutes={actualShiftMinutes}
                   workingMinutes={workingMinutes}
                   drivingMaximum={drivingMaximum}
-                  shiftMaximum={shiftMaximum}
                   extendedDrivingDaysUsed={extendedDrivingDaysUsed}
-                  extendedShiftsUsed={extendedShiftsUsed}
                   onDrivingChange={handleDrivingChange}
                   onBreakChange={handleBreakChange}
                 />
@@ -207,19 +193,10 @@ export function ShiftDialog({
 
             <DialogFooter
               className="
-                shrink-0
-                flex-row
-                flex-wrap
-                items-center
-                justify-center
-                gap-2
-                border-t
-                px-4
-                py-3
+                shrink-0 flex-row flex-wrap items-center justify-center
+                gap-2 border-t border-border px-4 py-3
                 pb-[calc(0.75rem+env(safe-area-inset-bottom))]
-                sm:px-6
-                sm:py-3
-                sm:pb-3
+                sm:px-6 sm:py-3 sm:pb-3
               "
             >
               {isEditing ? (
@@ -227,7 +204,12 @@ export function ShiftDialog({
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDeleteConfirmOpen(true)}
-                  className="text-danger hover:bg-danger/10 hover:text-danger dark:text-danger dark:hover:bg-danger/20 dark:hover:text-danger"
+                  className="
+                    min-h-10 text-danger
+                    hover:bg-danger/10 hover:text-danger
+                    dark:text-danger dark:hover:bg-danger/20
+                    dark:hover:text-danger
+                  "
                 >
                   <Trash2 className="size-4" />
                   Delete
@@ -238,7 +220,7 @@ export function ShiftDialog({
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="min-w-20"
+                className="min-h-10 min-w-20"
               >
                 Cancel
               </Button>
@@ -250,7 +232,7 @@ export function ShiftDialog({
                   isWeeklyRestBlocked ||
                   (!isEditing && !hasSelectedRestType)
                 }
-                className="min-w-28"
+                className="min-h-10 min-w-28"
               >
                 {isEditing ? 'Save changes' : 'Add shift'}
               </Button>
@@ -288,7 +270,11 @@ export function ShiftDialog({
 
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-danger text-destructive-foreground hover:bg-danger/90 dark:bg-danger dark:hover:bg-danger/90"
+              className="
+                bg-danger text-destructive-foreground
+                hover:bg-danger/90 dark:bg-danger
+                dark:hover:bg-danger/90
+              "
             >
               Delete
             </AlertDialogAction>

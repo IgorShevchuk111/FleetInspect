@@ -54,6 +54,7 @@ export default function DriverJournalPage() {
         open={isAddShiftOpen || Boolean(editingShift)}
         shift={editingShift}
         shifts={shifts}
+        restCompensations={restCompensations}
         onOpenChange={handleCloseShiftDialog}
         onSubmit={
           editingShift ? (data) => updateShift(editingShift.id, data) : addShift

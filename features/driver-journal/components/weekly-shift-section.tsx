@@ -53,6 +53,7 @@ export function WeeklyShiftSection({
               <h3 className="text-lg font-semibold leading-heading text-foreground">
                 Week: {formatWeek(weekStart)}
               </h3>
+
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <span className="text-sm leading-body text-foreground">
                   {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
@@ -64,18 +65,20 @@ export function WeeklyShiftSection({
           </div>
         </TableCell>
       </TableRow>
+
       {rows.map((row) => (
         <ShiftRow
           key={row.shift.id}
           shift={row.shift}
+          startsAfterWeeklyRest={row.startsAfterWeeklyRest}
           drivingStatus={row.drivingStatus}
           shiftStatus={row.shiftStatus}
           restStatus={row.restStatus}
           drivingUsageAfter={row.drivingUsageAfter}
           sharedAllowanceUsedAfter={row.sharedAllowanceUsedAfter}
-          extendedShiftUsageAfter={row.extendedShiftUsageAfter}
           reducedDailyRest={row.reducedDailyRest}
           extendedShift={row.extendedShift}
+          followingRestUsesAllowance={row.followingRestUsesAllowance}
           weeklyRestCompensationCandidates={
             row.weeklyRestCompensationCandidates
           }
@@ -86,6 +89,7 @@ export function WeeklyShiftSection({
           onDelete={onDelete}
         />
       ))}
+
       {rows.length === 0 && (
         <TableRow>
           <TableCell

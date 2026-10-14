@@ -28,6 +28,7 @@ import { formatDuration } from '@/features/driver-journal/utils/duration';
 import { getShiftDetailsData } from '@/features/driver-journal/utils/shift-details';
 import {
   getDrivingStatus,
+  getMaxShiftEndDateTime,
   getRestStatus,
   getShiftStatus,
 } from '@/features/driver-journal/utils/shift-status';
@@ -42,8 +43,7 @@ type ShiftDetailsDialogProps = {
   restStatus?: ReturnType<typeof getRestStatus> | null;
   drivingUsageAfter?: number;
   sharedAllowanceUsedAfter?: number;
-  extendedShiftUsageAfter?: number;
-  reducedDailyRest?: boolean;
+  followingRestUsesAllowance?: boolean;
   extendedShift?: boolean;
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
   restCompensations?: RestCompensation[];
@@ -185,8 +185,7 @@ export function ShiftDetailsDialog({
   restStatus,
   drivingUsageAfter = 0,
   sharedAllowanceUsedAfter = 0,
-  extendedShiftUsageAfter = 0,
-  reducedDailyRest = false,
+  followingRestUsesAllowance = false,
   extendedShift = false,
   weeklyRestCompensationCandidates = [],
   restCompensations = [],
@@ -196,8 +195,9 @@ export function ShiftDetailsDialog({
 }: ShiftDetailsDialogProps) {
   const details = getShiftDetailsData(shift, {
     drivingUsageAfter,
-    extendedShiftUsageAfter,
+    sharedAllowanceUsedAfter,
     extendedShift,
+    followingRestUsesAllowance,
     weeklyRestCompensationCandidates,
     restCompensations,
   });
@@ -220,11 +220,18 @@ export function ShiftDetailsDialog({
     shiftOver15Hours,
     drivingMaximumMinutes,
     shiftMaximumMinutes,
+    sharedAllowanceUsedBefore,
     compensationReceiver,
     compensationSource,
     candidates,
     savedCompensations,
   } = details;
+
+  const maximumEnd = getMaxShiftEndDateTime(
+    shift.date,
+    shift.start,
+    shiftMaximumMinutes,
+  );
 
   const acceptedCompensation = restCompensations.find(
     (compensation) =>
@@ -282,7 +289,20 @@ export function ShiftDetailsDialog({
 
               <DetailRow
                 label="End"
-                value={`${formatDate(endDate)} ${formatTime(shift.end)}`}
+                value={
+                  <div className="flex flex-col items-end">
+                    <span>
+                      {formatDate(endDate)} {formatTime(shift.end)}
+                    </span>
+
+                    {maximumEnd && (
+                      <StatusHint>
+                        Maximum end: {formatDate(maximumEnd.date)}{' '}
+                        {formatTime(maximumEnd.time)}
+                      </StatusHint>
+                    )}
+                  </div>
+                }
               />
             </Section>
 
@@ -333,8 +353,7 @@ export function ShiftDetailsDialog({
 
                     {shiftOver15Hours ? (
                       <StatusHint className="text-danger">
-                        Over maximum · {extendedShiftUsageAfter}/3 extended
-                        shifts used
+                        Over maximum · {sharedAllowanceUsedAfter}/3 shared uses
                       </StatusHint>
                     ) : (
                       <StatusHint
@@ -344,7 +363,7 @@ export function ShiftDetailsDialog({
                             : 'text-muted-foreground'
                         }
                       >
-                        Extended shifts {extendedShiftUsageAfter}/3 used
+                        Shared allowance {sharedAllowanceUsedAfter}/3 used
                       </StatusHint>
                     )}
                   </div>
@@ -358,14 +377,6 @@ export function ShiftDetailsDialog({
                 label="Working"
                 value={formatDuration(workingMinutes)}
               />
-
-              {shiftStatus && (
-                <DetailRow
-                  label="Status"
-                  value={shiftStatus.label}
-                  className={shiftStatus.className}
-                />
-              )}
 
               {drivingStatus && (
                 <DetailRow
@@ -402,22 +413,6 @@ export function ShiftDetailsDialog({
                       : undefined
                 }
               />
-
-              {shift.restType === 'daily' && reducedDailyRest && (
-                <DetailRow
-                  label="Reduced daily rests"
-                  value={`${sharedAllowanceUsedAfter}/3 used`}
-                  className="text-warning"
-                />
-              )}
-
-              {restStatus && (
-                <DetailRow
-                  label="Status"
-                  value={restStatus.label}
-                  className={restStatus.className}
-                />
-              )}
             </Section>
 
             <Section icon={Banknote} title="Earnings">

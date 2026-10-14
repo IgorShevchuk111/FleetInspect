@@ -1,9 +1,14 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 
+import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
+import {
+    buildSharedAllowanceUsage,
+    MAX_SHARED_ALLOWANCE,
+} from '@/features/driver-journal/utils/compliance-usage';
 import { countExtendedDrivingDays } from '@/features/driver-journal/utils/compliance';
-import { buildExtendedShiftUsage } from '@/features/driver-journal/utils/compliance-usage';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
 import { getStartOfWeek } from '@/features/driver-journal/utils/dates';
 import {
@@ -22,6 +27,7 @@ type ShiftDialogProps = {
     open: boolean;
     shift?: Shift | null;
     shifts: Shift[];
+    restCompensations: RestCompensation[];
     onOpenChange: (open: boolean) => void;
     onSubmit: (data: ShiftFormData) => void;
     onDelete?: () => void;
@@ -32,7 +38,6 @@ const EXTENDED_DAILY_DRIVING_LIMIT = 10 * 60;
 const REGULAR_SHIFT_SPREAD = 13 * 60;
 const MAX_SHIFT_SPREAD = 15 * 60;
 const MAX_EXTENDED_DRIVING_DAYS = 2;
-const MAX_EXTENDED_SHIFTS = 3;
 
 function getTodayDate() {
     const today = new Date();
@@ -119,6 +124,7 @@ export function useShiftDialog({
     open,
     shift,
     shifts,
+    restCompensations,
     onOpenChange,
     onSubmit,
     onDelete,
@@ -192,6 +198,7 @@ export function useShiftDialog({
 
     const currentWeekStart = getStartOfWeek(selectedDate);
 
+    // Extended driving days remain a separate Monday–Sunday counter.
     const extendedDrivingDaysUsed = countExtendedDrivingDays(
         shifts,
         currentWeekStart,
@@ -223,8 +230,10 @@ export function useShiftDialog({
         })
         : [];
 
-    const extendedShiftUsage = buildExtendedShiftUsage(
+    // Count both reduced daily rests and extended shifts against one allowance.
+    const sharedAllowanceUsage = buildSharedAllowanceUsage(
         shiftsBeforeCurrentShift,
+        restCompensations,
     );
 
     const previousShiftsChronological = [...shiftsBeforeCurrentShift].sort(
@@ -241,19 +250,19 @@ export function useShiftDialog({
         previousShiftsChronological.length - 1
         ];
 
-    const previousExtendedShiftsUsed = lastPreviousShift
-        ? (extendedShiftUsage.get(lastPreviousShift.id) ?? 0)
+    const previousSharedAllowanceUsed = lastPreviousShift
+        ? sharedAllowanceUsage.get(lastPreviousShift.id) ?? 0
         : 0;
 
-    const weeklyRestResetsExtendedShifts =
+    const weeklyRestResetsSharedAllowance =
         form.restType === 'weekly' && weeklyRestValidation.valid;
 
-    const extendedShiftsUsed = weeklyRestResetsExtendedShifts
+    const sharedAllowanceUsed = weeklyRestResetsSharedAllowance
         ? 0
-        : previousExtendedShiftsUsed;
+        : previousSharedAllowanceUsed;
 
     const shiftMaximum =
-        extendedShiftsUsed < MAX_EXTENDED_SHIFTS
+        sharedAllowanceUsed < MAX_SHARED_ALLOWANCE
             ? MAX_SHIFT_SPREAD
             : REGULAR_SHIFT_SPREAD;
 
@@ -427,7 +436,7 @@ export function useShiftDialog({
         previousCompletedShift,
         extendedDrivingDaysUsed,
         drivingMaximum,
-        extendedShiftsUsed,
+        sharedAllowanceUsed,
         shiftMaximum,
         actualDrivingMinutes,
         actualShiftMinutes,

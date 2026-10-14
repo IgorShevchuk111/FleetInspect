@@ -1,6 +1,6 @@
 'use client';
 
-import { Banknote, Moon } from 'lucide-react';
+import { Banknote } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,20 +36,6 @@ type RestEarningsSectionProps = {
   onEarnBlur: () => void;
 };
 
-function SectionHeader() {
-  return (
-    <div className="mb-3 flex min-w-0 items-center gap-2">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
-        <Moon aria-hidden="true" className="size-4 text-muted-foreground" />
-      </div>
-
-      <h3 className="text-sm font-medium leading-heading">
-        Rest &amp; earnings
-      </h3>
-    </div>
-  );
-}
-
 export function RestEarningsSection({
   form,
   canEnterRestOfShift,
@@ -80,94 +66,82 @@ export function RestEarningsSection({
     form.restType === 'weekly' && isWeeklyRestBlocked;
 
   return (
-    <section className="min-w-0 border-t border-border pt-4">
-      <SectionHeader />
+    <section className="min-w-0 space-y-5">
+      <div className="min-w-0 space-y-2">
+        <Label htmlFor="rest-type" className="text-sm text-muted-foreground">
+          Rest type
+        </Label>
 
-      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-        <div className="min-w-0 space-y-1.5">
-          <Label
-            htmlFor="rest-type"
-            className="text-caption text-muted-foreground"
-          >
-            Rest type
-          </Label>
-
-          <Select
-            value={form.restType}
-            onValueChange={(value) => onRestTypeChange(value as RestType)}
-            disabled={!canEnterRestOfShift}
-          >
-            <SelectTrigger id="rest-type" className="w-full min-w-0">
-              <SelectValue placeholder="Select rest type" />
-            </SelectTrigger>
-
-            <SelectContent
-              position="popper"
-              side="bottom"
-              sideOffset={6}
-              className="z-[100] min-w-[var(--radix-select-trigger-width)] bg-background"
-            >
-              <SelectItem value="daily">Daily rest</SelectItem>
-              <SelectItem value="weekly">Weekly rest</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {showWeeklyRestUnavailable && (
-            <p className="text-caption leading-body text-muted-foreground">
-              No previous completed shift. Rest duration cannot be calculated
-              yet.
-            </p>
-          )}
-
-          {showReducedWeeklyRest && (
-            <p className="text-caption leading-body text-warning">
-              Reduced weekly rest: 24–44h 59m. Your next weekly rest must be
-              regular.
-            </p>
-          )}
-
-          {showRegularWeeklyRest && (
-            <p className="text-caption leading-body text-success">
-              Regular weekly rest: 45 hours or more.
-            </p>
-          )}
-
-          {showWeeklyRestBlocked && (
-            <p className="text-caption font-medium leading-body text-danger">
-              {weeklyRestValidation.message}
-            </p>
-          )}
-        </div>
-
-        <div
-          className={`min-w-0 space-y-1.5 ${
-            !canEnterRestOfShift ? 'opacity-50' : ''
-          }`}
+        <Select
+          value={form.restType}
+          onValueChange={(value) => onRestTypeChange(value as RestType)}
+          disabled={!canEnterRestOfShift}
         >
-          <Label htmlFor="earn" className="text-caption text-muted-foreground">
-            Earn (£)
-          </Label>
+          <SelectTrigger
+            id="rest-type"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+          >
+            <SelectValue placeholder="Select rest type" />
+          </SelectTrigger>
 
-          <div className="relative min-w-0">
-            <Banknote
-              aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            />
+          <SelectContent
+            position="popper"
+            side="bottom"
+            sideOffset={6}
+            className="z-[100] min-w-[var(--radix-select-trigger-width)] bg-background"
+          >
+            <SelectItem value="daily">Daily rest</SelectItem>
+            <SelectItem value="weekly">Weekly rest</SelectItem>
+          </SelectContent>
+        </Select>
 
-            <Input
-              id="earn"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0"
-              value={form.earn}
-              onFocus={onEarnFocus}
-              onBlur={onEarnBlur}
-              onChange={onEarnChange}
-              disabled={!canEnterRestOfShift}
-              className="min-w-0 max-w-full pl-9"
-            />
-          </div>
+        {showWeeklyRestUnavailable && (
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            No previous completed shift. Rest duration cannot be calculated yet.
+          </p>
+        )}
+
+        {showReducedWeeklyRest && (
+          <p className="text-xs leading-relaxed text-warning">
+            Reduced weekly rest: 24–44h 59m. Your next weekly rest must be
+            regular.
+          </p>
+        )}
+
+        {showRegularWeeklyRest && (
+          <p className="text-xs leading-relaxed text-success">
+            Regular weekly rest: 45 hours or more.
+          </p>
+        )}
+
+        {showWeeklyRestBlocked && (
+          <p className="text-xs font-medium leading-relaxed text-danger">
+            {weeklyRestValidation.message}
+          </p>
+        )}
+      </div>
+
+      <div className="min-w-0 space-y-2">
+        <Label htmlFor="earn" className="text-sm text-muted-foreground">
+          Earn (£)
+        </Label>
+
+        <div className="relative min-w-0">
+          <Banknote className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+          <Input
+            id="earn"
+            type="number"
+            min={0}
+            step={0.01}
+            placeholder="0"
+            value={form.earn}
+            onFocus={onEarnFocus}
+            onChange={onEarnChange}
+            onBlur={onEarnBlur}
+            disabled={!canEnterRestOfShift}
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+          />
         </div>
       </div>
     </section>

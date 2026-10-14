@@ -38,13 +38,14 @@ import { cn } from '@/lib/utils';
 
 type ShiftRowProps = {
   shift: Shift;
+  startsAfterWeeklyRest?: boolean;
   drivingStatus?: ReturnType<typeof getDrivingStatus> | null;
   shiftStatus?: ReturnType<typeof getShiftStatus> | null;
   restStatus?: ReturnType<typeof getRestStatus> | null;
   drivingUsageAfter?: number;
   sharedAllowanceUsedAfter?: number;
-  extendedShiftUsageAfter?: number;
   reducedDailyRest?: boolean;
+  followingRestUsesAllowance?: boolean;
   extendedShift?: boolean;
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
   restCompensations?: RestCompensation[];
@@ -74,13 +75,14 @@ function formatTime(time: string | null | undefined) {
 
 export function ShiftRow({
   shift,
+  startsAfterWeeklyRest = false,
   drivingStatus,
   shiftStatus,
   restStatus,
   drivingUsageAfter = 0,
   sharedAllowanceUsedAfter = 0,
-  extendedShiftUsageAfter = 0,
   reducedDailyRest = false,
+  followingRestUsesAllowance = false,
   extendedShift = false,
   weeklyRestCompensationCandidates = [],
   restCompensations = [],
@@ -239,13 +241,18 @@ export function ShiftRow({
         style={{ touchAction: 'pan-y' }}
       >
         <TableCell colSpan={6} className="p-0">
-          <div className="relative isolate w-full overflow-hidden bg-danger/80">
+          <div className="relative isolate w-full overflow-hidden bg-background">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               aria-label="Delete shift"
-              className="absolute inset-y-0 right-0 z-0 size-16 rounded-none bg-danger/80 text-black hover:bg-danger"
+              tabIndex={swiped ? 0 : -1}
+              className={cn(
+                'absolute inset-y-0 right-0 z-0 size-16 rounded-none',
+                'bg-danger/80 text-black hover:bg-danger',
+                !swiped && 'pointer-events-none',
+              )}
               onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation();
@@ -260,7 +267,7 @@ export function ShiftRow({
                 'relative z-10 grid w-full grid-cols-[16.6667%_16.6667%_16.6667%_16.6667%_16.6667%_16.6667%]',
                 'transition-transform duration-200 ease-out',
                 swiped ? '-translate-x-16' : 'translate-x-0',
-                'bg-background hover:bg-muted',
+                isWeeklyRest ? 'bg-muted' : 'bg-background hover:bg-muted',
               )}
             >
               {/* Start */}
@@ -269,7 +276,7 @@ export function ShiftRow({
                   'min-w-0 border-r border-border/30 border-l-2 px-0.5 py-1.5',
                   isReducedWeeklyRest
                     ? 'border-l-red-500'
-                    : isRegularWeeklyRest
+                    : isRegularWeeklyRest || startsAfterWeeklyRest
                       ? 'border-l-green-500'
                       : 'border-l-transparent',
                 )}
@@ -315,14 +322,21 @@ export function ShiftRow({
                   <span
                     className={cn(
                       'mt-0.5 w-full max-w-[42px] border-t border-border/50 pt-0.5 text-[10px] font-semibold',
-                      isReducedWeeklyRest
+                      isReducedWeeklyRest || reducedDailyRest
                         ? 'text-danger'
-                        : isRegularWeeklyRest
+                        : isRegularWeeklyRest ||
+                            (isWeeklyRest && !isReducedWeeklyRest)
                           ? 'text-success'
                           : 'text-muted-foreground',
                     )}
                   >
-                    {isWeeklyRest ? (isReducedWeeklyRest ? 'RW' : 'W') : 'D'}
+                    {isWeeklyRest
+                      ? isReducedWeeklyRest
+                        ? 'RW'
+                        : 'W'
+                      : reducedDailyRest
+                        ? 'RD'
+                        : 'D'}
                   </span>
                 </div>
               </div>
@@ -411,9 +425,8 @@ export function ShiftRow({
         shiftStatus={shiftStatus}
         restStatus={restStatus}
         drivingUsageAfter={drivingUsageAfter}
-        extendedShiftUsageAfter={extendedShiftUsageAfter}
         sharedAllowanceUsedAfter={sharedAllowanceUsedAfter}
-        reducedDailyRest={reducedDailyRest}
+        followingRestUsesAllowance={followingRestUsesAllowance}
         extendedShift={extendedShift}
         weeklyRestCompensationCandidates={weeklyRestCompensationCandidates}
         restCompensations={restCompensations}
