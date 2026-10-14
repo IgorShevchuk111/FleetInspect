@@ -24,11 +24,14 @@ type WeeklySummaryData = {
   twoWeekDriving: number;
   average17WeekWorking: number;
   annualEarned: number;
+  extendedDrivingDaysUsed: number;
 };
 
 type WeeklySummaryProps = {
   summary: WeeklySummaryData;
   weekStart: Date;
+  sharedAllowanceUsed: number;
+  extendedDrivingDaysUsed: number;
 };
 
 type SummaryRowProps = {
@@ -89,7 +92,7 @@ function SummarySection({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-3 border-t border-border pt-5">
+    <section className={title === 'Shift' ? '' : 'border-t border-border pt-5'}>
       <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
         {title}
       </h3>
@@ -99,7 +102,11 @@ function SummarySection({
   );
 }
 
-export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
+export function WeeklySummary({
+  summary,
+  weekStart,
+  sharedAllowanceUsed,
+}: WeeklySummaryProps) {
   const currentWeekStart = getStartOfWeek(weekStart);
   const currentWeekEnd = getEndOfWeek(weekStart);
 
@@ -133,14 +140,30 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
           <div className="space-y-6">
-            <SummarySection title="Driving limits">
+            <SummarySection title="Shift">
               <div className="divide-y divide-border">
                 <SummaryRow
-                  label="Weekly driving"
-                  value={`${formatDuration(summary.driving)} / 56h`}
+                  label="Extended shifts / reduced daily rests"
+                  value={`${sharedAllowanceUsed}/3 used`}
                   prominent
                 />
+              </div>
 
+              <PeriodLabel>Since last weekly rest</PeriodLabel>
+            </SummarySection>
+
+            <SummarySection title="Driving limits">
+              <SummaryRow
+                label="Weekly driving"
+                value={`${formatDuration(summary.driving)} / 56h`}
+                prominent
+              />
+
+              <PeriodLabel>
+                Extended driving days: {summary.extendedDrivingDaysUsed}/2 used
+              </PeriodLabel>
+
+              <div className="divide-y divide-border">
                 <SummaryRow
                   label="2-week driving"
                   value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
@@ -152,7 +175,6 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
                 {formatDateRange(twoWeekStart, currentWeekEnd)}
               </PeriodLabel>
             </SummarySection>
-
             <SummarySection title="Working time">
               <div className="divide-y divide-border">
                 <SummaryRow
@@ -174,7 +196,6 @@ export function WeeklySummary({ summary, weekStart }: WeeklySummaryProps) {
                 {formatDateRange(seventeenWeekStart, currentWeekEnd)}
               </PeriodLabel>
             </SummarySection>
-
             <SummarySection title="Earnings">
               <div className="divide-y divide-border">
                 <SummaryRow
