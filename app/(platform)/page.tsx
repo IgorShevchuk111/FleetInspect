@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { InstallAppActions } from '@/features/driver-journal/components/install-app-actions';
+import { InstallAppActions } from '@/components/shared/install-app-actions';
+import { PwaLoginRedirect } from '@/components/shared/pwa-login-redirect';
 
 import { ArrowRight, ClipboardCheck, Map, Truck } from 'lucide-react';
 
@@ -124,7 +125,10 @@ export default async function HomePage({
                     </Link>
 
                     {shouldShowInstallOptions ? (
-                      <InstallAppActions loginHref="/login" />
+                      <>
+                        <PwaLoginRedirect />
+                        <InstallAppActions loginHref="/login" />
+                      </>
                     ) : (
                       <Link
                         href={user ? app.href : '/login'}

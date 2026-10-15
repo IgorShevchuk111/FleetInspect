@@ -100,37 +100,41 @@ export function InstallAppActions({
               <Smartphone className="size-6" />
             </div>
 
-            <DialogTitle>Install FleetInspect</DialogTitle>
+            <DialogTitle>INSTALLATION INSTRUCTIONS</DialogTitle>
 
             <DialogDescription>
-              Add FleetInspect to your home screen for quick access to your
-              applications.
+              If you wish to create an icon on your mobile or tablet for easy
+              access you will need to do the following:
             </DialogDescription>
           </DialogHeader>
 
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-0 sm:py-2">
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Android</h3>
+              <h3 className="text-sm font-semibold">Android Device</h3>
               <p className="text-sm leading-6 text-muted-foreground">
-                Open your browser menu using the three dots in the top-right
-                corner. Select Install app, or Add to Home screen if that is the
-                option available.
+                Click the 3 dots towards the top right hand corner of the
+                screen, this will give you a menu, towards the bottom of the
+                menu click the &apos;Install App&apos; option.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">iPhone or iPad</h3>
+              <h3 className="text-sm font-semibold">Apple IOS Device</h3>
               <p className="text-sm leading-6 text-muted-foreground">
-                Open this website in Safari. Tap Share (the square with an
-                upward arrow), select Add to Home Screen, then tap Add.
+                Click on the Share button icon (a square with an upward arrow)
+                next to the URL bar. You can then select Add to Home Screen.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Windows or desktop</h3>
+              <h3 className="text-sm font-semibold">
+                Windows Phone or Desktop
+              </h3>
               <p className="text-sm leading-6 text-muted-foreground">
-                Look for the install icon in your browser&apos;s address bar, or
-                open the browser menu and select Install app if available.
+                Click the 3 dots towards the bottom left corner of the screen,
+                this will give you a menu, towards the bottom of the menu select
+                &apos;pin to start&apos; this will add an icon to your home
+                screen.
               </p>
             </section>
           </div>
