@@ -79,7 +79,7 @@ export function RestEarningsSection({
         >
           <SelectTrigger
             id="rest-type"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-[length:var(--font-size-body)]"
           >
             <SelectValue placeholder="Select rest type" />
           </SelectTrigger>
@@ -127,8 +127,6 @@ export function RestEarningsSection({
         </Label>
 
         <div className="relative min-w-0">
-          <Banknote className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-
           <Input
             id="earn"
             type="number"
@@ -140,7 +138,7 @@ export function RestEarningsSection({
             onChange={onEarnChange}
             onBlur={onEarnBlur}
             disabled={!canEnterRestOfShift}
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-[length:var(--font-size-body)]"
           />
         </div>
       </div>
