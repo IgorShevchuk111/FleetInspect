@@ -75,6 +75,9 @@ export function InstallAppActions({
   return (
     <>
       <div className="mt-7 flex flex-col gap-3">
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">
+          For best results, install the Fleetinspect Web App
+        </p>
         <Button
           type="button"
           size="lg"
