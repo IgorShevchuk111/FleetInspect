@@ -17,11 +17,14 @@
     --primary: 214 89% 52%;
     --primary-hover: 214 89% 46%;
     --primary-foreground: 0 0% 100%;
+
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
     --accent-foreground: var(--foreground);
+
     --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
+
     --input: var(--border);
     --ring: var(--primary);
 
@@ -80,11 +83,14 @@
     --primary: 214 89% 60%;
     --primary-hover: 214 89% 55%;
     --primary-foreground: 0 0% 100%;
+
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
     --accent-foreground: var(--foreground);
+
     --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
+
     --input: var(--border);
     --ring: var(--primary);
 
@@ -124,6 +130,28 @@
   }
 
   body {
-    @apply bg-background font-sans text-foreground;
+    @apply bg-background font-sans text-body leading-body text-foreground;
+  }
+
+  /* Default heading styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-page-title leading-heading;
+  }
+
+  h2 {
+    @apply text-heading leading-heading;
+  }
+
+  h3 {
+    @apply text-body leading-heading;
   }
 }
