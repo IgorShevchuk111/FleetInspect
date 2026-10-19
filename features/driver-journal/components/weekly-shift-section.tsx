@@ -55,7 +55,7 @@ export function WeeklyShiftSection({
               </h3>
 
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <span className="text-sm leading-body text-foreground">
+                <span className="text-small leading-body text-foreground">
                   {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
                 </span>
 

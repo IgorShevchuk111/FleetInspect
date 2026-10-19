@@ -93,13 +93,12 @@ const tableClass = `  w-full
   table-fixed
   border-separate
   border-spacing-0
-  text-[13px]   [&_tbody_tr]:border-b   [&_tbody_td]:border-r   [&_tbody_td]:border-border/30   [&_tbody_td:last-child]:border-r-0   [&_thead_th]:border-r   [&_thead_th]:border-border/30   [&_thead_th:last-child]:border-r-0`;
+   [&_tbody_tr]:border-b   [&_tbody_td]:border-r   [&_tbody_td]:border-border/30   [&_tbody_td:last-child]:border-r-0   [&_thead_th]:border-r   [&_thead_th]:border-border/30   [&_thead_th:last-child]:border-r-0`;
 
 const headerClass = `  bg-muted/70
   px-0.5
   py-2
   text-center
-  text-xs
   font-semibold
   uppercase
   tracking-wide
@@ -108,12 +107,12 @@ const headerClass = `  bg-muted/70
 function TableColumns() {
   return (
     <colgroup>
-      <col className="w-[16.6667%]" />
-      <col className="w-[16.6667%]" />
-      <col className="w-[16.6667%]" />
-      <col className="w-[16.6667%]" />
-      <col className="w-[16.6667%]" />
-      <col className="w-[16.6667%]" />
+      <col className="w-[15%]" />
+      <col className="w-[19%]" />
+      <col className="w-[15%]" />
+      <col className="w-[18%]" />
+      <col className="w-[13%]" />
+      <col className="w-[20%]" />
     </colgroup>
   );
 }
@@ -144,7 +143,7 @@ export function ShiftsTable({
 
   if (sortedWeeks.length === 0) {
     return (
-      <div className="py-10 text-center text-sm text-muted-foreground">
+      <div className="py-10 text-center text-small text-muted-foreground">
         No shifts yet.
       </div>
     );

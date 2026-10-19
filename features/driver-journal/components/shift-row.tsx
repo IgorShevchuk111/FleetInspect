@@ -264,7 +264,7 @@ export function ShiftRow({
 
             <div
               className={cn(
-                'relative z-10 grid w-full grid-cols-[16.6667%_16.6667%_16.6667%_16.6667%_16.6667%_16.6667%]',
+                'relative z-10 grid w-full grid-cols-[15%_19%_15%_18%_13%_20%]',
                 'transition-transform duration-200 ease-out',
                 swiped ? '-translate-x-16' : 'translate-x-0',
                 isWeeklyRest ? 'bg-muted' : 'bg-background hover:bg-muted',
@@ -282,12 +282,8 @@ export function ShiftRow({
                 )}
               >
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-caption font-medium">
-                    {formatDate(shift.date)}
-                  </span>
-                  <span className="text-caption text-muted-foreground">
-                    {formatTime(shift.start)}
-                  </span>
+                  <span>{formatDate(shift.date)}</span>
+                  <span>{formatTime(shift.start)}</span>
                 </div>
               </div>
 
@@ -315,13 +311,11 @@ export function ShiftRow({
               {/* Rest */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex min-h-9 flex-col items-center justify-center leading-none">
-                  <span className="text-caption font-medium">
-                    {formatDuration(effectiveRestMinutes)}
-                  </span>
+                  <span>{formatDuration(effectiveRestMinutes)}</span>
 
                   <span
                     className={cn(
-                      'mt-0.5 w-full max-w-[42px] border-t border-border/50 pt-0.5 text-[10px] font-semibold',
+                      'mt-0.5 w-full max-w-[42px] border-t border-border/50 pt-0.5 font-semibold',
                       isReducedWeeklyRest || reducedDailyRest
                         ? 'text-danger'
                         : isRegularWeeklyRest ||
@@ -344,12 +338,8 @@ export function ShiftRow({
               {/* End */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5">
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-caption font-medium">
-                    {formatDate(endDate)}
-                  </span>
-                  <span className="text-caption text-muted-foreground">
-                    {formatTime(shift.end)}
-                  </span>
+                  <span>{formatDate(endDate)}</span>
+                  <span>{formatTime(shift.end)}</span>
                 </div>
               </div>
 
