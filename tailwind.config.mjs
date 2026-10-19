@@ -26,14 +26,17 @@ const tailwindConfig = {
         'primary-hover': 'hsl(var(--primary-hover))',
         'primary-foreground': 'hsl(var(--primary-foreground))',
         'secondary-foreground': 'hsl(var(--secondary-foreground))',
+
         accent: 'hsl(var(--accent))',
         'accent-foreground': 'hsl(var(--accent-foreground))',
 
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
         danger: 'hsl(var(--danger))',
+
         destructive: 'hsl(var(--destructive))',
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
+
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         border: 'hsl(var(--border))',
@@ -73,10 +76,10 @@ const tailwindConfig = {
 
       fontSize: {
         caption: 'var(--font-size-caption)',
-        secondary: 'var(--font-size-secondary)',
+        small: 'var(--font-size-secondary)',
         body: 'var(--font-size-body)',
         heading: 'var(--font-size-heading)',
-        'page-title': 'var(--font-size-page-title)',
+        title: 'var(--font-size-page-title)',
       },
 
       lineHeight: {

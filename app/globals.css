@@ -17,11 +17,14 @@
     --primary: 214 89% 52%;
     --primary-hover: 214 89% 46%;
     --primary-foreground: 0 0% 100%;
+
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
     --accent-foreground: var(--foreground);
+
     --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
+
     --input: var(--border);
     --ring: var(--primary);
 
@@ -32,11 +35,11 @@
     --border: 220 10% 85%;
 
     /* Typography */
-    --font-size-caption: 0.75rem;
-    --font-size-secondary: 0.875rem;
-    --font-size-body: 1rem;
-    --font-size-heading: 1.125rem;
-    --font-size-page-title: 1.5rem;
+    --font-size-caption: 0.75rem; /* 12px */
+    --font-size-secondary: 0.875rem; /* 14px */
+    --font-size-body: 1rem; /* 16px */
+    --font-size-heading: 1.125rem; /* 18px */
+    --font-size-page-title: 1.5rem; /* 24px */
 
     --line-height-body: 1.5;
     --line-height-heading: 1.25;
@@ -80,11 +83,14 @@
     --primary: 214 89% 60%;
     --primary-hover: 214 89% 55%;
     --primary-foreground: 0 0% 100%;
+
     --secondary-foreground: var(--foreground);
     --accent: var(--muted);
     --accent-foreground: var(--foreground);
+
     --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
+
     --input: var(--border);
     --ring: var(--primary);
 
@@ -124,6 +130,28 @@
   }
 
   body {
-    @apply bg-background font-sans text-foreground;
+    @apply bg-background font-sans text-body leading-body text-foreground;
+  }
+
+  /* Default heading styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-title leading-heading;
+  }
+
+  h2 {
+    @apply text-heading leading-heading;
+  }
+
+  h3 {
+    @apply text-body leading-heading;
   }
 }
