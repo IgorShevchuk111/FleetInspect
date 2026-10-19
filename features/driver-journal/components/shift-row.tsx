@@ -264,7 +264,7 @@ export function ShiftRow({
 
             <div
               className={cn(
-                'relative z-10 grid w-full grid-cols-[15%_19%_15%_18%_13%_20%]',
+                'relative z-10 grid w-full grid-cols-[13%_19%_18%_18%_13%_19%]',
                 'transition-transform duration-200 ease-out',
                 swiped ? '-translate-x-16' : 'translate-x-0',
                 isWeeklyRest ? 'bg-muted' : 'bg-background hover:bg-muted',
