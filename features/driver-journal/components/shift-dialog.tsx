@@ -128,11 +128,11 @@ export function ShiftDialog({
               </div>
 
               <div className="min-w-0">
-                <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
+                <DialogTitle className="font-semibold leading-heading text-foreground text-title">
                   {isEditing ? 'Edit shift' : 'Add shift'}
                 </DialogTitle>
 
-                <DialogDescription className="text-caption leading-body">
+                <DialogDescription className="text-samll leading-body text-muted-foreground">
                   {isEditing
                     ? 'Update your driving shift details.'
                     : 'Enter your driving shift details.'}

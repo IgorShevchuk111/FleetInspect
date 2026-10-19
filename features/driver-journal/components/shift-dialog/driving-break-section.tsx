@@ -6,6 +6,7 @@ import type {
   ShiftFormData,
 } from '@/features/driver-journal/types/driver-journal';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
+import { Label } from '@/components/ui/label';
 
 type DrivingBreakSectionProps = {
   form: ShiftFormData;
@@ -46,13 +47,13 @@ export function DrivingBreakSection({
         />
 
         {actualDrivingMinutes > 0 && (
-          <p className="text-sm font-semibold tabular-nums">
+          <p className="text-small  tabular-nums">
             {formatDuration(actualDrivingMinutes)} /{' '}
             {formatDuration(drivingMaximum)}
           </p>
         )}
 
-        <p className="text-xs leading-relaxed text-muted-foreground">
+        <p className="text-small leading-relaxed text-muted-foreground">
           Max today: {formatDuration(drivingMaximum)} · Extended days{' '}
           {extendedDrivingDaysUsed}/2 used
         </p>
@@ -71,14 +72,13 @@ export function DrivingBreakSection({
       {/* Working time */}
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <span className="text-sm font-medium">Working</span>
-
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <Label className="text-lg ">Working</Label>
+          <p className="text-small leading-relaxed text-muted-foreground">
             Shift time minus break
           </p>
         </div>
 
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
+        <span className="shrink-0  tabular-nums">
           {formatDuration(workingMinutes)}
         </span>
       </div>
