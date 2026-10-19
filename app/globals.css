@@ -35,11 +35,11 @@
     --border: 220 10% 85%;
 
     /* Typography */
-    --font-size-caption: 0.75rem;
-    --font-size-secondary: 0.875rem;
-    --font-size-body: 1rem;
-    --font-size-heading: 1.125rem;
-    --font-size-page-title: 1.5rem;
+    --font-size-caption: 0.75rem; /* 12px */
+    --font-size-secondary: 0.875rem; /* 14px */
+    --font-size-body: 1rem; /* 16px */
+    --font-size-heading: 1.125rem; /* 18px */
+    --font-size-page-title: 1.5rem; /* 24px */
 
     --line-height-body: 1.5;
     --line-height-heading: 1.25;
@@ -144,7 +144,7 @@
   }
 
   h1 {
-    @apply text-page-title leading-heading;
+    @apply text-title leading-heading;
   }
 
   h2 {

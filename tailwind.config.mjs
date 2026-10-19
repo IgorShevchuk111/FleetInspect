@@ -76,10 +76,10 @@ const tailwindConfig = {
 
       fontSize: {
         caption: 'var(--font-size-caption)',
-        secondary: 'var(--font-size-secondary)',
+        small: 'var(--font-size-secondary)',
         body: 'var(--font-size-body)',
         heading: 'var(--font-size-heading)',
-        'page-title': 'var(--font-size-page-title)',
+        title: 'var(--font-size-page-title)',
       },
 
       lineHeight: {
