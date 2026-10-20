@@ -68,7 +68,7 @@ export function RestEarningsSection({
   return (
     <section className="min-w-0 space-y-5">
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="rest-type" className="text-sm text-muted-foreground">
+        <Label htmlFor="rest-type" className="text-lg ">
           Rest type
         </Label>
 
@@ -79,7 +79,7 @@ export function RestEarningsSection({
         >
           <SelectTrigger
             id="rest-type"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-[length:var(--font-size-body)]"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-body"
           >
             <SelectValue placeholder="Select rest type" />
           </SelectTrigger>
@@ -96,33 +96,33 @@ export function RestEarningsSection({
         </Select>
 
         {showWeeklyRestUnavailable && (
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <p className="text-small leading-relaxed text-muted-foreground">
             No previous completed shift. Rest duration cannot be calculated yet.
           </p>
         )}
 
         {showReducedWeeklyRest && (
-          <p className="text-xs leading-relaxed text-warning">
+          <p className="text-small leading-relaxed text-warning">
             Reduced weekly rest: 24–44h 59m. Your next weekly rest must be
             regular.
           </p>
         )}
 
         {showRegularWeeklyRest && (
-          <p className="text-xs leading-relaxed text-success">
+          <p className="text-small leading-relaxed text-success">
             Regular weekly rest: 45 hours or more.
           </p>
         )}
 
         {showWeeklyRestBlocked && (
-          <p className="text-xs font-medium leading-relaxed text-danger">
+          <p className="text-small font-medium leading-relaxed text-danger">
             {weeklyRestValidation.message}
           </p>
         )}
       </div>
 
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="earn" className="text-sm text-muted-foreground">
+        <Label htmlFor="earn" className="text-lg">
           Earn (£)
         </Label>
 
@@ -138,7 +138,7 @@ export function RestEarningsSection({
             onChange={onEarnChange}
             onBlur={onEarnBlur}
             disabled={!canEnterRestOfShift}
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-[length:var(--font-size-body)]"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-body"
           />
         </div>
       </div>

@@ -87,12 +87,10 @@ function DetailRow({
 }) {
   return (
     <div className="flex min-h-10 items-center justify-between gap-3 border-b border-border/50 py-2 last:border-b-0">
-      <span className="text-caption leading-body text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-bodys leading-body ">{label}</span>
 
       <div
-        className={`text-right text-[length:var(--font-size-secondary)] leading-body font-medium text-foreground ${className ?? ''}`}
+        className={`text-right text-body leading-body text-foreground ${className ?? ''}`}
       >
         {value}
       </div>
@@ -114,7 +112,7 @@ function Section({
       <div className="flex items-center gap-2">
         <Icon className="size-4 shrink-0 text-muted-foreground" />
 
-        <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
+        <h3 className="text-heading font-semibold leading-heading text-muted-foreground">
           {title}
         </h3>
       </div>
@@ -132,7 +130,7 @@ function StatusHint({
   className?: string;
 }) {
   return (
-    <span className={`text-caption leading-body ${className}`}>{children}</span>
+    <span className={`text-small leading-body ${className}`}>{children}</span>
   );
 }
 
@@ -266,11 +264,11 @@ export function ShiftDetailsDialog({
             </div>
 
             <div className="min-w-0">
-              <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
+              <DialogTitle className=" font-semibold leading-heading text-foreground text-title">
                 Shift details
               </DialogTitle>
 
-              <DialogDescription className="text-caption leading-body">
+              <DialogDescription className="text-small leading-body">
                 {formatDate(shift.date)} {formatTime(shift.start)}
                 {' → '}
                 {formatDate(endDate)} {formatTime(shift.end)}

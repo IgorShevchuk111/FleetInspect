@@ -7,6 +7,7 @@ import type {
   ShiftFormData,
 } from '@/features/driver-journal/types/driver-journal';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
+import { Label } from '@/components/ui/label';
 
 type DrivingBreakSectionProps = {
   form: ShiftFormData;
@@ -53,7 +54,7 @@ export function DrivingBreakSection({
           </p>
         )}
 
-        <p className="text-xs leading-relaxed text-muted-foreground">
+        <p className="text-small leading-relaxed text-muted-foreground">
           Max today: {formatDuration(drivingMaximum)} · Extended days{' '}
           {extendedDrivingDaysUsed}/2 used
         </p>
@@ -78,7 +79,7 @@ export function DrivingBreakSection({
           </p>
         </div>
 
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
+        <span className="shrink-0  tabular-nums">
           {formatDuration(workingMinutes)}
         </span>
       </div>

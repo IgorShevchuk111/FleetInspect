@@ -154,7 +154,7 @@ export function ShiftTimesSection({
             onChange={(event) => onStartTimeChange(event.target.value)}
             onBlur={onStartTimeBlur}
             aria-label="Start time"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 "
           />
         </div>
       </div>
@@ -180,12 +180,12 @@ export function ShiftTimesSection({
             onChange={(event) => onEndTimeChange(event.target.value)}
             disabled={!canEnterRestOfShift}
             aria-label="End time"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 "
           />
         </div>
 
         {maximumEnd && (
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <p className="text-small leading-relaxed text-muted-foreground">
             {maximumType}: {formatDate(maximumEnd.date)}, {maximumEnd.time}
           </p>
         )}
@@ -200,13 +200,13 @@ export function ShiftTimesSection({
           </p>
         </div>
 
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
+        <span className="shrink-0 tabular-nums">
           {formatDuration(actualShiftMinutes)} / {formatDuration(shiftMaximum)}
         </span>
       </div>
 
       {hasUnfinishedPreviousShift && (
-        <p className="text-sm font-medium leading-body text-danger">
+        <p className="text-small font-medium leading-body text-danger">
           You must finish your previous shift before adding a new shift.
         </p>
       )}

@@ -77,17 +77,12 @@ export function DurationInputField({
             onFocus={() => handleFocus('hours')}
             onBlur={() => handleBlur('hours')}
             onChange={(event) => handleChange('hours', event.target.value)}
-            className="h-10 w-full min-w-0 rounded-md border-input px-3 text-[length:var(--font-size-body)] shadow-none"
+            className="h-10 w-full min-w-0 rounded-md border-input px-3 text-body shadow-none"
           />
         </div>
 
         <div className="min-w-0 space-y-1">
-          <Label
-            htmlFor={`${label}-minutes`}
-            className="text-xs font-normal text-muted-foreground"
-          >
-            Minutes
-          </Label>
+          <Label htmlFor={`${label}-minutes`}>Minutes</Label>
 
           <Input
             id={`${label}-minutes`}
@@ -100,7 +95,7 @@ export function DurationInputField({
             onFocus={() => handleFocus('minutes')}
             onBlur={() => handleBlur('minutes')}
             onChange={(event) => handleChange('minutes', event.target.value)}
-            className="h-10 w-full min-w-0 rounded-md border-input px-3 text-[length:var(--font-size-body)] shadow-none"
+            className="h-10 w-full min-w-0 rounded-md border-input px-3 text-body shadow-none"
           />
         </div>
       </div>

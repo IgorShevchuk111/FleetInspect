@@ -127,7 +127,12 @@ export function WeeklySummary({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="min-h-9">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="min-h-9 bg-accent"
+        >
           Weekly Summary
         </Button>
       </DialogTrigger>

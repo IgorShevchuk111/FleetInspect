@@ -10,11 +10,9 @@ export function JournalHeader({ onAddShift }: JournalHeaderProps) {
   return (
     <header className="flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl">
-          Driver Journal
-        </h1>
+        <h1>Driver Journal</h1>
 
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-small text-muted-foreground">
           Manage your shifts and rest periods
         </p>
       </div>
@@ -22,11 +20,11 @@ export function JournalHeader({ onAddShift }: JournalHeaderProps) {
       <Button
         type="button"
         onClick={onAddShift}
-        className="h-control shrink-0 gap-2 rounded-control px-control-x font-medium shadow-sm"
+        className="h-control shrink-0 gap-1 rounded-control px-control-x font-medium shadow-sm"
       >
         <Plus className="size-4" aria-hidden="true" />
         <span className="hidden sm:inline">Add Shift</span>
-        <span className="sm:hidden">Add</span>
+        <span className="sm:hidden">ADD</span>
       </Button>
     </header>
   );
