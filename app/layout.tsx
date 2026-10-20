@@ -4,6 +4,7 @@ import './globals.css';
 import Footer from '@/components/layout/Footer';
 import Main from '@/components/layout/Main';
 import 'leaflet/dist/leaflet.css';
+import { DriverJournalLanguageProvider } from '@/features/driver-journal/i18n/language-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -87,9 +88,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="FleetInspect" />
       </head>
       <body className={`min-h-screen flex flex-col ${inter.className}`}>
-        <Header />
-        <Main>{children}</Main>
-        <Footer />
+        <DriverJournalLanguageProvider>
+          <Header />
+          <Main>{children}</Main>
+          <Footer />
+        </DriverJournalLanguageProvider>
       </body>
     </html>
   );

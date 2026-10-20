@@ -20,8 +20,8 @@ import {
   getStartOfWeek,
 } from '@/features/driver-journal/utils/dates';
 import { formatDuration } from '@/features/driver-journal/utils/duration';
-
 import { EarningsPeriod } from '@/features/driver-journal/components/earnings-period';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 type WeeklySummaryData = {
   driving: number;
@@ -47,8 +47,8 @@ type SummaryRowProps = {
   prominent?: boolean;
 };
 
-function formatShortDate(date: Date) {
-  return new Intl.DateTimeFormat('en-GB', {
+function formatShortDate(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -125,6 +125,9 @@ export function WeeklySummary({
   allShifts,
 }: WeeklySummaryProps) {
   const [open, setOpen] = useState(false);
+  const { language, t } = useTranslations();
+
+  const locale = language === 'uk' ? 'uk-UA' : 'en-GB';
 
   const currentWeekStart = getStartOfWeek(weekStart);
   const currentWeekEnd = getEndOfWeek(weekStart);
@@ -149,7 +152,7 @@ export function WeeklySummary({
           size="sm"
           className="min-h-9 bg-accent"
         >
-          Weekly Summary
+          {t('weeklySummary')}
         </Button>
       </DialogTrigger>
 
@@ -162,13 +165,13 @@ export function WeeklySummary({
 
             <div className="min-w-0">
               <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
-                Weekly Summary
+                {t('weeklySummary')}
               </DialogTitle>
 
               <DialogDescription className="text-caption leading-body">
-                {formatShortDate(currentWeekStart)} –{' '}
-                {formatShortDate(currentWeekEnd)}
-                <span className="mt-0.5 block">Monday – Sunday</span>
+                {formatShortDate(currentWeekStart, locale)} –{' '}
+                {formatShortDate(currentWeekEnd, locale)}
+                <span className="mt-0.5 block">{t('mondaySunday')}</span>
               </DialogDescription>
             </div>
           </div>
@@ -176,49 +179,49 @@ export function WeeklySummary({
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="space-y-5 px-4 py-5 sm:px-6">
-            <SummarySection icon={Clock3} title="Shift">
+            <SummarySection icon={Clock3} title={t('shift')}>
               <SummaryRow
-                label="Extended shifts / reduced rests"
-                value={`${sharedAllowanceUsed}/3 used`}
-                detail="Since last weekly rest"
+                label={t('extendedShiftsReducedRests')}
+                value={`${sharedAllowanceUsed}/3 ${t('used')}`}
+                detail={t('sinceLastWeeklyRest')}
                 prominent
               />
             </SummarySection>
 
-            <SummarySection icon={Gauge} title="Driving limits">
+            <SummarySection icon={Gauge} title={t('drivingLimits')}>
               <SummaryRow
-                label="Weekly driving"
+                label={t('weeklyDriving')}
                 value={`${formatDuration(summary.driving)} / 56h`}
-                detail={`Extended driving days: ${summary.extendedDrivingDaysUsed}/2 used`}
+                detail={`${t('extendedDrivingDays')}: ${summary.extendedDrivingDaysUsed}/2 ${t('used')}`}
                 prominent
               />
 
               <SummaryRow
-                label="2-week driving"
+                label={t('twoWeekDriving')}
                 value={`${formatDuration(summary.twoWeekDriving)} / 90h`}
-                detail={`${formatShortDate(twoWeekStart)} – ${formatShortDate(currentWeekEnd)}`}
+                detail={`${formatShortDate(twoWeekStart, locale)} – ${formatShortDate(currentWeekEnd, locale)}`}
                 prominent
               />
             </SummarySection>
 
-            <SummarySection icon={CalendarDays} title="Working time">
+            <SummarySection icon={CalendarDays} title={t('workingTime')}>
               <SummaryRow
-                label="This week"
+                label={t('thisWeek')}
                 value={formatDuration(summary.working)}
                 prominent
               />
 
               <SummaryRow
-                label="17-week average"
+                label={t('seventeenWeekAverage')}
                 value={`${formatDuration(
                   Math.round(summary.average17WeekWorking),
-                )} / week`}
-                detail={`${formatShortDate(seventeenWeekStart)} – ${formatShortDate(currentWeekEnd)}`}
+                )} / ${t('perWeek')}`}
+                detail={`${formatShortDate(seventeenWeekStart, locale)} – ${formatShortDate(currentWeekEnd, locale)}`}
                 prominent
               />
             </SummarySection>
 
-            <SummarySection icon={Banknote} title="Earnings">
+            <SummarySection icon={Banknote} title={t('earnings')}>
               <div className="pt-3">
                 <EarningsPeriod
                   key={`${earningsPeriodStart}-${earningsPeriodEnd}`}
@@ -238,7 +241,7 @@ export function WeeklySummary({
             className="min-h-10"
             onClick={() => setOpen(false)}
           >
-            Close
+            {t('close')}
           </Button>
         </DialogFooter>
       </DialogContent>

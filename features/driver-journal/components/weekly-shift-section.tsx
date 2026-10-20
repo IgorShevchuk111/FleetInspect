@@ -1,4 +1,7 @@
+'use client';
+
 import { TableCell, TableRow } from '@/components/ui/table';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
@@ -36,6 +39,8 @@ export function WeeklyShiftSection({
   onAcceptRestCompensation,
   onCancelRestCompensation,
 }: WeeklyShiftSectionProps) {
+  const { t } = useTranslations();
+
   const weeklySummary = calculateWeeklySummary(
     allShifts,
     weekStart,
@@ -51,12 +56,13 @@ export function WeeklyShiftSection({
           <div className="border-b border-border bg-background px-card pt-8 pb-2 sm:px-card">
             <div className="flex flex-col items-center gap-2">
               <h3 className="text-lg font-semibold leading-heading text-foreground">
-                Week: {formatWeek(weekStart)}
+                {t('week')}: {formatWeek(weekStart)}
               </h3>
 
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <span className="text-small leading-body text-foreground">
-                  {shifts.length} {shifts.length === 1 ? 'shift' : 'shifts'}
+                  {shifts.length}{' '}
+                  {shifts.length === 1 ? t('shiftSingular') : t('shiftPlural')}
                 </span>
 
                 <WeeklySummary
@@ -101,7 +107,7 @@ export function WeeklyShiftSection({
             colSpan={6}
             className="h-20 px-card py-card text-center text-sm text-muted-foreground"
           >
-            No shifts this week.
+            {t('noShiftsThisWeek')}
           </TableCell>
         </TableRow>
       )}

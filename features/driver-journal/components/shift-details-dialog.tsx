@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import { formatDuration } from '@/features/driver-journal/utils/duration';
@@ -87,7 +88,7 @@ function DetailRow({
 }) {
   return (
     <div className="flex min-h-10 items-center justify-between gap-3 border-b border-border/50 py-2 last:border-b-0">
-      <span className="text-bodys leading-body ">{label}</span>
+      <span className="text-bodys leading-body">{label}</span>
 
       <div
         className={`text-right text-body leading-body text-foreground ${className ?? ''}`}
@@ -141,21 +142,23 @@ function CompensationOption({
   option: WeeklyRestCompensationCandidate['options'][number];
   onAccept?: () => void;
 }) {
+  const { t } = useTranslations();
+
   return (
     <div className="flex items-center justify-between gap-3 border-t border-border py-3 first:border-t-0">
       <div className="min-w-0">
         <div className="text-caption font-medium">
-          {option.restType === 'weekly' ? 'Weekly rest' : 'Daily rest'}
+          {option.restType === 'weekly' ? t('weeklyRest') : t('dailyRest')}
         </div>
 
         <div className="text-caption leading-body text-muted-foreground">
-          {formatDuration(option.dailyRestMinutes)} rest ·{' '}
-          {formatDuration(option.compensationMinutes)} compensation
+          {formatDuration(option.dailyRestMinutes)} {t('rest')} ·{' '}
+          {formatDuration(option.compensationMinutes)} {t('compensation')}
         </div>
 
         {option.usesReducedDailyRest && (
           <StatusHint className="text-warning">
-            Uses reduced daily rest
+            {t('usesReducedDailyRest')}
           </StatusHint>
         )}
       </div>
@@ -167,7 +170,7 @@ function CompensationOption({
           className="min-h-9 shrink-0"
           onClick={onAccept}
         >
-          Accept
+          {t('accept')}
         </Button>
       )}
     </div>
@@ -191,6 +194,8 @@ export function ShiftDetailsDialog({
   onAcceptRestCompensation,
   onCancelRestCompensation,
 }: ShiftDetailsDialogProps) {
+  const { t } = useTranslations();
+
   const details = getShiftDetailsData(shift, {
     drivingUsageAfter,
     sharedAllowanceUsedAfter,
@@ -264,8 +269,8 @@ export function ShiftDetailsDialog({
             </div>
 
             <div className="min-w-0">
-              <DialogTitle className=" font-semibold leading-heading text-foreground text-title">
-                Shift details
+              <DialogTitle className="font-semibold leading-heading text-foreground text-title">
+                {t('shiftDetails')}
               </DialogTitle>
 
               <DialogDescription className="text-small leading-body">
@@ -279,14 +284,14 @@ export function ShiftDetailsDialog({
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="space-y-5 px-4 py-5 sm:px-6">
-            <Section icon={CalendarDays} title="Shift times">
+            <Section icon={CalendarDays} title={t('shiftTimes')}>
               <DetailRow
-                label="Start"
+                label={t('start')}
                 value={`${formatDate(shift.date)} ${formatTime(shift.start)}`}
               />
 
               <DetailRow
-                label="End"
+                label={t('end')}
                 value={
                   <div className="flex flex-col items-end">
                     <span>
@@ -295,7 +300,7 @@ export function ShiftDetailsDialog({
 
                     {maximumEnd && (
                       <StatusHint>
-                        Maximum end: {formatDate(maximumEnd.date)}{' '}
+                        {t('maximumEnd')}: {formatDate(maximumEnd.date)}{' '}
                         {formatTime(maximumEnd.time)}
                       </StatusHint>
                     )}
@@ -304,9 +309,9 @@ export function ShiftDetailsDialog({
               />
             </Section>
 
-            <Section icon={Gauge} title="Driving & shift">
+            <Section icon={Gauge} title={t('drivingAndShift')}>
               <DetailRow
-                label="Driving"
+                label={t('driving')}
                 value={
                   <div className="flex flex-col items-end">
                     <span>
@@ -316,7 +321,8 @@ export function ShiftDetailsDialog({
 
                     {drivingOver10Hours ? (
                       <StatusHint className="text-danger">
-                        Over maximum · {drivingUsageAfter}/2 extended days used
+                        {t('overMaximum')} · {drivingUsageAfter}/2{' '}
+                        {t('extendedDaysUsed')}
                       </StatusHint>
                     ) : (
                       <StatusHint
@@ -326,7 +332,7 @@ export function ShiftDetailsDialog({
                             : 'text-muted-foreground'
                         }
                       >
-                        Extended days {drivingUsageAfter}/2 used
+                        {t('extendedDays')} {drivingUsageAfter}/2 {t('used')}
                       </StatusHint>
                     )}
                   </div>
@@ -341,7 +347,7 @@ export function ShiftDetailsDialog({
               />
 
               <DetailRow
-                label="Shift"
+                label={t('shift')}
                 value={
                   <div className="flex flex-col items-end">
                     <span>
@@ -351,7 +357,8 @@ export function ShiftDetailsDialog({
 
                     {shiftOver15Hours ? (
                       <StatusHint className="text-danger">
-                        Over maximum · {sharedAllowanceUsedAfter}/3 shared uses
+                        {t('overMaximum')} · {sharedAllowanceUsedAfter}/3{' '}
+                        {t('sharedUses')}
                       </StatusHint>
                     ) : (
                       <StatusHint
@@ -361,7 +368,8 @@ export function ShiftDetailsDialog({
                             : 'text-muted-foreground'
                         }
                       >
-                        Shared allowance {sharedAllowanceUsedAfter}/3 used
+                        {t('sharedAllowance')} {sharedAllowanceUsedAfter}/3{' '}
+                        {t('used')}
                       </StatusHint>
                     )}
                   </div>
@@ -369,25 +377,28 @@ export function ShiftDetailsDialog({
                 className={shiftOver15Hours ? 'text-danger' : undefined}
               />
 
-              <DetailRow label="Break" value={formatDuration(breakMinutes)} />
+              <DetailRow
+                label={t('break')}
+                value={formatDuration(breakMinutes)}
+              />
 
               <DetailRow
-                label="Working"
+                label={t('working')}
                 value={formatDuration(workingMinutes)}
               />
 
               {drivingStatus && (
                 <DetailRow
-                  label="Driving status"
+                  label={t('drivingStatus')}
                   value={drivingStatus.label}
                   className={drivingStatus.className}
                 />
               )}
             </Section>
 
-            <Section icon={Moon} title="Rest">
+            <Section icon={Moon} title={t('rest')}>
               <DetailRow
-                label="Rest"
+                label={t('rest')}
                 value={
                   <div className="flex flex-col items-end">
                     <span>{formatDuration(effectiveRestMinutes)}</span>
@@ -395,11 +406,11 @@ export function ShiftDetailsDialog({
                     <StatusHint>
                       {isWeeklyRest
                         ? isReducedWeeklyRest
-                          ? 'Reduced weekly'
-                          : 'Regular weekly'
+                          ? t('reducedWeekly')
+                          : t('regularWeekly')
                         : isReducedDailyRest
-                          ? 'Reduced daily'
-                          : 'Regular daily'}
+                          ? t('reducedDaily')
+                          : t('regularDaily')}
                     </StatusHint>
                   </div>
                 }
@@ -413,45 +424,45 @@ export function ShiftDetailsDialog({
               />
             </Section>
 
-            <Section icon={Banknote} title="Earnings">
+            <Section icon={Banknote} title={t('earnings')}>
               <DetailRow
-                label="Earn"
+                label={t('earn')}
                 value={formatMoney(shift.earn)}
                 className="text-success"
               />
             </Section>
 
             {compensationReceiver && (
-              <Section icon={CheckCircle2} title="Compensation">
+              <Section icon={CheckCircle2} title={t('compensation')}>
                 <DetailRow
-                  label="Compensation"
+                  label={t('compensation')}
                   value={formatDuration(compensationMinutes)}
                   className="text-success"
                 />
 
                 <DetailRow
-                  label="Original rest"
+                  label={t('originalRest')}
                   value={formatDuration(restMinutes)}
                 />
 
                 <DetailRow
-                  label="Effective rest"
+                  label={t('effectiveRest')}
                   value={formatDuration(effectiveRestMinutes)}
                 />
               </Section>
             )}
 
             {compensationSource && (
-              <Section icon={CheckCircle2} title="Weekly rest compensation">
+              <Section icon={CheckCircle2} title={t('weeklyRestCompensation')}>
                 <DetailRow
-                  label="Status"
-                  value="Accepted"
+                  label={t('status')}
+                  value={t('accepted')}
                   className="text-success"
                 />
 
                 {acceptedCompensation && (
                   <DetailRow
-                    label="Compensation"
+                    label={t('compensation')}
                     value={formatDuration(
                       Number(acceptedCompensation.compensation_minutes),
                     )}
@@ -461,7 +472,7 @@ export function ShiftDetailsDialog({
             )}
 
             {candidates.length > 0 && (
-              <Section icon={BedDouble} title="Available compensation">
+              <Section icon={BedDouble} title={t('availableCompensation')}>
                 <div className="rounded-md border border-border">
                   {candidates.map((candidate) => (
                     <div
@@ -469,21 +480,21 @@ export function ShiftDetailsDialog({
                       className="p-3"
                     >
                       <DetailRow
-                        label="Reduced weekly rest"
+                        label={t('reducedWeeklyRest')}
                         value={formatDuration(
                           candidate.reducedWeeklyRestMinutes,
                         )}
                       />
 
                       <DetailRow
-                        label="Required compensation"
+                        label={t('requiredCompensation')}
                         value={formatDuration(
                           candidate.requiredCompensationMinutes,
                         )}
                       />
 
                       <DetailRow
-                        label="Deadline"
+                        label={t('deadline')}
                         value={formatDate(candidate.deadline)}
                       />
 
@@ -507,7 +518,7 @@ export function ShiftDetailsDialog({
             )}
 
             {savedCompensations.length > 0 && (
-              <Section icon={CheckCircle2} title="Saved compensation">
+              <Section icon={CheckCircle2} title={t('savedCompensation')}>
                 <div className="rounded-md border border-border">
                   {savedCompensations.map((compensation) => {
                     const minutes = Number(
@@ -524,10 +535,10 @@ export function ShiftDetailsDialog({
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-caption font-medium">
                             {accepted
-                              ? 'Accepted'
+                              ? t('accepted')
                               : declined
-                                ? 'Declined'
-                                : 'Pending'}
+                                ? t('declined')
+                                : t('pending')}
                           </span>
 
                           <span
@@ -545,7 +556,7 @@ export function ShiftDetailsDialog({
 
                         {compensation.daily_rest_minutes != null && (
                           <div className="mt-1 text-caption leading-body text-muted-foreground">
-                            Daily rest:{' '}
+                            {t('dailyRest')}:{' '}
                             {formatDuration(
                               Number(compensation.daily_rest_minutes),
                             )}
@@ -562,7 +573,7 @@ export function ShiftDetailsDialog({
                               onCancelRestCompensation(compensation.id)
                             }
                           >
-                            Cancel decision
+                            {t('cancelDecision')}
                           </Button>
                         )}
                       </div>
@@ -581,12 +592,12 @@ export function ShiftDetailsDialog({
             className="min-h-10"
             onClick={() => onOpenChange(false)}
           >
-            Close
+            {t('close')}
           </Button>
 
           <Button type="button" className="min-h-10" onClick={handleEdit}>
             <Pencil className="size-4" />
-            Edit shift
+            {t('editShift')}
           </Button>
         </DialogFooter>
       </DialogContent>

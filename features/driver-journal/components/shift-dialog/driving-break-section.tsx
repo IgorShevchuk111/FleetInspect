@@ -2,6 +2,7 @@
 
 import { Label } from '@/components/ui/label';
 import { DurationInputField } from '@/features/driver-journal/components/duration-input';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import type {
   DurationInput,
   ShiftFormData,
@@ -35,12 +36,13 @@ export function DrivingBreakSection({
   onDrivingChange,
   onBreakChange,
 }: DrivingBreakSectionProps) {
+  const { t } = useTranslations();
+
   return (
     <section className="min-w-0 space-y-5">
-      {/* Driving */}
       <div className="min-w-0 space-y-2">
         <DurationInputField
-          label="Driving"
+          label={t('driving')}
           value={form.driving}
           onChange={onDrivingChange}
           disabled={!canEnterRestOfShift}
@@ -54,31 +56,29 @@ export function DrivingBreakSection({
         )}
 
         <p className="text-small leading-relaxed text-muted-foreground">
-          Max today: {formatDuration(drivingMaximum)} · Extended days{' '}
-          {extendedDrivingDaysUsed}/2 used
+          {t('maxToday')}: {formatDuration(drivingMaximum)} ·{' '}
+          {t('extendedDays')} {extendedDrivingDaysUsed}/2 {t('used')}
         </p>
       </div>
 
-      {/* Break */}
       <div className="min-w-0">
         <DurationInputField
-          label="Break"
+          label={t('break')}
           value={form.break}
           onChange={onBreakChange}
           disabled={!canEnterRestOfShift}
         />
       </div>
 
-      {/* Working time */}
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <Label className=" text-muted-foreground">Working</Label>
+          <Label className="text-muted-foreground">{t('working')}</Label>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Shift time minus break
+            {t('shiftTimeMinusBreak')}
           </p>
         </div>
 
-        <span className="shrink-0  tabular-nums">
+        <span className="shrink-0 tabular-nums">
           {formatDuration(workingMinutes)}
         </span>
       </div>

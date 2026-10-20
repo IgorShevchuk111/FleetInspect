@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 import type {
   RestType,
@@ -36,21 +37,14 @@ function getDateTime(date: string, time: string) {
   return value;
 }
 
-function formatDateTime(value: Date) {
-  return new Intl.DateTimeFormat('en-GB', {
+function formatDateTime(value: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   }).format(value);
-}
-
-function formatRestDuration(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  return `${hours}h ${remainingMinutes}m`;
 }
 
 export function RestTypeDialog({
@@ -60,6 +54,9 @@ export function RestTypeDialog({
   onOpenChange,
   onSelect,
 }: RestTypeDialogProps) {
+  const { language, t } = useTranslations();
+  const locale = language === 'uk' ? 'uk-UA' : 'en-GB';
+
   const currentStartDateTime = getDateTime(form.date, form.start);
 
   const previousEndDateTime = previousCompletedShift
@@ -69,67 +66,75 @@ export function RestTypeDialog({
       )
     : undefined;
 
+  const restMinutes =
+    currentStartDateTime && previousEndDateTime
+      ? Math.max(
+          0,
+          Math.round(
+            (currentStartDateTime.getTime() - previousEndDateTime.getTime()) /
+              60000,
+          ),
+        )
+      : 0;
+
+  const restHours = Math.floor(restMinutes / 60);
+  const remainingMinutes = restMinutes % 60;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="z-[100] w-[calc(100vw-2rem)] max-w-sm">
         <DialogHeader>
-          <DialogTitle>What type of rest?</DialogTitle>
+          <DialogTitle>{t('whatTypeOfRest')}</DialogTitle>
         </DialogHeader>
 
         {previousCompletedShift ? (
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">
-              {previousEndDateTime ? formatDateTime(previousEndDateTime) : ''}
+              {previousEndDateTime
+                ? formatDateTime(previousEndDateTime, locale)
+                : ''}
               {' → '}
-              {currentStartDateTime ? formatDateTime(currentStartDateTime) : ''}
+              {currentStartDateTime
+                ? formatDateTime(currentStartDateTime, locale)
+                : ''}
             </p>
 
             <p className="text-sm font-medium">
-              Rest:
-              {formatRestDuration(
-                currentStartDateTime && previousEndDateTime
-                  ? Math.max(
-                      0,
-                      Math.round(
-                        (currentStartDateTime.getTime() -
-                          previousEndDateTime.getTime()) /
-                          60000,
-                      ),
-                    )
-                  : 0,
-              )}
+              {t('rest')}: {restHours}
+              {t('hoursShort')} {remainingMinutes}
+              {t('minutesShort')}
             </p>
           </div>
         ) : (
           <div className="space-y-1">
             {currentStartDateTime ? (
               <p className="text-sm text-muted-foreground">
-                {formatDateTime(currentStartDateTime)}
+                {formatDateTime(currentStartDateTime, locale)}
               </p>
             ) : null}
 
             <p className="text-sm text-muted-foreground">
-              No previous completed shift
+              {t('noPreviousCompletedShift')}
             </p>
           </div>
         )}
 
-        <div className="flex gap-2 pt-2">
+        <div className="grid grid-cols-2 gap-2 pt-2">
           <Button
             type="button"
-            className="flex-1"
+            className="min-w-0 whitespace-normal px-2"
             onClick={() => onSelect('daily')}
           >
-            Daily rest
+            {t('dailyRest')}
           </Button>
 
           <Button
             type="button"
             variant="outline"
-            className="flex-1"
+            className="min-w-0 whitespace-normal px-2"
             onClick={() => onSelect('weekly')}
           >
-            Weekly rest
+            {t('weeklyRest')}
           </Button>
         </div>
 
@@ -139,7 +144,7 @@ export function RestTypeDialog({
           className="w-full"
           onClick={() => onOpenChange(false)}
         >
-          Close
+          {t('close')}
         </Button>
       </DialogContent>
     </Dialog>

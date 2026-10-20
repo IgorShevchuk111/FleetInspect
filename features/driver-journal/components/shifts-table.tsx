@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
@@ -93,7 +94,13 @@ const tableClass = `  w-full
   table-fixed
   border-separate
   border-spacing-0
-   [&_tbody_tr]:border-b   [&_tbody_td]:border-r   [&_tbody_td]:border-border/30   [&_tbody_td:last-child]:border-r-0   [&_thead_th]:border-r   [&_thead_th]:border-border/30   [&_thead_th:last-child]:border-r-0`;
+  [&_tbody_tr]:border-b
+  [&_tbody_td]:border-r
+  [&_tbody_td]:border-border/30
+  [&_tbody_td:last-child]:border-r-0
+  [&_thead_th]:border-r
+  [&_thead_th]:border-border/30
+  [&_thead_th:last-child]:border-r-0`;
 
 const headerClass = `  bg-muted/70
   px-0.5
@@ -126,7 +133,8 @@ function HeaderContent({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-0.5">
-      {icon} <span>{label}</span>
+      {icon}
+      <span>{label}</span>
     </div>
   );
 }
@@ -139,12 +147,16 @@ export function ShiftsTable({
   onEdit,
   onDelete,
 }: ShiftsTableProps) {
+  const { t, language } = useTranslations();
+  const localizedHeaderClass = `${headerClass} ${
+    language === 'uk' ? 'text-[8px]' : ''
+  }`;
   const sortedWeeks = groupShiftsByWeek(shifts);
 
   if (sortedWeeks.length === 0) {
     return (
       <div className="py-10 text-center text-small text-muted-foreground">
-        No shifts yet.
+        {t('noShiftsYet')}
       </div>
     );
   }
@@ -156,51 +168,52 @@ export function ShiftsTable({
           <TableColumns />
           <TableHeader className="bg-muted/70">
             <TableRow className="border-b border-border/60 bg-muted/70">
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<Clock className="size-5" aria-hidden="true" />}
-                  label="Start"
+                  label={t('start')}
                 />
               </TableHead>
 
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<TachographDrivingIcon />}
-                  label="Driving"
+                  label={t('driving')}
                 />
               </TableHead>
 
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<Timer className="size-5" aria-hidden="true" />}
-                  label="Shift"
+                  label={t('shift')}
                 />
               </TableHead>
 
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<BedDouble className="size-5" aria-hidden="true" />}
-                  label="Rest"
+                  label={t('rest')}
                 />
               </TableHead>
 
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<Flag className="size-5" aria-hidden="true" />}
-                  label="End"
+                  label={t('end')}
                 />
               </TableHead>
 
-              <TableHead className={headerClass}>
+              <TableHead className={localizedHeaderClass}>
                 <HeaderContent
                   icon={<Ellipsis className="size-5" aria-hidden="true" />}
-                  label="Actions"
+                  label={t('actions')}
                 />
               </TableHead>
             </TableRow>
           </TableHeader>
         </Table>
       </div>
+
       <div className="w-full min-w-0 overflow-x-hidden">
         <Table className={tableClass}>
           <TableColumns />
