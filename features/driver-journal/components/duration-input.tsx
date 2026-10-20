@@ -59,14 +59,11 @@ export function DurationInputField({
 
   return (
     <div className="min-w-0 space-y-2">
-      <Label className="text-sm font-medium">{label}</Label>
+      <Label className=" text-muted-foreground">{label}</Label>
 
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="min-w-0 space-y-1">
-          <Label
-            htmlFor={`${label}-hours`}
-            className="text-xs font-normal text-muted-foreground"
-          >
+          <Label htmlFor={`${label}-hours`} className=" text-muted-foreground">
             Hours
           </Label>
 

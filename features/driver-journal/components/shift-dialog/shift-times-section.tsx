@@ -136,7 +136,7 @@ export function ShiftTimesSection({
     <section className="min-w-0 space-y-5">
       {/* Start */}
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="start-date" className="text-sm text-muted-foreground">
+        <Label htmlFor="start-date" className=" text-muted-foreground">
           Start
         </Label>
 
@@ -161,7 +161,7 @@ export function ShiftTimesSection({
 
       {/* End */}
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="end-date" className="text-sm text-muted-foreground">
+        <Label htmlFor="end-date" className=" text-muted-foreground">
           End
         </Label>
 
@@ -194,7 +194,7 @@ export function ShiftTimesSection({
       {/* Shift summary */}
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <span className="text-sm font-medium">Shift</span>
+          <Label className=" text-muted-foreground">Shift</Label>
           <p className="text-xs leading-relaxed text-muted-foreground">
             Shared allowance: {sharedAllowanceUsed}/3 used
           </p>
