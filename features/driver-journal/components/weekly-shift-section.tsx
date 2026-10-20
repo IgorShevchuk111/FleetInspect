@@ -63,6 +63,7 @@ export function WeeklyShiftSection({
                   weekStart={weekStart}
                   summary={weeklySummary}
                   sharedAllowanceUsed={weeklySummary.sharedAllowanceUsed}
+                  allShifts={allShifts}
                 />
               </div>
             </div>

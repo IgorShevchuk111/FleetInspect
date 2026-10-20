@@ -14,11 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import type { Shift } from '@/features/driver-journal/types/driver-journal';
 import {
   getEndOfWeek,
   getStartOfWeek,
 } from '@/features/driver-journal/utils/dates';
 import { formatDuration } from '@/features/driver-journal/utils/duration';
+
+import { EarningsPeriod } from '@/features/driver-journal/components/earnings-period';
 
 type WeeklySummaryData = {
   driving: number;
@@ -34,6 +37,7 @@ type WeeklySummaryProps = {
   summary: WeeklySummaryData;
   weekStart: Date;
   sharedAllowanceUsed: number;
+  allShifts: Shift[];
 };
 
 type SummaryRowProps = {
@@ -49,6 +53,14 @@ function formatShortDate(date: Date) {
     month: 'short',
     year: 'numeric',
   }).format(date);
+}
+
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 function SummaryRow({
@@ -110,6 +122,7 @@ export function WeeklySummary({
   summary,
   weekStart,
   sharedAllowanceUsed,
+  allShifts,
 }: WeeklySummaryProps) {
   const [open, setOpen] = useState(false);
 
@@ -123,6 +136,9 @@ export function WeeklySummary({
   seventeenWeekStart.setDate(seventeenWeekStart.getDate() - 16 * 7);
 
   const yearStart = new Date(currentWeekEnd.getFullYear(), 0, 1);
+
+  const earningsPeriodStart = formatDateInput(currentWeekStart);
+  const earningsPeriodEnd = formatDateInput(currentWeekEnd);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -203,21 +219,14 @@ export function WeeklySummary({
             </SummarySection>
 
             <SummarySection icon={Banknote} title="Earnings">
-              <SummaryRow
-                label="Earned this week"
-                value={`£${summary.earn.toFixed(2)}`}
-                prominent
-              />
-
-              <SummaryRow
-                label="Year-to-date"
-                value={`£${summary.annualEarned.toLocaleString('en-GB', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`}
-                detail={`${formatShortDate(yearStart)} – ${formatShortDate(currentWeekEnd)}`}
-                prominent
-              />
+              <div className="pt-3">
+                <EarningsPeriod
+                  key={`${earningsPeriodStart}-${earningsPeriodEnd}`}
+                  allShifts={allShifts}
+                  defaultStartDate={earningsPeriodStart}
+                  defaultEndDate={earningsPeriodEnd}
+                />
+              </div>
             </SummarySection>
           </div>
         </div>
