@@ -7,7 +7,6 @@ import type {
   ShiftFormData,
 } from '@/features/driver-journal/types/driver-journal';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
-import { Label } from '@/components/ui/label';
 
 type DrivingBreakSectionProps = {
   form: ShiftFormData;
