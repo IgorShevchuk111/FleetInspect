@@ -13,6 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
@@ -25,6 +27,8 @@ interface InstallAppActionsProps {
 export function InstallAppActions({
   loginHref = '/login',
 }: InstallAppActionsProps) {
+  const { t } = useTranslations();
+
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
@@ -76,8 +80,9 @@ export function InstallAppActions({
     <>
       <div className="mt-7 flex flex-col gap-3">
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">
-          For best results, install the Fleetinspect Web App
+          {t('installAppDescription')}
         </p>
+
         <Button
           type="button"
           size="lg"
@@ -85,12 +90,12 @@ export function InstallAppActions({
           onClick={handleInstall}
         >
           <Download className="mr-2 size-4" />
-          Install FleetInspect
+          {t('installApp')}
         </Button>
 
         <Button asChild variant="outline" size="lg" className="w-full">
           <Link href={loginHref}>
-            Skip for now
+            {t('skipForNow')}
             <ExternalLink className="ml-2 size-4" />
           </Link>
         </Button>
@@ -103,52 +108,44 @@ export function InstallAppActions({
               <Smartphone className="size-6" />
             </div>
 
-            <DialogTitle>INSTALLATION INSTRUCTIONS</DialogTitle>
+            <DialogTitle>{t('installationInstructions')}</DialogTitle>
 
             <DialogDescription>
-              If you wish to create an icon on your mobile or tablet for easy
-              access you will need to do the following:
+              {t('installationDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-0 sm:py-2">
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Android Device</h3>
+              <h3 className="text-sm font-semibold">{t('androidDevice')}</h3>
+
               <p className="text-sm leading-6 text-muted-foreground">
-                Click the 3 dots towards the top right hand corner of the
-                screen, this will give you a menu, towards the bottom of the
-                menu click the &apos;Install App&apos; option.
+                {t('androidInstructions')}
               </p>
             </section>
 
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Apple IOS Device</h3>
+              <h3 className="text-sm font-semibold">{t('iosDevice')}</h3>
+
               <p className="text-sm leading-6 text-muted-foreground">
-                Click on the Share button icon (a square with an upward arrow)
-                next to the URL bar. You can then select Add to Home Screen.
+                {t('iosInstructions')}
               </p>
             </section>
 
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">
-                Windows Phone or Desktop
-              </h3>
+              <h3 className="text-sm font-semibold">{t('desktopDevice')}</h3>
+
               <p className="text-sm leading-6 text-muted-foreground">
-                Click the 3 dots towards the bottom left corner of the screen,
-                this will give you a menu, towards the bottom of the menu select
-                &apos;pin to start&apos; this will add an icon to your home
-                screen.
+                {t('desktopInstructions')}
               </p>
             </section>
           </div>
 
           <div className="shrink-0 border-t bg-background px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:border-0 sm:px-0 sm:pt-0 sm:pb-0">
-            <Button
-              asChild
-              className="w-full"
-              onClick={() => setInstructionsOpen(false)}
-            >
-              <Link href={loginHref}>Continue to login</Link>
+            <Button asChild className="w-full">
+              <Link href={loginHref} onClick={() => setInstructionsOpen(false)}>
+                {t('continueToLogin')}
+              </Link>
             </Button>
           </div>
         </DialogContent>

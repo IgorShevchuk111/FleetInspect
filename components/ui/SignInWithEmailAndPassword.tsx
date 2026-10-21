@@ -9,10 +9,13 @@ import {
 import React, { useState } from 'react';
 import SpinnerMini from './SpinnerMini';
 import { useSignInWithPassword } from '@/lib/auth/hooks/useSignInWithPassword';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 export default function SignInWithEmailAndPassword() {
   const { handleSubmit, isLoading, error } = useSignInWithPassword();
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslations();
+
   return (
     <div>
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -21,7 +24,7 @@ export default function SignInWithEmailAndPassword() {
             htmlFor="email"
             className="block text-sm font-medium text-secondary-foreground mb-1"
           >
-            Email address
+            {t('authEmailAddress')}
           </label>
 
           <div className="relative">
@@ -33,8 +36,7 @@ export default function SignInWithEmailAndPassword() {
               type="email"
               name="email"
               id="email"
-              defaultValue="user@example.com"
-              placeholder="Enter your email"
+              placeholder={t('authEmailPlaceholder')}
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm transition-colors duration-200 relative z-20"
               required
               autoComplete="email"
@@ -47,7 +49,7 @@ export default function SignInWithEmailAndPassword() {
             htmlFor="password"
             className="block text-sm font-medium text-secondary-foreground mb-1"
           >
-            Password
+            {t('authPassword')}
           </label>
 
           <div className="relative">
@@ -59,8 +61,7 @@ export default function SignInWithEmailAndPassword() {
               type={showPassword ? 'text' : 'password'}
               name="password"
               id="password"
-              defaultValue="123456"
-              placeholder="Enter your password"
+              placeholder={t('authPasswordPlaceholder')}
               className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm transition-colors duration-200 relative z-20"
               required
               autoComplete="current-password"
@@ -68,6 +69,9 @@ export default function SignInWithEmailAndPassword() {
 
             <button
               type="button"
+              aria-label={
+                showPassword ? t('authHidePassword') : t('authShowPassword')
+              }
               className="absolute inset-y-0 right-0 pr-3 flex items-center z-30"
               onClick={() => setShowPassword((prev) => !prev)}
             >
@@ -90,7 +94,7 @@ export default function SignInWithEmailAndPassword() {
           ) : (
             <>
               <LockClosedIcon className="h-4 w-4" />
-              Sign in
+              {t('authSignIn')}
             </>
           )}
         </button>
