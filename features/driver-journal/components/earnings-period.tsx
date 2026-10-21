@@ -95,16 +95,12 @@ export function EarningsPeriod({
       <div className="flex items-center gap-2">
         <Banknote className="size-4 shrink-0 text-muted-foreground" />
 
-        <h4 className="text-muted-foreground text-small">
-          {t('earningsPeriod')}
-        </h4>
+        <h3 className="text-muted-foreground ">{t('earningsPeriod')}</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="min-w-0 space-y-1.5">
-          <span className="text-caption leading-body text-muted-foreground">
-            {t('from')}
-          </span>
+          <span className="text-small ">{t('from')}</span>
 
           <Popover>
             <PopoverTrigger asChild>
@@ -138,9 +134,7 @@ export function EarningsPeriod({
         </div>
 
         <div className="min-w-0 space-y-1.5">
-          <span className="text-caption leading-body text-muted-foreground">
-            {t('to')}
-          </span>
+          <span className="text-small ">{t('to')}</span>
 
           <Popover>
             <PopoverTrigger asChild>
@@ -179,14 +173,12 @@ export function EarningsPeriod({
       ) : (
         <div className="flex items-end justify-between gap-3 border-t border-border/50 pt-3">
           <div className="min-w-0">
-            <p className="text-caption leading-body text-muted-foreground">
+            <p className="text-small leading-body text-muted-foreground">
               {formatDateLabel(startDate, locale)} –{' '}
               {formatDateLabel(endDate, locale)}
             </p>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t('totalEarned')}
-            </p>
+            <p className="mt-1 ">{t('totalEarned')}</p>
           </div>
 
           <p className="shrink-0 text-lg font-semibold leading-heading tabular-nums text-foreground">

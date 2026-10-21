@@ -89,10 +89,10 @@ export default function Header() {
               className="w-64 border border-border bg-background opacity-100 shadow-xl"
             >
               <DropdownMenuLabel className="font-normal">
-                <p className="text-sm font-medium">{t('account')}</p>
+                <h1 className="font-medium">{t('account')}</h1>
 
                 {email && (
-                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                  <p className="mt-1 truncate text-body text-muted-foreground">
                     {email}
                   </p>
                 )}
@@ -100,7 +100,7 @@ export default function Header() {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild className="text-md">
                 <Link href="/profile">
                   <User />
                   {t('profile')}
@@ -114,7 +114,7 @@ export default function Header() {
                     className="flex items-center gap-2"
                   >
                     <Languages className="size-4" />
-                    <span>{t('language')}</span>
+                    <span className="text-body">{t('language')}</span>
                   </DropdownMenuItem>
                 </CollapsibleTrigger>
 
@@ -127,7 +127,7 @@ export default function Header() {
                       }
                     }}
                   >
-                    <DropdownMenuRadioItem value="en">
+                    <DropdownMenuRadioItem value="en" className="text-md">
                       {t('english')}
                     </DropdownMenuRadioItem>
 
@@ -140,7 +140,7 @@ export default function Header() {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={signOut}>
+              <DropdownMenuItem onClick={signOut} className="text-md">
                 <LogOut />
                 {t('signOut')}
               </DropdownMenuItem>

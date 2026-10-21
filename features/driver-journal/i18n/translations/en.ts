@@ -126,8 +126,34 @@ const en = {
     ukrainian: 'Ukrainian',
     signOut: 'Sign out',
     signIn: 'Sign in',
-
-
+    profileTitle: 'Profile',
+    profileSubtitle: 'Manage your account and applications.',
+    profileActive: 'Active',
+    profilePersonalInformation: 'Personal information',
+    profileAccountDetails: 'Your account details.',
+    profileFullName: 'Full name',
+    profileEmail: 'Email',
+    profileApplications: 'Applications',
+    profileApplicationsDescription: 'Applications available to your account.',
+    profileFleetInspection: 'Fleet Inspection',
+    profileFleetInspectionDescription: 'Vehicle inspections, defects, photos and reports.',
+    profileDriverJournal: 'Driver Journal',
+    profileDriverJournalDescription: 'Shifts, driving time, breaks, rest and working time.',
+    profileRoutePlanner: 'Route Planner',
+    profileRoutePlannerDescription: 'Plan and manage your driving routes.',
+    profileSignOut: 'Sign out',
+    profileSignOutDescription: 'Sign out of your FleetInspect account.',
+    signingOut: 'Signing out...',
+    homeAccessRestricted: 'Access restricted',
+    homeAccessDeniedPrefix: "You don't currently have access to",
+    homeAccessDeniedSuffix:
+        'Please contact your administrator if you think you should have access.',
+    homeThisApplication: 'this application',
+    homeApplications: 'Applications',
+    homeYourApplications: 'Your applications',
+    homeChooseApplication: 'Choose an application to get started.',
+    homeOpenApplication: 'Open application',
+    homeOpen: 'Open',
 } as const;
 
 export default en;

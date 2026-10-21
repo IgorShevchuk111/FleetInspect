@@ -49,7 +49,7 @@ export function DrivingBreakSection({
         />
 
         {actualDrivingMinutes > 0 && (
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <p className="text-small leading-relaxed text-muted-foreground">
             {formatDuration(actualDrivingMinutes)} /{' '}
             {formatDuration(drivingMaximum)}
           </p>
@@ -72,8 +72,10 @@ export function DrivingBreakSection({
 
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <Label className="text-muted-foreground">{t('working')}</Label>
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <Label className="text-muted-foreground  text-lg">
+            {t('working')}
+          </Label>
+          <p className="text-small leading-relaxed text-muted-foreground">
             {t('shiftTimeMinusBreak')}
           </p>
         </div>

@@ -131,7 +131,7 @@ export function ShiftDialog({
               </div>
 
               <div className="min-w-0">
-                <DialogTitle className="font-semibold leading-heading text-foreground text-title">
+                <DialogTitle className="font-semibold leading-heading text-foreground text-title mb-3§">
                   {isEditing ? t('editShift') : t('addShift')}
                 </DialogTitle>
 
