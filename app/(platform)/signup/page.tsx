@@ -4,11 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-
 import { toast, Toaster } from 'sonner';
-
 import { createClient } from '@/lib/supabase/client';
-
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -19,16 +17,14 @@ import {
 
 export default function SignUpPage() {
   const supabase = createClient();
-
+  const { t } = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const hasShownToast = useRef(false);
 
   const [isLoading, setIsLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -62,11 +58,11 @@ export default function SignUpPage() {
     if (error === 'user_not_found' && !hasShownToast.current) {
       hasShownToast.current = true;
 
-      toast.info('Account not found', {
-        description: 'Please create a new account to continue.',
+      toast.info(t('signupAccountNotFound'), {
+        description: t('signupAccountNotFoundDescription'),
       });
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -84,24 +80,24 @@ export default function SignUpPage() {
       !formData.password ||
       !formData.confirmPassword
     ) {
-      toast.error('All fields are required');
+      toast.error(t('signupAllFieldsRequired'));
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('signupPasswordsMismatch'));
       return false;
     }
 
     if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('signupPasswordMinLength'));
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(formData.email)) {
-      toast.error('Invalid email address');
+      toast.error(t('signupInvalidEmail'));
       return false;
     }
 
@@ -115,7 +111,7 @@ export default function SignUpPage() {
 
     setIsLoading(true);
 
-    const loadingToast = toast.loading('Creating your account...');
+    const loadingToast = toast.loading(t('signupCreatingAccountToast'));
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -130,31 +126,33 @@ export default function SignUpPage() {
 
       if (error) {
         toast.dismiss(loadingToast);
-
         toast.error(error.message);
+
         router.push(`/login?email=${encodeURIComponent(formData.email)}`);
+
         return;
       }
 
       if (!data.user) {
         toast.dismiss(loadingToast);
-
-        toast.error('Failed to create account');
-
+        toast.error(t('signupCreateAccountFailed'));
         return;
       }
 
       toast.dismiss(loadingToast);
 
-      toast.success('Account created successfully!', {
-        description: 'Please check your email to verify your account.',
+      toast.success(t('signupAccountCreated'), {
+        description: t('signupVerifyEmail'),
       });
 
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss(loadingToast);
 
-      toast.error(error?.message || 'Something went wrong');
+      const message =
+        error instanceof Error ? error.message : t('signupSomethingWentWrong');
+
+      toast.error(message || t('signupSomethingWentWrong'));
     } finally {
       setIsLoading(false);
     }
@@ -185,11 +183,11 @@ export default function SignUpPage() {
       <div className="mx-auto w-full max-w-md sm:mt-8">
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-2">
-            Create account
+            {t('signupCreateAccount')}
           </h1>
 
           <p className="text-base sm:text-lg text-gray-600">
-            Join us to get started
+            {t('signupSubtitle')}
           </p>
         </div>
       </div>
@@ -203,7 +201,7 @@ export default function SignUpPage() {
                 htmlFor="fullName"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Full Name
+                {t('signupFullName')}
               </label>
 
               <div className="relative">
@@ -218,7 +216,7 @@ export default function SignUpPage() {
                   required
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  placeholder="Enter your full name"
+                  placeholder={t('signupFullNamePlaceholder')}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
@@ -230,7 +228,7 @@ export default function SignUpPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email address
+                {t('signupEmailAddress')}
               </label>
 
               <div className="relative">
@@ -246,7 +244,7 @@ export default function SignUpPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Enter your email"
+                  placeholder={t('signupEmailPlaceholder')}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
@@ -258,7 +256,7 @@ export default function SignUpPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Password
+                {t('signupPassword')}
               </label>
 
               <div className="relative">
@@ -274,12 +272,13 @@ export default function SignUpPage() {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Enter your password"
+                  placeholder={t('signupPasswordPlaceholder')}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
 
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
                 >
@@ -298,7 +297,7 @@ export default function SignUpPage() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Confirm Password
+                {t('signupConfirmPassword')}
               </label>
 
               <div className="relative">
@@ -314,12 +313,15 @@ export default function SignUpPage() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  placeholder="Confirm your password"
+                  placeholder={t('signupConfirmPasswordPlaceholder')}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
 
                 <button
                   type="button"
+                  aria-label={
+                    showConfirmPassword ? 'Hide password' : 'Show password'
+                  }
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
@@ -337,7 +339,9 @@ export default function SignUpPage() {
               disabled={isLoading}
               className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading
+                ? t('signupCreatingAccount')
+                : t('signupCreateAccount')}
             </button>
           </form>
 
@@ -350,7 +354,7 @@ export default function SignUpPage() {
 
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-white text-gray-500">
-                  Or continue with
+                  {t('authOrContinueWith')}
                 </span>
               </div>
             </div>
@@ -358,6 +362,7 @@ export default function SignUpPage() {
             {/* Google */}
             <div className="mt-6">
               <button
+                type="button"
                 onClick={handleGoogleSignUp}
                 className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-900 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
               >
@@ -369,7 +374,7 @@ export default function SignUpPage() {
                   className="w-5 h-5"
                 />
 
-                <span>Sign up with Google</span>
+                <span>{t('signupWithGoogle')}</span>
               </button>
             </div>
           </div>
@@ -377,12 +382,12 @@ export default function SignUpPage() {
           {/* Login link */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              {t('signupHasAccount')}{' '}
               <Link
                 href="/login"
                 className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200"
               >
-                Sign in here
+                {t('signupSignInHere')}
               </Link>
             </p>
           </div>
