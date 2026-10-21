@@ -26,6 +26,7 @@ import { RestEarningsSection } from '@/features/driver-journal/components/shift-
 import { RestTypeDialog } from '@/features/driver-journal/components/shift-dialog/rest-type-dialog';
 import { ShiftTimesSection } from '@/features/driver-journal/components/shift-dialog/shift-times-section';
 import { useShiftDialog } from '@/features/driver-journal/hooks/use-shift-dialog';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import type {
   Shift,
@@ -45,12 +46,14 @@ type ShiftDialogProps = {
 export function ShiftDialog({
   open,
   shift,
-  shifts = [],
+  shifts,
   restCompensations = [],
   onOpenChange,
   onSubmit,
   onDelete,
 }: ShiftDialogProps) {
+  const { t } = useTranslations();
+
   const {
     form,
     isEditing,
@@ -129,13 +132,11 @@ export function ShiftDialog({
 
               <div className="min-w-0">
                 <DialogTitle className="font-semibold leading-heading text-foreground text-title">
-                  {isEditing ? 'Edit shift' : 'Add shift'}
+                  {isEditing ? t('editShift') : t('addShift')}
                 </DialogTitle>
 
                 <DialogDescription className="text-samll leading-body text-muted-foreground">
-                  {isEditing
-                    ? 'Update your driving shift details.'
-                    : 'Enter your driving shift details.'}
+                  {isEditing ? t('updateShiftDetails') : t('enterShiftDetails')}
                 </DialogDescription>
               </div>
             </div>
@@ -212,7 +213,7 @@ export function ShiftDialog({
                   "
                 >
                   <Trash2 className="size-4" />
-                  Delete
+                  {t('delete')}
                 </Button>
               ) : null}
 
@@ -222,7 +223,7 @@ export function ShiftDialog({
                 onClick={handleCancel}
                 className="min-h-10 min-w-20"
               >
-                Cancel
+                {t('cancel')}
               </Button>
 
               <Button
@@ -234,7 +235,7 @@ export function ShiftDialog({
                 }
                 className="min-h-10 min-w-28"
               >
-                {isEditing ? 'Save changes' : 'Add shift'}
+                {isEditing ? t('saveChanges') : t('addShift')}
               </Button>
             </DialogFooter>
           </form>
@@ -256,17 +257,16 @@ export function ShiftDialog({
         <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-heading leading-heading">
-              Delete shift?
+              {t('deleteShiftTitle')}
             </AlertDialogTitle>
 
             <AlertDialogDescription className="text-caption leading-body">
-              This action cannot be undone. This shift will be permanently
-              removed from the journal.
+              {t('deleteShiftWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
 
             <AlertDialogAction
               onClick={handleDelete}
@@ -276,7 +276,7 @@ export function ShiftDialog({
                 dark:hover:bg-danger/90
               "
             >
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

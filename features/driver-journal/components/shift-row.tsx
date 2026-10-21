@@ -22,19 +22,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
-
-import type { RestCompensation } from '../services/driver-journal';
-import { formatDuration } from '../utils/duration';
-import { calculateShiftMinutes } from '../utils/shifts';
-import type { WeeklyRestCompensationCandidate } from '../utils/weekly-rest-compensation';
 import {
   getDrivingStatus,
   getRestStatus,
   getShiftStatus,
 } from '@/features/driver-journal/utils/shift-status';
-import { ShiftDetailsDialog } from './shift-details-dialog';
 import { cn } from '@/lib/utils';
+
+import type { RestCompensation } from '../services/driver-journal';
+import { formatDuration } from '../utils/duration';
+import { calculateShiftMinutes } from '../utils/shifts';
+import type { WeeklyRestCompensationCandidate } from '../utils/weekly-rest-compensation';
+
+import { ShiftDetailsDialog } from './shift-details-dialog';
 
 type ShiftRowProps = {
   shift: Shift;
@@ -91,6 +93,8 @@ export function ShiftRow({
   onEdit,
   onDelete,
 }: ShiftRowProps) {
+  const { t } = useTranslations();
+
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [swiped, setSwiped] = useState(false);
@@ -246,7 +250,7 @@ export function ShiftRow({
               type="button"
               variant="ghost"
               size="icon"
-              aria-label="Delete shift"
+              aria-label={t('deleteShift')}
               tabIndex={swiped ? 0 : -1}
               className={cn(
                 'absolute inset-y-0 right-0 z-0 size-16 rounded-none',
@@ -270,7 +274,6 @@ export function ShiftRow({
                 isWeeklyRest ? 'bg-muted' : 'bg-background hover:bg-muted',
               )}
             >
-              {/* Start */}
               <div
                 className={cn(
                   'min-w-0 border-r border-border/30 border-l-2 px-0.5 py-1.5',
@@ -287,7 +290,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* Driving */}
               <div
                 className={cn(
                   'min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center',
@@ -297,7 +299,6 @@ export function ShiftRow({
                 {formatDuration(drivingMinutes)}
               </div>
 
-              {/* Shift */}
               <div
                 className={cn(
                   'min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center',
@@ -308,7 +309,6 @@ export function ShiftRow({
                 {formatDuration(shiftMinutes)}
               </div>
 
-              {/* Rest */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5 text-center">
                 <div className="flex min-h-9 flex-col items-center justify-center leading-none">
                   <span>{formatDuration(effectiveRestMinutes)}</span>
@@ -326,16 +326,15 @@ export function ShiftRow({
                   >
                     {isWeeklyRest
                       ? isReducedWeeklyRest
-                        ? 'RW'
-                        : 'W'
+                        ? t('reducedWeeklyRestShort')
+                        : t('weeklyRestShort')
                       : reducedDailyRest
-                        ? 'RD'
-                        : 'D'}
+                        ? t('reducedDailyRestShort')
+                        : t('dailyRestShort')}
                   </span>
                 </div>
               </div>
 
-              {/* End */}
               <div className="min-w-0 border-r border-border/30 px-0.5 py-1.5">
                 <div className="flex flex-col items-center leading-tight">
                   <span>{formatDate(endDate)}</span>
@@ -343,7 +342,6 @@ export function ShiftRow({
                 </div>
               </div>
 
-              {/* Actions */}
               <div
                 className="min-w-0 px-0.5 py-1.5 text-center"
                 onClick={(event) => event.stopPropagation()}
@@ -360,7 +358,7 @@ export function ShiftRow({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      aria-label="Shift actions"
+                      aria-label={t('shiftActions')}
                       className="size-8"
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={(event) => {
@@ -382,12 +380,12 @@ export function ShiftRow({
                   >
                     <DropdownMenuItem onClick={handleViewDetails}>
                       <Eye className="size-4" />
-                      View Details
+                      {t('viewDetails')}
                     </DropdownMenuItem>
 
                     <DropdownMenuItem onClick={handleEdit}>
                       <Pencil className="size-4" />
-                      Edit Shift
+                      {t('editShift')}
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
@@ -397,7 +395,7 @@ export function ShiftRow({
                       onClick={handleDeleteRequest}
                     >
                       <Trash2 className="size-4" />
-                      Delete Shift
+                      {t('deleteShift')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -429,21 +427,21 @@ export function ShiftRow({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this shift?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteThisShift')}</AlertDialogTitle>
 
             <AlertDialogDescription>
-              This will permanently delete this shift from your Driver Journal.
+              {t('deleteShiftPermanently')}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
 
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
             >
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
+import { enGB, uk } from 'date-fns/locale';
 import { Banknote, CalendarIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 type EarningsPeriodProps = {
   allShifts: Shift[];
@@ -44,20 +45,20 @@ function toDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateLabel(value: string): string {
+function formatDateLabel(value: string, locale: string): string {
   const date = parseDate(value);
 
-  if (!date) return 'Select date';
+  if (!date) return locale === 'uk-UA' ? 'Виберіть дату' : 'Select date';
 
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   }).format(date);
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-GB', {
+function formatCurrency(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'GBP',
   }).format(amount);
@@ -70,6 +71,9 @@ export function EarningsPeriod({
 }: EarningsPeriodProps) {
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
+  const { language, t } = useTranslations();
+
+  const locale = language === 'uk' ? 'uk-UA' : 'en-GB';
 
   const validPeriod =
     Boolean(parseDate(startDate)) &&
@@ -91,15 +95,15 @@ export function EarningsPeriod({
       <div className="flex items-center gap-2">
         <Banknote className="size-4 shrink-0 text-muted-foreground" />
 
-        <h4 className="text-sm font-semibold leading-heading text-foreground">
-          Earnings period
+        <h4 className="text-muted-foreground text-small">
+          {t('earningsPeriod')}
         </h4>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="min-w-0 space-y-1.5">
           <span className="text-caption leading-body text-muted-foreground">
-            From
+            {t('from')}
           </span>
 
           <Popover>
@@ -110,13 +114,16 @@ export function EarningsPeriod({
                 className="w-full min-w-0 justify-start gap-2 font-normal"
               >
                 <CalendarIcon className="size-4 shrink-0" />
-                <span className="truncate">{formatDateLabel(startDate)}</span>
+                <span className="truncate">
+                  {formatDateLabel(startDate, locale)}
+                </span>
               </Button>
             </PopoverTrigger>
 
             <PopoverContent align="start" className="w-auto p-0">
               <Calendar
                 mode="single"
+                locale={language === 'uk' ? uk : enGB}
                 captionLayout="dropdown"
                 startMonth={new Date(2000, 0)}
                 endMonth={new Date(new Date().getFullYear() + 1, 11)}
@@ -132,7 +139,7 @@ export function EarningsPeriod({
 
         <div className="min-w-0 space-y-1.5">
           <span className="text-caption leading-body text-muted-foreground">
-            To
+            {t('to')}
           </span>
 
           <Popover>
@@ -143,13 +150,16 @@ export function EarningsPeriod({
                 className="w-full min-w-0 justify-start gap-2 font-normal"
               >
                 <CalendarIcon className="size-4 shrink-0" />
-                <span className="truncate">{formatDateLabel(endDate)}</span>
+                <span className="truncate">
+                  {formatDateLabel(endDate, locale)}
+                </span>
               </Button>
             </PopoverTrigger>
 
             <PopoverContent align="start" className="w-auto p-0">
               <Calendar
                 mode="single"
+                locale={language === 'uk' ? uk : enGB}
                 captionLayout="dropdown"
                 startMonth={new Date(2000, 0)}
                 endMonth={new Date(new Date().getFullYear() + 1, 11)}
@@ -165,22 +175,22 @@ export function EarningsPeriod({
       </div>
 
       {!validPeriod ? (
-        <p className="text-sm text-destructive">
-          Select a valid date range. The end date must not be before the start
-          date.
-        </p>
+        <p className="text-sm text-destructive">{t('invalidDateRange')}</p>
       ) : (
         <div className="flex items-end justify-between gap-3 border-t border-border/50 pt-3">
           <div className="min-w-0">
             <p className="text-caption leading-body text-muted-foreground">
-              {formatDateLabel(startDate)} – {formatDateLabel(endDate)}
+              {formatDateLabel(startDate, locale)} –{' '}
+              {formatDateLabel(endDate, locale)}
             </p>
 
-            <p className="mt-1 text-sm text-muted-foreground">Total earned</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t('totalEarned')}
+            </p>
           </div>
 
           <p className="shrink-0 text-lg font-semibold leading-heading tabular-nums text-foreground">
-            {formatCurrency(totalEarned)}
+            {formatCurrency(totalEarned, locale)}
           </p>
         </div>
       )}

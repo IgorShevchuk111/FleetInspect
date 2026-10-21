@@ -2,6 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 import type { DurationInput } from '@/features/driver-journal/types/driver-journal';
 
@@ -18,6 +19,8 @@ export function DurationInputField({
   onChange,
   disabled = false,
 }: DurationInputFieldProps) {
+  const { t } = useTranslations();
+
   const handleFocus = (field: 'hours' | 'minutes') => {
     if (disabled) return;
 
@@ -59,12 +62,12 @@ export function DurationInputField({
 
   return (
     <div className="min-w-0 space-y-2">
-      <Label className=" text-muted-foreground">{label}</Label>
+      <Label className="text-muted-foreground">{label}</Label>
 
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="min-w-0 space-y-1">
-          <Label htmlFor={`${label}-hours`} className=" text-muted-foreground">
-            Hours
+          <Label htmlFor={`${label}-hours`} className="text-muted-foreground">
+            {t('hours')}
           </Label>
 
           <Input
@@ -82,7 +85,9 @@ export function DurationInputField({
         </div>
 
         <div className="min-w-0 space-y-1">
-          <Label htmlFor={`${label}-minutes`}>Minutes</Label>
+          <Label htmlFor={`${label}-minutes`} className="text-muted-foreground">
+            {t('minutes')}
+          </Label>
 
           <Input
             id={`${label}-minutes`}

@@ -1,7 +1,6 @@
 'use client';
 
-import { Banknote } from 'lucide-react';
-
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -47,6 +46,8 @@ export function RestEarningsSection({
   onEarnChange,
   onEarnBlur,
 }: RestEarningsSectionProps) {
+  const { t } = useTranslations();
+
   const showWeeklyRestUnavailable =
     form.restType === 'weekly' && !previousCompletedShift;
 
@@ -68,8 +69,8 @@ export function RestEarningsSection({
   return (
     <section className="min-w-0 space-y-5">
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="rest-type" className="text-lg ">
-          Rest type
+        <Label htmlFor="rest-type" className="text-muted-foreground">
+          {t('restType')}
         </Label>
 
         <Select
@@ -81,7 +82,7 @@ export function RestEarningsSection({
             id="rest-type"
             className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-body"
           >
-            <SelectValue placeholder="Select rest type" />
+            <SelectValue placeholder={t('selectRestType')} />
           </SelectTrigger>
 
           <SelectContent
@@ -90,27 +91,26 @@ export function RestEarningsSection({
             sideOffset={6}
             className="z-[100] min-w-[var(--radix-select-trigger-width)] bg-background"
           >
-            <SelectItem value="daily">Daily rest</SelectItem>
-            <SelectItem value="weekly">Weekly rest</SelectItem>
+            <SelectItem value="daily">{t('dailyRest')}</SelectItem>
+            <SelectItem value="weekly">{t('weeklyRest')}</SelectItem>
           </SelectContent>
         </Select>
 
         {showWeeklyRestUnavailable && (
           <p className="text-small leading-relaxed text-muted-foreground">
-            No previous completed shift. Rest duration cannot be calculated yet.
+            {t('noPreviousCompletedShift')}
           </p>
         )}
 
         {showReducedWeeklyRest && (
           <p className="text-small leading-relaxed text-warning">
-            Reduced weekly rest: 24–44h 59m. Your next weekly rest must be
-            regular.
+            {t('reducedWeeklyRest')} {t('nextWeeklyRestMustBeRegular')}
           </p>
         )}
 
         {showRegularWeeklyRest && (
           <p className="text-small leading-relaxed text-success">
-            Regular weekly rest: 45 hours or more.
+            {t('regularWeeklyRest')}
           </p>
         )}
 
@@ -122,8 +122,8 @@ export function RestEarningsSection({
       </div>
 
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="earn" className="text-lg">
-          Earn (£)
+        <Label htmlFor="earn" className="text-muted-foreground">
+          {t('earn')}
         </Label>
 
         <div className="relative min-w-0">

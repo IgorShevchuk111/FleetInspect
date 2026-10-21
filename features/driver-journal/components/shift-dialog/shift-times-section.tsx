@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CalendarDays } from 'lucide-react';
+import { enGB, uk } from 'date-fns/locale';
 
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import type { ShiftFormData } from '@/features/driver-journal/types/driver-journal';
 import { minutesToDuration } from '@/features/driver-journal/utils/duration';
 import { getMaxShiftEndDateTime } from '@/features/driver-journal/utils/shift-status';
@@ -48,12 +50,14 @@ function dateToDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, language: 'en' | 'uk'): string {
   const date = dateStringToDate(value);
 
-  if (!date) return 'Select date';
+  if (!date) {
+    return language === 'uk' ? 'Виберіть дату' : 'Select date';
+  }
 
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(language === 'uk' ? 'uk-UA' : 'en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -79,22 +83,24 @@ function DatePicker({
 }) {
   const [open, setOpen] = useState(false);
   const selectedDate = dateStringToDate(value);
+  const { language, t } = useTranslations();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         id={id}
         disabled={disabled}
-        aria-label={`${id === 'start-date' ? 'Start' : 'End'} date: ${formatDate(value)}`}
+        aria-label={`${t(id === 'start-date' ? 'startDate' : 'endDate')}: ${formatDate(value, language)}`}
         className="inline-flex h-10 w-full min-w-0 items-center justify-start gap-2 rounded-md border border-input bg-background px-3 text-left text-sm font-normal shadow-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
       >
         <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
-        <span className="truncate">{formatDate(value)}</span>
+        <span className="truncate">{formatDate(value, language)}</span>
       </PopoverTrigger>
 
       <PopoverContent align="start" className="w-auto p-0">
         <Calendar
           mode="single"
+          locale={language === 'uk' ? uk : enGB}
           selected={selectedDate}
           onSelect={(date) => {
             if (!date) return;
@@ -124,20 +130,21 @@ export function ShiftTimesSection({
   onEndDateChange,
   onEndTimeChange,
 }: ShiftTimesSectionProps) {
+  const { language, t } = useTranslations();
+
   const maximumEnd =
     form.date && form.start
       ? getMaxShiftEndDateTime(form.date, form.start, shiftMaximum)
       : null;
 
   const maximumType =
-    shiftMaximum >= 15 * 60 ? 'Extended maximum' : 'Regular maximum';
+    shiftMaximum >= 15 * 60 ? t('extendedMaximum') : t('regularMaximum');
 
   return (
     <section className="min-w-0 space-y-5">
-      {/* Start */}
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="start-date" className=" text-muted-foreground">
-          Start
+        <Label htmlFor="start-date" className="text-muted-foreground">
+          {t('start')}
         </Label>
 
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
@@ -153,16 +160,15 @@ export function ShiftTimesSection({
             value={form.start}
             onChange={(event) => onStartTimeChange(event.target.value)}
             onBlur={onStartTimeBlur}
-            aria-label="Start time"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 "
+            aria-label={t('startTime')}
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2"
           />
         </div>
       </div>
 
-      {/* End */}
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="end-date" className=" text-muted-foreground">
-          End
+        <Label htmlFor="end-date" className="text-muted-foreground">
+          {t('end')}
         </Label>
 
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
@@ -179,24 +185,24 @@ export function ShiftTimesSection({
             value={form.end}
             onChange={(event) => onEndTimeChange(event.target.value)}
             disabled={!canEnterRestOfShift}
-            aria-label="End time"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 "
+            aria-label={t('endTime')}
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2"
           />
         </div>
 
         {maximumEnd && (
           <p className="text-small leading-relaxed text-muted-foreground">
-            {maximumType}: {formatDate(maximumEnd.date)}, {maximumEnd.time}
+            {maximumType}: {formatDate(maximumEnd.date, language)},{' '}
+            {maximumEnd.time}
           </p>
         )}
       </div>
 
-      {/* Shift summary */}
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <Label className=" text-muted-foreground">Shift</Label>
+          <Label className="text-muted-foreground">{t('shift')}</Label>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Shared allowance: {sharedAllowanceUsed}/3 used
+            {t('sharedAllowance')}: {sharedAllowanceUsed}/3 {t('used')}
           </p>
         </div>
 
@@ -207,7 +213,7 @@ export function ShiftTimesSection({
 
       {hasUnfinishedPreviousShift && (
         <p className="text-small font-medium leading-body text-danger">
-          You must finish your previous shift before adding a new shift.
+          {t('previousShiftMustFinish')}
         </p>
       )}
     </section>
