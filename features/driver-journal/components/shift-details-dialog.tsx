@@ -269,7 +269,7 @@ export function ShiftDetailsDialog({
             </div>
 
             <div className="min-w-0">
-              <DialogTitle className="font-semibold leading-heading text-foreground text-title">
+              <DialogTitle className="font-semibold leading-heading text-foreground text-title mb-3">
                 {t('shiftDetails')}
               </DialogTitle>
 

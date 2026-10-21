@@ -71,23 +71,13 @@ function SummaryRow({
 }: SummaryRowProps) {
   return (
     <div className="flex min-h-10 items-center justify-between gap-3 border-b border-border/50 py-2 last:border-b-0">
-      <span className="min-w-0 flex-1 text-caption leading-body text-muted-foreground">
-        {label}
-      </span>
+      <span className="min-w-0 flex-1  ">{label}</span>
 
       <div className="flex max-w-[65%] shrink-0 flex-col items-end gap-0.5 text-right">
-        <span
-          className={`text-[length:var(--font-size-secondary)] leading-body tabular-nums text-foreground ${
-            prominent ? 'font-semibold' : 'font-medium'
-          }`}
-        >
-          {value}
-        </span>
+        <span>{value}</span>
 
         {detail && (
-          <span className="text-caption leading-body text-muted-foreground">
-            {detail}
-          </span>
+          <span className="text-small text-muted-foreground">{detail}</span>
         )}
       </div>
     </div>
@@ -108,9 +98,7 @@ function SummarySection({
       <div className="flex items-center gap-2">
         <Icon className="size-4 shrink-0 text-muted-foreground" />
 
-        <h3 className="text-[length:var(--font-size-secondary)] font-semibold leading-heading text-muted-foreground">
-          {title}
-        </h3>
+        <h2 className=" text-muted-foreground">{title}</h2>
       </div>
 
       <div>{children}</div>
@@ -164,11 +152,11 @@ export function WeeklySummary({
             </div>
 
             <div className="min-w-0">
-              <DialogTitle className="text-heading font-semibold leading-heading text-foreground">
+              <DialogTitle className="font-semibold leading-heading text-foreground text-title mb-3">
                 {t('weeklySummary')}
               </DialogTitle>
 
-              <DialogDescription className="text-caption leading-body">
+              <DialogDescription className=" leading-body  text-small">
                 {formatShortDate(currentWeekStart, locale)} –{' '}
                 {formatShortDate(currentWeekEnd, locale)}
                 <span className="mt-0.5 block">{t('mondaySunday')}</span>
@@ -184,7 +172,7 @@ export function WeeklySummary({
                 label={t('extendedShiftsReducedRests')}
                 value={`${sharedAllowanceUsed}/3 ${t('used')}`}
                 detail={t('sinceLastWeeklyRest')}
-                prominent
+                // prominent
               />
             </SummarySection>
 

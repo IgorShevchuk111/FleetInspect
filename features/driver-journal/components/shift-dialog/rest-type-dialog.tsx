@@ -89,7 +89,7 @@ export function RestTypeDialog({
 
         {previousCompletedShift ? (
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body text-muted-foreground">
               {previousEndDateTime
                 ? formatDateTime(previousEndDateTime, locale)
                 : ''}
@@ -99,7 +99,7 @@ export function RestTypeDialog({
                 : ''}
             </p>
 
-            <p className="text-sm font-medium">
+            <p className="text-body font-medium">
               {t('rest')}: {restHours}
               {t('hoursShort')} {remainingMinutes}
               {t('minutesShort')}

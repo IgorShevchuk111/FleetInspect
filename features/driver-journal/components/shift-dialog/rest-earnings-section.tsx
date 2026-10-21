@@ -69,7 +69,7 @@ export function RestEarningsSection({
   return (
     <section className="min-w-0 space-y-5">
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="rest-type" className="text-muted-foreground">
+        <Label htmlFor="rest-type" className="text-muted-foreground text-lg">
           {t('restType')}
         </Label>
 
@@ -80,7 +80,7 @@ export function RestEarningsSection({
         >
           <SelectTrigger
             id="rest-type"
-            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-body"
+            className="h-10 min-h-8 w-full min-w-0 appearance-none rounded-md border border-input bg-background px-2 text-small"
           >
             <SelectValue placeholder={t('selectRestType')} />
           </SelectTrigger>
@@ -122,7 +122,7 @@ export function RestEarningsSection({
       </div>
 
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="earn" className="text-muted-foreground">
+        <Label htmlFor="earn" className="text-muted-foreground text-lg">
           {t('earn')}
         </Label>
 

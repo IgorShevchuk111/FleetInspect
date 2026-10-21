@@ -91,7 +91,7 @@ function DatePicker({
         id={id}
         disabled={disabled}
         aria-label={`${t(id === 'start-date' ? 'startDate' : 'endDate')}: ${formatDate(value, language)}`}
-        className="inline-flex h-10 w-full min-w-0 items-center justify-start gap-2 rounded-md border border-input bg-background px-3 text-left text-sm font-normal shadow-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
+        className="inline-flex h-10 w-full min-w-0 items-center justify-start gap-2 rounded-md border border-input bg-background px-3 text-left text-md font-normal shadow-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
       >
         <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
         <span className="truncate">{formatDate(value, language)}</span>
@@ -143,7 +143,7 @@ export function ShiftTimesSection({
   return (
     <section className="min-w-0 space-y-5">
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="start-date" className="text-muted-foreground">
+        <Label htmlFor="start-date" className="text-muted-foreground text-lg">
           {t('start')}
         </Label>
 
@@ -167,7 +167,7 @@ export function ShiftTimesSection({
       </div>
 
       <div className="min-w-0 space-y-2">
-        <Label htmlFor="end-date" className="text-muted-foreground">
+        <Label htmlFor="end-date" className="text-muted-foreground text-lg">
           {t('end')}
         </Label>
 
@@ -200,8 +200,8 @@ export function ShiftTimesSection({
 
       <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border pt-3">
         <div className="min-w-0 space-y-1">
-          <Label className="text-muted-foreground">{t('shift')}</Label>
-          <p className="text-xs leading-relaxed text-muted-foreground">
+          <Label className="text-muted-foreground text-lg">{t('shift')}</Label>
+          <p className="text-small leading-relaxed text-muted-foreground">
             {t('sharedAllowance')}: {sharedAllowanceUsed}/3 {t('used')}
           </p>
         </div>
