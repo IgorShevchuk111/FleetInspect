@@ -37,7 +37,7 @@ export default function SignInWithEmailAndPassword() {
               name="email"
               id="email"
               placeholder={t('authEmailPlaceholder')}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm transition-colors duration-200 relative z-20"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-md transition-colors duration-200 relative z-20"
               required
               autoComplete="email"
             />
@@ -62,7 +62,7 @@ export default function SignInWithEmailAndPassword() {
               name="password"
               id="password"
               placeholder={t('authPasswordPlaceholder')}
-              className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm transition-colors duration-200 relative z-20"
+              className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-md transition-colors duration-200 relative z-20"
               required
               autoComplete="current-password"
             />

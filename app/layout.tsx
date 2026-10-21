@@ -1,3 +1,4 @@
+import type { Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Header from '@/components/layout/Header';
 import './globals.css';
@@ -5,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import Main from '@/components/layout/Main';
 import 'leaflet/dist/leaflet.css';
 import { DriverJournalLanguageProvider } from '@/features/driver-journal/i18n/language-provider';
-
+import { ViewportZoomLock } from '@/components/shared/viewport-zoom-lock';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
@@ -14,7 +15,7 @@ export const metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'default' as const,
     title: 'FleetInspect',
   },
   formatDetection: {
@@ -31,9 +32,11 @@ export const metadata = {
   },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: '#3b82f6',
 };
 
@@ -88,6 +91,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="FleetInspect" />
       </head>
       <body className={`min-h-screen flex flex-col ${inter.className}`}>
+        <ViewportZoomLock />
+
         <DriverJournalLanguageProvider>
           <Header />
           <Main>{children}</Main>

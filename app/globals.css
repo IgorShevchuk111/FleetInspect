@@ -155,3 +155,7 @@
     @apply text-body leading-heading;
   }
 }
+
+html {
+  touch-action: manipulation;
+}
