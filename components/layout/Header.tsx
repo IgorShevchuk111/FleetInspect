@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Languages, LogOut, User, BookOpen } from 'lucide-react';
+import { Languages, LogOut, User, BookOpen, Menu, House } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import {
   DropdownMenu,
@@ -47,7 +47,6 @@ export default function Header() {
   }, [supabase]);
 
   const email = session?.user?.email;
-  const initial = email?.charAt(0).toUpperCase() ?? 'U';
 
   return (
     <header className="border-b border-border/60 bg-background/95 backdrop-blur">
@@ -55,7 +54,7 @@ export default function Header() {
         <Logo />
 
         <div className="flex items-center gap-2">
-          {/* Language selector - available to everyone */}
+          {/* Language selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -95,20 +94,18 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Authentication controls */}
+          {/* Authentication menu */}
           {loading ? (
-            <div className="h-9 w-9 animate-pulse rounded-lg bg-muted" />
+            <div className="size-9 animate-pulse rounded-lg bg-muted" />
           ) : session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  aria-label={t('openAccountMenu')}
-                  className="flex items-center rounded-full border border-border/70 bg-background p-1 transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  aria-label={language === 'uk' ? 'Відкрити меню' : 'Open menu'}
+                  className="inline-flex size-9 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
-                  <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                    {initial}
-                  </span>
+                  <Menu className="size-5" />
                 </button>
               </DropdownMenuTrigger>
 
@@ -129,13 +126,11 @@ export default function Header() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild className="text-md">
-                  <Link href="/profile">
-                    <User />
-                    {t('profile')}
+                  <Link href="/tachograph">
+                    <House />
+                    {t('home')}
                   </Link>
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild className="text-md">
                   <Link href="/driver-journal">
@@ -143,6 +138,17 @@ export default function Header() {
                     {t('driverJournal')}
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild className="text-md">
+                  <Link href="/profile">
+                    <User />
+                    {t('profile')}
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
 
                 <DropdownMenuItem onClick={signOut} className="text-md">
                   <LogOut />

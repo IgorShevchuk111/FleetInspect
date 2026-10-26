@@ -203,7 +203,7 @@ const en = {
     desktopDevice: 'Windows or desktop',
     desktopInstructions: 'Open your browser menu and select the available install or add-to-home-screen option.',
     continueToLogin: 'Continue to login',
-
+    home: 'Home',
 } as const;
 
 export default en;

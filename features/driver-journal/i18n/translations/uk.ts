@@ -207,7 +207,7 @@ const uk: Record<TranslationKey, string> = {
     desktopDevice: 'Windows або комп’ютер',
     desktopInstructions: 'Відкрийте меню браузера та виберіть доступний пункт встановлення застосунку або додавання на головний екран.',
     continueToLogin: 'Перейти до входу',
-
+    home: 'Головна',
 };
 
 export default uk;

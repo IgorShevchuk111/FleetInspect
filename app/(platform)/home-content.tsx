@@ -27,7 +27,7 @@ const apps = [
   },
   {
     id: 'driverJournal',
-    href: '/driver-journal',
+    href: '/tachograph',
     icon: ClipboardCheck,
     nameKey: 'profileDriverJournal',
     descriptionKey: 'profileDriverJournalDescription',
