@@ -207,7 +207,15 @@ const uk: Record<TranslationKey, string> = {
     desktopDevice: 'Windows або комп’ютер',
     desktopInstructions: 'Відкрийте меню браузера та виберіть доступний пункт встановлення застосунку або додавання на головний екран.',
     continueToLogin: 'Перейти до входу',
-
+    home: 'Головна',
+    tachographWork: 'Робота',
+    tachographRest: 'Відпочинок',
+    workingDay: 'Робочий день',
+    dailyDriving: 'Добове водіння',
+    breakTime: 'Перерва',
+    workingWeek: 'Робочий тиждень',
+    averageWorkingTime: 'Середній робочий час',
+    locked: 'Заблоковано',
 };
 
 export default uk;

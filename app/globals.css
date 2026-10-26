@@ -4,35 +4,40 @@
 
 @layer base {
   :root {
-    /* Colors */
-    --background: 210 20% 96%;
-    --secondary: 220 13% 91%;
-    --surface: 0 0% 100%;
-    --card: 0 0% 99%;
+    /* Base */
+    --background: 210 20% 96%; /*#f3f5f7 */
+    --foreground: 0 0% 3%; /* #080808 */
 
-    --foreground: 0 0% 3%;
-    --muted: 210 16% 93%;
-    --muted-foreground: 215 5% 45%;
+    /* Surfaces */
+    --card: 0 0% 100%; /* #ffffff */
 
-    --primary: 214 89% 52%;
-    --primary-hover: 214 89% 46%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary */
+    --primary: 214 89% 52%; /* #1876f2*/
+    --primary-foreground: 0 0% 100%; /* #ffffff */
 
-    --secondary-foreground: var(--foreground);
-    --accent: var(--muted);
-    --accent-foreground: var(--foreground);
+    /* Secondary */
+    --secondary: 220 13% 91%; /* #e5e7eb */
+    --secondary-foreground: 0 0% 3%; /* #080808 */
 
-    --destructive: var(--danger);
-    --destructive-foreground: 0 0% 100%;
+    /* Muted */
+    --muted: 210 16% 93%; /* #eaedf0 */
+    --muted-foreground: 215 5% 45%; /* #6d7278*/
 
-    --input: var(--border);
-    --ring: var(--primary);
+    /* Accent */
+    --accent: 210 16% 93%; /* #eaedf0*/
+    --accent-foreground: 0 0% 3%; /* #080808 */
 
-    --success: 110 60% 45%;
-    --warning: 45 95% 55%;
-    --danger: 0 85% 60%;
+    /* Status */
+    --destructive: 0 85% 60%; /* #f04242 */
+    --destructive-foreground: 0 0% 100%; /* #ffffff */
+    --success: 110 60% 45%; /* #4db82e */
+    --warning: 45 95% 55%; /* #f9c52d */
+    --danger: 0 85% 60%; /* #f04242  */
 
-    --border: 220 10% 85%;
+    /* Borders and focus */
+    --border: 220 10% 85%; /* #d6d8dc */
+    --input: 220 10% 85%; /* #d6d8dc */
+    --ring: 214 89% 52%; /* #1876f2 */
 
     /* Typography */
     --font-size-caption: 0.75rem; /* 12px */
