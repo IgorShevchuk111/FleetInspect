@@ -18,6 +18,9 @@ type LimitCardProps = {
   locked?: boolean;
   active?: boolean;
   progress?: number;
+  labelPosition?: string;
+  warningAt?: number;
+  successAt?: number;
 };
 
 export function LimitCard({
@@ -28,8 +31,18 @@ export function LimitCard({
   locked = false,
   active = false,
   progress = 0,
+  labelPosition = '-right-2 -top-[0.8rem]',
+  warningAt,
+  successAt,
 }: LimitCardProps) {
   const words = title.split(' ');
+
+  const progressColor =
+    successAt !== undefined && progress >= successAt
+      ? 'bg-success'
+      : warningAt !== undefined && progress >= warningAt
+        ? 'bg-warning'
+        : 'bg-danger';
 
   return (
     <Card
@@ -40,10 +53,10 @@ export function LimitCard({
       <CardContent className="grid min-h-20 grid-cols-[120px_minmax(4rem,.7fr)_minmax(0,1fr)] items-stretch gap-2 p-0">
         <div
           className={`relative flex min-w-0 flex-wrap items-center justify-center gap-2 px-2 py-4 text-center ${
-            active ? 'bg-primary text-primary-foreground' : ''
+            active ? `${progressColor} text-primary-foreground` : ''
           }`}
         >
-          <span className="text-body  leading-tight underline decoration-1 underline-offset-4 sm:text-heading">
+          <span className="text-body  leading-tight underline decoration-1 underline-offset-4 ">
             {words[0]}
             {words.length > 1 && (
               <>
@@ -70,13 +83,13 @@ export function LimitCard({
               aria-label="Заблоковано"
             />
           ) : (
-            <span className="whitespace-nowrap text-heading tabular-nums sm:text-title">
+            <span className="whitespace-nowrap text-heading tabular-nums ">
               {current}
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-3 py-4">
+        <div className="flex items-center justify-center gap-3 px-3 py-4">
           {!locked &&
             limits?.map((limit, index) => (
               <div
@@ -85,11 +98,11 @@ export function LimitCard({
                   limit.good ? 'text-success' : ''
                 }`}
               >
-                <span className="whitespace-nowrap text-heading tabular-nums sm:text-title">
+                <span className="whitespace-nowrap text-heading tabular-nums ">
                   {limit.remaining ?? limit.value}
                 </span>
 
-                <span className="absolute -right-2 -top-[0.8rem] text-caption">
+                <span className={`absolute ${labelPosition} text-caption`}>
                   {limit.value}
                 </span>
               </div>
@@ -99,8 +112,9 @@ export function LimitCard({
 
       {active && (
         <Progress
-          value={Math.min(progress, 100)}
-          className="absolute bottom-0 left-0 h-2 rounded-none"
+          value={Math.min(Math.max(progress, 0), 100)}
+          indicatorClassName={progressColor}
+          className="absolute bottom-0 left-[120px] h-2 w-[calc(100%-120px)] rounded-none bg-muted"
         />
       )}
     </Card>

@@ -30,6 +30,9 @@
     /* Status */
     --destructive: 0 85% 60%; /* #f04242 */
     --destructive-foreground: 0 0% 100%; /* #ffffff */
+    --success: 110 60% 45%; /* #4db82e */
+    --warning: 45 95% 55%; /* #f9c52d */
+    --danger: 0 85% 60%; /* #f04242  */
 
     /* Borders and focus */
     --border: 220 10% 85%; /* #d6d8dc */

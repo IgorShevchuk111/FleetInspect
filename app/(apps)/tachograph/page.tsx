@@ -7,8 +7,8 @@ import { LimitCard } from '@/features/driver-journal/components/limit-card';
 type Mode = 'start' | 'rest';
 
 const modes: { id: Mode; label: string }[] = [
-  { id: 'start', label: 'РОБОТА' },
-  { id: 'rest', label: 'ВІДПОЧИНОК' },
+  { id: 'start', label: 'Робота' },
+  { id: 'rest', label: 'Відпочинок' },
 ];
 
 export default function TachographPage() {
@@ -68,13 +68,15 @@ export default function TachographPage() {
           <LimitCard
             title="Добовий відпочинок"
             count={3}
-            current="13:54"
+            current="8:54"
             limits={[
               { value: '9', good: true, remaining: '9:00' },
               { value: '11', good: false, remaining: '11:00' },
             ]}
             active
-            progress={65}
+            progress={88}
+            warningAt={50}
+            successAt={80}
           />
 
           <LimitCard
@@ -87,26 +89,30 @@ export default function TachographPage() {
           />
 
           <LimitCard
+            labelPosition="right-[-2rem] -top-4"
             current="0:00"
             title="Тижневе водіння"
-            limits={[{ remaining: '56:00', value: '56' }]}
+            limits={[{ remaining: '56:00', value: '56:00' }]}
           />
           <LimitCard
+            labelPosition="right-[-2rem] -top-4"
             current="0:00"
             title="Двотижневе водіння"
-            limits={[{ remaining: '90:00', value: '90' }]}
+            limits={[{ remaining: '90:00', value: '90:00' }]}
           />
 
           <LimitCard
+            labelPosition="right-[-2rem] -top-4"
             title="Робочий тиждень"
             current="42:00"
-            limits={[{ remaining: '18:00', value: '60' }]}
+            limits={[{ remaining: '18:00', value: '60:00' }]}
           />
 
           <LimitCard
+            labelPosition="right-[-2rem] -top-4"
             title="Середній робочий час"
             current="46:30"
-            limits={[{ remaining: '1:30', value: '48' }]}
+            limits={[{ remaining: '1:30', value: '48:00' }]}
           />
         </section>
       </div>
