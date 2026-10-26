@@ -11,7 +11,7 @@ const apps = [
   },
   {
     id: 'driverJournal',
-    href: '/tachograph',
+    href: 'driver-journal/tachograph',
   },
   {
     id: 'routePlanner',

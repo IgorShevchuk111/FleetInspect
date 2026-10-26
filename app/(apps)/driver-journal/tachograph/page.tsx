@@ -3,17 +3,18 @@
 import { useState } from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { LimitCard } from '@/features/driver-journal/components/limit-card';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 
 type Mode = 'start' | 'rest';
 
-const modes: { id: Mode; label: string }[] = [
-  { id: 'start', label: 'Робота' },
-  { id: 'rest', label: 'Відпочинок' },
-];
-
 export default function TachographPage() {
   const [activeMode, setActiveMode] = useState<Mode>('rest');
+  const { t } = useTranslations();
 
+  const modes: { id: Mode; label: string }[] = [
+    { id: 'start', label: t('tachographWork') },
+    { id: 'rest', label: t('tachographRest') },
+  ];
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl ">
@@ -39,7 +40,7 @@ export default function TachographPage() {
 
         <section className="space-y-3 p-2 sm:p-4">
           <LimitCard
-            title="Робочий день"
+            title={t('workingDay')}
             count={3}
             limits={[
               { remaining: '13:00', value: '13' },
@@ -48,7 +49,7 @@ export default function TachographPage() {
           />
 
           <LimitCard
-            title="Добове водіння"
+            title={t('dailyDriving')}
             count={2}
             limits={[
               { remaining: '9:00', value: '9' },
@@ -57,7 +58,7 @@ export default function TachographPage() {
           />
 
           <LimitCard
-            title="Перерва"
+            title={t('breakTime')}
             current="0:00"
             limits={[
               { remaining: '0:15', value: '15' },
@@ -66,7 +67,7 @@ export default function TachographPage() {
           />
 
           <LimitCard
-            title="Добовий відпочинок"
+            title={t('dailyRest')}
             count={3}
             current="8:54"
             limits={[
@@ -80,7 +81,7 @@ export default function TachographPage() {
           />
 
           <LimitCard
-            title="Тижневий відпочинок"
+            title={t('weeklyRest')}
             current="0:00"
             limits={[
               { remaining: '24:00', value: '24' },
@@ -89,28 +90,28 @@ export default function TachographPage() {
           />
 
           <LimitCard
+            title={t('weeklyDriving')}
             labelPosition="right-[-2rem] -top-4"
             current="0:00"
-            title="Тижневе водіння"
             limits={[{ remaining: '56:00', value: '56:00' }]}
           />
           <LimitCard
             labelPosition="right-[-2rem] -top-4"
             current="0:00"
-            title="Двотижневе водіння"
+            title={t('twoWeekDriving')}
             limits={[{ remaining: '90:00', value: '90:00' }]}
           />
 
           <LimitCard
             labelPosition="right-[-2rem] -top-4"
-            title="Робочий тиждень"
+            title={t('workingWeek')}
             current="42:00"
             limits={[{ remaining: '18:00', value: '60:00' }]}
           />
 
           <LimitCard
             labelPosition="right-[-2rem] -top-4"
-            title="Середній робочий час"
+            title={t('averageWorkingTime')}
             current="46:30"
             limits={[{ remaining: '1:30', value: '48:00' }]}
           />

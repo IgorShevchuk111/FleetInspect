@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { LockKeyhole } from 'lucide-react';
+import { useTranslations } from '../i18n/use-translations';
 
 type LimitCardProps = {
   title: string;
@@ -36,6 +37,7 @@ export function LimitCard({
   successAt,
 }: LimitCardProps) {
   const words = title.split(' ');
+  const { t } = useTranslations();
 
   const progressColor =
     successAt !== undefined && progress >= successAt
@@ -80,7 +82,7 @@ export function LimitCard({
           {locked ? (
             <LockKeyhole
               className="size-8 text-muted-foreground"
-              aria-label="Заблоковано"
+              aria-label={t('locked')}
             />
           ) : (
             <span className="whitespace-nowrap text-heading tabular-nums ">

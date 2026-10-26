@@ -126,7 +126,7 @@ export default function Header() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild className="text-md">
-                  <Link href="/tachograph">
+                  <Link href="/driver-journal/tachograph">
                     <House />
                     {t('home')}
                   </Link>

@@ -208,6 +208,18 @@ const uk: Record<TranslationKey, string> = {
     desktopInstructions: 'Відкрийте меню браузера та виберіть доступний пункт встановлення застосунку або додавання на головний екран.',
     continueToLogin: 'Перейти до входу',
     home: 'Головна',
+    tachographWork: 'Робота',
+    tachographRest: 'Відпочинок',
+    workingDay: 'Робочий день',
+    dailyDriving: 'Добове водіння',
+    breakTime: 'Перерва',
+    dailyRest: 'Добовий відпочинок',
+    weeklyRest: 'Тижневий відпочинок',
+    weeklyDriving: 'Тижневе водіння',
+    twoWeekDriving: 'Двотижневе водіння',
+    workingWeek: 'Робочий тиждень',
+    averageWorkingTime: 'Середній робочий час',
+    locked: 'Заблоковано',
 };
 
 export default uk;

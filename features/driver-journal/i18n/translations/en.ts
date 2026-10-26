@@ -204,6 +204,18 @@ const en = {
     desktopInstructions: 'Open your browser menu and select the available install or add-to-home-screen option.',
     continueToLogin: 'Continue to login',
     home: 'Home',
+    tachographWork: 'Work',
+    tachographRest: 'Rest',
+    workingDay: 'Working day',
+    dailyDriving: 'Daily driving',
+    breakTime: 'Break',
+    dailyRest: 'Daily rest',
+    weeklyRest: 'Weekly rest',
+    weeklyDriving: 'Weekly driving',
+    twoWeekDriving: 'Two-week driving',
+    workingWeek: 'Working week',
+    averageWorkingTime: 'Average working time',
+    locked: 'Locked',
 } as const;
 
 export default en;
