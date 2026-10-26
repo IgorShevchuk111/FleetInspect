@@ -212,6 +212,9 @@ const en = {
     workingWeek: 'Working week',
     averageWorkingTime: 'Average working time',
     locked: 'Locked',
+    date: 'Date',
+    confirm: 'Confirm',
+    restStartTime: 'Rest start time',
 } as const;
 
 export default en;

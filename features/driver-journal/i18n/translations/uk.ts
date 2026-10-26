@@ -216,6 +216,9 @@ const uk: Record<TranslationKey, string> = {
     workingWeek: 'Робочий тиждень',
     averageWorkingTime: 'Середній робочий час',
     locked: 'Заблоковано',
+    date: 'Дата',
+    confirm: 'Підтвердити',
+    restStartTime: 'Початок відпочинку',
 };
 
 export default uk;
