@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { LimitCard } from '@/features/driver-journal/components/limit-card';
 import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
-
+import { TimeDialog } from '@/features/driver-journal/components/tachograph/time-dialog';
 type Mode = 'start' | 'rest';
 
 export default function TachographPage() {
   const [activeMode, setActiveMode] = useState<Mode>('rest');
   const { t } = useTranslations();
+
+  const [isStartDialogOpen, setIsStartDialogOpen] = useState(false);
+  const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
 
   const modes: { id: Mode; label: string }[] = [
     { id: 'start', label: t('tachographWork') },
@@ -22,7 +25,16 @@ export default function TachographPage() {
           type="single"
           value={activeMode}
           onValueChange={(value) => {
-            if (value) setActiveMode(value as Mode);
+            if (!value) return;
+
+            if (value === 'start') {
+              setIsStartDialogOpen(true);
+              return;
+            }
+
+            if (value === 'rest') {
+              setIsEndDialogOpen(true);
+            }
           }}
           className="bg-card px-2 py-4 border-b-2 border-border rounded-none h-auto w-full"
         >
@@ -117,6 +129,25 @@ export default function TachographPage() {
           />
         </section>
       </div>
+      <TimeDialog
+        mode="work"
+        open={isStartDialogOpen}
+        onOpenChange={setIsStartDialogOpen}
+        onConfirm={(date, start) => {
+          // TODO: Save the new shift using addShift().
+          setActiveMode('start');
+        }}
+      />
+
+      <TimeDialog
+        mode="rest"
+        open={isEndDialogOpen}
+        onOpenChange={setIsEndDialogOpen}
+        onConfirm={(date, restStart) => {
+          // TODO: Finish the active shift using updateShift().
+          setActiveMode('rest');
+        }}
+      />
     </main>
   );
 }
