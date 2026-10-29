@@ -169,12 +169,16 @@ export function TimeDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="mt-4 flex  flex-row gap-3">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1"
+          >
             {t('cancel')}
           </Button>
 
-          <Button onClick={handleConfirm} disabled={!time}>
+          <Button onClick={handleConfirm} disabled={!time} className="flex-1">
             {t('confirm')}
           </Button>
         </DialogFooter>

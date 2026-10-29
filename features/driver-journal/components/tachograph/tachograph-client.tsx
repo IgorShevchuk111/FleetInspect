@@ -50,17 +50,17 @@ export default function TachographClient() {
 
             setActiveDialog(value === 'start' ? 'work' : 'rest');
           }}
-          className="bg-card px-2 py-4 border-b-2 border-border rounded-none h-auto w-full"
+          className="h-auto w-full rounded-none border-b-2 border-border bg-card px-2 py-3 sm:py-4"
         >
           {modes.map(({ id, label }) => (
             <ToggleGroupItem
               key={id}
               value={id}
               aria-label={label}
-              className="flex-1 text-lg data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90"
               onClick={() => {
                 setActiveDialog(id === 'start' ? 'work' : 'rest');
               }}
+              className="min-h-12 flex-1 text-base font-medium sm:text-lg data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90"
             >
               {label}
             </ToggleGroupItem>
