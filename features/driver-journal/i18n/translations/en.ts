@@ -215,6 +215,7 @@ const en = {
     date: 'Date',
     confirm: 'Confirm',
     restStartTime: 'Rest start time',
+    workStartTime: 'Work start time',
 } as const;
 
 export default en;
