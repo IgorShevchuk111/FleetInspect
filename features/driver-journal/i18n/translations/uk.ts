@@ -219,6 +219,7 @@ const uk: Record<TranslationKey, string> = {
     date: 'Дата',
     confirm: 'Підтвердити',
     restStartTime: 'Початок відпочинку',
+    workStartTime: 'Початок роботи',
 };
 
 export default uk;
