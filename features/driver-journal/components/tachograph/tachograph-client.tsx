@@ -6,13 +6,15 @@ import { LimitCard } from '@/features/driver-journal/components/limit-card';
 import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import { TimeDialog } from '@/features/driver-journal/components/tachograph/time-dialog';
 import type { RestOptions } from '@/features/driver-journal/components/tachograph/rest-form';
+import { createShiftAction } from '@/features/driver-journal/actions/create-shift';
+import { toast } from 'sonner';
 
 type Mode = 'start' | 'rest';
 
 export default function TachographClient() {
   const [activeMode, setActiveMode] = useState<Mode>('rest');
   const { t } = useTranslations();
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeDialog, setActiveDialog] = useState<'work' | 'rest' | null>(
     null,
   );
@@ -22,22 +24,37 @@ export default function TachographClient() {
     { id: 'rest', label: t('tachographRest') },
   ];
 
-  const handleConfirm = (
+  const handleConfirm = async (
     date: string,
     time: string,
     restOptions?: RestOptions,
-  ) => {
+  ): Promise<boolean> => {
     if (activeDialog === 'work') {
-      // TODO: Save the new shift using addShift().
-      setActiveMode('start');
+      try {
+        const result = await createShiftAction(date, time);
+
+        if (result.success === false) {
+          toast.error(result.error);
+          return false;
+        }
+
+        setActiveMode('start');
+        toast.success('Shift started successfully');
+
+        return true;
+      } catch {
+        toast.error('Could not start the shift. Please try again.');
+        return false;
+      }
     }
 
     if (activeDialog === 'rest') {
-      // TODO: Pass the selected options to updateShift().
+      // Rest handling will be implemented separately.
       setActiveMode('rest');
+      return true;
     }
 
-    setActiveDialog(null);
+    return false;
   };
   return (
     <main className="min-h-screen bg-background">
@@ -46,7 +63,7 @@ export default function TachographClient() {
           type="single"
           value={activeMode}
           onValueChange={(value) => {
-            if (!value) return;
+            if (!value || value === activeMode) return;
 
             setActiveDialog(value === 'start' ? 'work' : 'rest');
           }}
@@ -58,6 +75,7 @@ export default function TachographClient() {
               value={id}
               aria-label={label}
               onClick={() => {
+                if (id === activeMode) return;
                 setActiveDialog(id === 'start' ? 'work' : 'rest');
               }}
               className="min-h-12 flex-1 text-base font-medium sm:text-lg data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90"

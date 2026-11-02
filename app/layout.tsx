@@ -7,6 +7,8 @@ import Main from '@/components/layout/Main';
 import 'leaflet/dist/leaflet.css';
 import { DriverJournalLanguageProvider } from '@/features/driver-journal/i18n/language-provider';
 import { ViewportZoomLock } from '@/components/shared/viewport-zoom-lock';
+import { Toaster } from '@/components/ui/sonner';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
@@ -98,6 +100,7 @@ export default function RootLayout({
           <Main>{children}</Main>
           <Footer />
         </DriverJournalLanguageProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
