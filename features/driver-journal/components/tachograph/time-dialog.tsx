@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { enGB, uk } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -35,7 +35,11 @@ type TimeDialogProps = {
   open: boolean;
   mode: 'work' | 'rest';
   onOpenChange: (open: boolean) => void;
-  onConfirm: (date: string, time: string, restOptions?: RestOptions) => void;
+  onConfirm: (
+    date: string,
+    time: string,
+    restOptions?: RestOptions,
+  ) => Promise<boolean>;
 };
 //#endregion
 
@@ -81,6 +85,7 @@ export function TimeDialog({
   const [time, setTime] = useState(format(new Date(), 'HH:mm'));
   const [restOptions, setRestOptions] =
     useState<RestOptions>(INITIAL_REST_OPTIONS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //Effects
   useEffect(() => {
@@ -94,21 +99,35 @@ export function TimeDialog({
   }, [open, mode]);
 
   // Handlers
-  function handleConfirm() {
-    if (!time) return;
+  async function handleConfirm() {
+    if (!time || isSubmitting) return;
 
-    onConfirm(
-      format(date, 'yyyy-MM-dd'),
-      time,
-      mode === 'rest' ? restOptions : undefined,
-    );
+    setIsSubmitting(true);
 
-    onOpenChange(false);
+    try {
+      const success = await onConfirm(
+        format(date, 'yyyy-MM-dd'),
+        time,
+        mode === 'rest' ? restOptions : undefined,
+      );
+
+      if (success) {
+        onOpenChange(false);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Render
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (isSubmitting) return;
+        onOpenChange(nextOpen);
+      }}
+    >
       <DialogContent className={DIALOG_CONTENT_CLASS_NAME}>
         <DialogHeader>
           <DialogTitle className="text-title">
@@ -157,6 +176,7 @@ export function TimeDialog({
               value={time}
               onChange={(event) => setTime(event.target.value)}
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -169,16 +189,22 @@ export function TimeDialog({
           )}
         </div>
 
-        <DialogFooter className="mt-4 flex  flex-row gap-3">
+        <DialogFooter className="mt-4 flex flex-row gap-3">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
             className="flex-1"
           >
             {t('cancel')}
           </Button>
 
-          <Button onClick={handleConfirm} disabled={!time} className="flex-1">
+          <Button
+            onClick={handleConfirm}
+            disabled={!time || isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {t('confirm')}
           </Button>
         </DialogFooter>
