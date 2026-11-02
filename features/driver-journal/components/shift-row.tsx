@@ -2,7 +2,7 @@
 
 import { useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-
+import type { OperationResult } from '@/features/driver-journal/hooks/use-driver-journal';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -51,13 +51,16 @@ type ShiftRowProps = {
   extendedShift?: boolean;
   weeklyRestCompensationCandidates?: WeeklyRestCompensationCandidate[];
   restCompensations?: RestCompensation[];
-  onAcceptRestCompensation?: (
+  onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
-  ) => Promise<void>;
-  onCancelRestCompensation?: (compensationId: string) => Promise<void>;
+  ) => Promise<OperationResult>;
+
+  onCancelRestCompensation: (
+    compensationId: string,
+  ) => Promise<OperationResult>;
   onEdit: (shift: Shift) => void;
   onDelete: (shift: Shift) => void;
 };

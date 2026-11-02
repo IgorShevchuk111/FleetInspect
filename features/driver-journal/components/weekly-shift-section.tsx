@@ -2,7 +2,7 @@
 
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
-
+import type { OperationResult } from '@/features/driver-journal/hooks/use-driver-journal';
 import type { Shift } from '@/features/driver-journal/types/driver-journal';
 
 import type { RestCompensation } from '../services/driver-journal';
@@ -25,8 +25,11 @@ type WeeklyShiftSectionProps = {
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
-  ) => Promise<void>;
-  onCancelRestCompensation: (compensationId: string) => Promise<void>;
+  ) => Promise<OperationResult>;
+
+  onCancelRestCompensation: (
+    compensationId: string,
+  ) => Promise<OperationResult>;
 };
 
 export function WeeklyShiftSection({

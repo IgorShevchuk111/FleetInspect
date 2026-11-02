@@ -220,6 +220,10 @@ const uk: Record<TranslationKey, string> = {
     confirm: 'Підтвердити',
     restStartTime: 'Початок відпочинку',
     workStartTime: 'Початок роботи',
+    shiftDeletedSuccessfully: 'Зміну успішно видалено',
+    shiftAddedSuccessfully: 'Зміну успішно додано',
+    shiftUpdatedSuccessfully: 'Зміну успішно оновлено',
+    failedToSaveShift: 'Не вдалося зберегти зміну. Спробуйте ще раз.'
 };
 
 export default uk;

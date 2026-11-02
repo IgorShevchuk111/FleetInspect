@@ -216,6 +216,10 @@ const en = {
     confirm: 'Confirm',
     restStartTime: 'Rest start time',
     workStartTime: 'Work start time',
+    shiftDeletedSuccessfully: 'Shift deleted successfully',
+    shiftAddedSuccessfully: 'Shift added successfully',
+    shiftUpdatedSuccessfully: 'Shift updated successfully',
+    failedToSaveShift: 'Failed to save shift. Please try again.'
 } as const;
 
 export default en;

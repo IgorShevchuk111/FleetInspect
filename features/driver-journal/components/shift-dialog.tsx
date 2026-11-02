@@ -1,4 +1,5 @@
 'use client';
+import type { OperationResult } from '@/features/driver-journal/hooks/use-driver-journal';
 
 import {
   AlertDialog,
@@ -39,8 +40,8 @@ type ShiftDialogProps = {
   shifts?: Shift[];
   restCompensations?: RestCompensation[];
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: ShiftFormData) => void;
-  onDelete?: () => void;
+  onSubmit: (data: ShiftFormData) => Promise<OperationResult>;
+  onDelete?: () => Promise<OperationResult>;
 };
 
 export function ShiftDialog({
@@ -72,6 +73,8 @@ export function ShiftDialog({
     hasSelectedRestType,
     isRestTypeDialogOpen,
     isDeleteConfirmOpen,
+    isSubmitting,
+    isDeleting,
     setIsRestTypeDialogOpen,
     setIsDeleteConfirmOpen,
     handleStartDateChange,
@@ -104,6 +107,10 @@ export function ShiftDialog({
       <Dialog
         open={open}
         onOpenChange={(nextOpen) => {
+          if (!nextOpen && (isSubmitting || isDeleting)) {
+            return;
+          }
+
           if (!nextOpen) {
             setIsRestTypeDialogOpen(false);
           }
@@ -204,13 +211,9 @@ export function ShiftDialog({
                 <Button
                   type="button"
                   variant="ghost"
+                  disabled={isSubmitting || isDeleting}
                   onClick={() => setIsDeleteConfirmOpen(true)}
-                  className="
-                    min-h-10 text-danger
-                    hover:bg-danger/10 hover:text-danger
-                    dark:text-danger dark:hover:bg-danger/20
-                    dark:hover:text-danger
-                  "
+                  className="min-h-10 text-danger"
                 >
                   <Trash2 className="size-4" />
                   {t('delete')}
@@ -220,6 +223,7 @@ export function ShiftDialog({
               <Button
                 type="button"
                 variant="outline"
+                disabled={isSubmitting || isDeleting}
                 onClick={handleCancel}
                 className="min-h-10 min-w-20"
               >
@@ -229,13 +233,19 @@ export function ShiftDialog({
               <Button
                 type="submit"
                 disabled={
+                  isSubmitting ||
+                  isDeleting ||
                   hasUnfinishedPreviousShift ||
                   isWeeklyRestBlocked ||
                   (!isEditing && !hasSelectedRestType)
                 }
                 className="min-h-10 min-w-28"
               >
-                {isEditing ? t('saveChanges') : t('addShift')}
+                {isSubmitting
+                  ? 'Saving...'
+                  : isEditing
+                    ? t('saveChanges')
+                    : t('addShift')}
               </Button>
             </DialogFooter>
           </form>
@@ -252,7 +262,13 @@ export function ShiftDialog({
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={setIsDeleteConfirmOpen}
+        onOpenChange={(nextOpen) => {
+          if (isDeleting) {
+            return;
+          }
+
+          setIsDeleteConfirmOpen(nextOpen);
+        }}
       >
         <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <AlertDialogHeader>

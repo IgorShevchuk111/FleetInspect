@@ -2,6 +2,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
+import type { OperationResult } from '@/features/driver-journal/hooks/use-driver-journal';
 
 import type { RestCompensation } from '@/features/driver-journal/services/driver-journal';
 import {
@@ -29,8 +32,8 @@ type ShiftDialogProps = {
     shifts: Shift[];
     restCompensations: RestCompensation[];
     onOpenChange: (open: boolean) => void;
-    onSubmit: (data: ShiftFormData) => void;
-    onDelete?: () => void;
+    onSubmit: (data: ShiftFormData) => Promise<OperationResult>;
+    onDelete?: () => Promise<OperationResult>;
 };
 
 const DAILY_DRIVING_LIMIT = 9 * 60;
@@ -38,6 +41,8 @@ const EXTENDED_DAILY_DRIVING_LIMIT = 10 * 60;
 const REGULAR_SHIFT_SPREAD = 13 * 60;
 const MAX_SHIFT_SPREAD = 15 * 60;
 const MAX_EXTENDED_DRIVING_DAYS = 2;
+
+
 
 function getTodayDate() {
     const today = new Date();
@@ -129,11 +134,13 @@ export function useShiftDialog({
     onSubmit,
     onDelete,
 }: ShiftDialogProps) {
+    const { t } = useTranslations();
     const [form, setForm] = useState<ShiftFormData>(getInitialForm());
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isRestTypeDialogOpen, setIsRestTypeDialogOpen] = useState(false);
     const [hasSelectedRestType, setHasSelectedRestType] = useState(false);
-
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const isEditing = Boolean(shift);
 
     useEffect(() => {
@@ -384,8 +391,12 @@ export function useShiftDialog({
         }
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (isSubmitting || isDeleting) {
+            return;
+        }
 
         if (hasUnfinishedPreviousShift) {
             return;
@@ -396,32 +407,73 @@ export function useShiftDialog({
             return;
         }
 
-        if (
-            form.restType === 'weekly' &&
-            !weeklyRestValidation.valid
-        ) {
+        if (form.restType === 'weekly' && !weeklyRestValidation.valid) {
             return;
         }
 
-        onSubmit(form);
+        setIsSubmitting(true);
+
+        try {
+            const result = await onSubmit(form);
+
+            if (result.success === false) {
+                toast.error(result.error);
+                return;
+            }
+            toast.success(
+                isEditing
+                    ? t('shiftUpdatedSuccessfully')
+                    : t('shiftAddedSuccessfully')
+            );
+
+            onOpenChange(false);
+        } catch (error) {
+            console.error('Failed to submit driver journal shift:', error);
+            toast.error(t('failedToSaveShift'));
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleDelete() {
+
+        if (!onDelete || isDeleting || isSubmitting) {
+            return;
+        }
+
+        setIsDeleting(true);
+
+        try {
+            const result = await onDelete();
+
+            if (result.success === false) {
+                toast.error(result.error);
+                return;
+            }
+
+            setIsDeleteConfirmOpen(false);
+            toast.success(t('shiftDeletedSuccessfully'));
+            onOpenChange(false);
+        } catch (error) {
+            console.error('Failed to delete driver journal shift:', error);
+            toast.error('Failed to delete shift. Please try again.');
+        } finally {
+            setIsDeleting(false);
+        }
     }
 
     function handleCancel() {
+        if (isSubmitting || isDeleting) {
+            return;
+        }
+
         setForm(getInitialForm());
         setIsRestTypeDialogOpen(false);
         setHasSelectedRestType(false);
         onOpenChange(false);
     }
 
-    function handleDelete() {
-        if (!onDelete) {
-            return;
-        }
 
-        onDelete();
-        setIsDeleteConfirmOpen(false);
-        onOpenChange(false);
-    }
 
     const isWeeklyRestBlocked =
         form.restType === 'weekly' &&
@@ -445,6 +497,8 @@ export function useShiftDialog({
         hasSelectedRestType,
         isRestTypeDialogOpen,
         isDeleteConfirmOpen,
+        isSubmitting,
+        isDeleting,
         setIsRestTypeDialogOpen,
         setIsDeleteConfirmOpen,
         handleStartDateChange,
@@ -461,6 +515,6 @@ export function useShiftDialog({
         handleRestTypeSelection,
         handleSubmit,
         handleCancel,
-        handleDelete,
+        handleDelete
     };
 }

@@ -1,10 +1,11 @@
 'use client';
 
 import { useDriverJournal } from '@/features/driver-journal/hooks/use-driver-journal';
-
+import { useTranslations } from '@/features/driver-journal/i18n/use-translations';
 import { JournalHeader } from '@/features/driver-journal/components/journal-header';
 import { ShiftDialog } from '@/features/driver-journal/components/shift-dialog';
 import { ShiftsTable } from '@/features/driver-journal/components/shifts-table';
+import { toast } from 'sonner';
 
 export default function DriverJournalPage() {
   const {
@@ -22,6 +23,8 @@ export default function DriverJournalPage() {
     deleteShift,
   } = useDriverJournal();
 
+  const { t } = useTranslations();
+
   const handleCloseShiftDialog = (open: boolean) => {
     if (open) {
       return;
@@ -31,8 +34,15 @@ export default function DriverJournalPage() {
     cancelEditingShift();
   };
 
-  const handleDeleteShift = (shift: { id: string }) => {
-    deleteShift(shift.id);
+  const handleDeleteShift = async (shift: { id: string }) => {
+    const result = await deleteShift(shift.id);
+
+    if (result.success === false) {
+      toast.error(result.error);
+      return;
+    }
+
+    toast.success(t('shiftDeletedSuccessfully'));
   };
 
   return (

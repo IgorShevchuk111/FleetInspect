@@ -12,6 +12,7 @@ import {
   Moon,
   Pencil,
 } from 'lucide-react';
+import type { OperationResult } from '@/features/driver-journal/hooks/use-driver-journal';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -50,13 +51,16 @@ type ShiftDetailsDialogProps = {
   restCompensations?: RestCompensation[];
   onEdit: (shift: Shift) => void;
   onDelete: (shift: Shift) => void;
-  onAcceptRestCompensation?: (
+  onAcceptRestCompensation: (
     reducedWeeklyRestShiftId: string,
     compensationShiftId: string,
     dailyRestMinutes: number,
     compensationMinutes: number,
-  ) => Promise<void>;
-  onCancelRestCompensation?: (compensationId: string) => Promise<void>;
+  ) => Promise<OperationResult>;
+
+  onCancelRestCompensation: (
+    compensationId: string,
+  ) => Promise<OperationResult>;
 };
 
 function formatDate(value: string) {
