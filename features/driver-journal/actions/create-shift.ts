@@ -4,7 +4,17 @@
 import { createClient } from '@/lib/supabase/server';
 
 type CreateShiftResult =
-    | { success: true; shift: { id: string; date: string; start: string } }
+    | {
+        success: true;
+        shift: {
+            id: string;
+            date: string;
+            start: string;
+            end: string | null;
+            end_date: string | null;
+            rest_type: string;
+        };
+    }
     | { success: false; error: string };
 
 export async function createShiftAction(
@@ -15,12 +25,13 @@ export async function createShiftAction(
         return { success: false, error: 'Invalid shift date.' };
     }
 
-    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(start)) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(start)) {
         return { success: false, error: 'Invalid start time.' };
     }
 
     try {
         const supabase = await createClient();
+
         const {
             data: { user },
             error: authError,
@@ -67,7 +78,7 @@ export async function createShiftAction(
                 end: null,
                 earn: 0,
             })
-            .select('id, date, start')
+            .select('id, date, start, end, end_date, rest_type')
             .single();
 
         if (error) {

@@ -83,6 +83,7 @@ export function TimeDialog({
   // State
   const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState(format(new Date(), 'HH:mm'));
+  const [exactNow, setExactNow] = useState(true);
   const [restOptions, setRestOptions] =
     useState<RestOptions>(INITIAL_REST_OPTIONS);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,6 +96,7 @@ export function TimeDialog({
 
     setDate(now);
     setTime(format(now, 'HH:mm'));
+    setExactNow(true);
     setRestOptions({ ...INITIAL_REST_OPTIONS });
   }, [open, mode]);
 
@@ -105,9 +107,17 @@ export function TimeDialog({
     setIsSubmitting(true);
 
     try {
+      const now = new Date();
+
+      const isCurrentDate =
+        format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+
+      const selectedTime =
+        exactNow && isCurrentDate ? format(now, 'HH:mm:ss') : `${time}:00`;
+
       const success = await onConfirm(
         format(date, 'yyyy-MM-dd'),
-        time,
+        selectedTime,
         mode === 'rest' ? restOptions : undefined,
       );
 
@@ -174,7 +184,10 @@ export function TimeDialog({
             <Input
               type="time"
               value={time}
-              onChange={(event) => setTime(event.target.value)}
+              onChange={(event) => {
+                setTime(event.target.value);
+                setExactNow(false);
+              }}
               required
               disabled={isSubmitting}
             />

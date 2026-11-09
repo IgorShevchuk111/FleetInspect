@@ -45,3 +45,22 @@ export function formatDuration(
     return `${Math.floor(minutes / 60)}h ${minutes % 60
         }m`;
 }
+
+
+
+export const formatTimer = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+export function formatHoursMinutes(totalMinutes: number): string {
+    const minutes = Math.max(0, Math.round(totalMinutes));
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    return `${hours}:${String(remainingMinutes).padStart(2, '0')}`;
+}

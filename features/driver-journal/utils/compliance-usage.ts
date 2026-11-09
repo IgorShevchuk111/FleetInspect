@@ -27,7 +27,7 @@ const MINIMUM_REDUCED_DAILY_REST_MINUTES = 9 * 60;
 /**
  * Returns the Monday date for the fixed Monday–Sunday week.
  */
-function getFixedWeekKey(dateString: string) {
+export function getFixedWeekKey(dateString: string) {
     const date = new Date(`${dateString}T12:00:00`);
 
     if (Number.isNaN(date.getTime())) {

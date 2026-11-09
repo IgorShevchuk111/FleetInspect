@@ -1,3 +1,4 @@
+
 export function getStartOfWeek(date: Date): Date {
     const result = new Date(date);
 
@@ -34,6 +35,17 @@ function formatDate(date: Date): string {
     }).format(date);
 }
 
+export function formatDateTime(date: Date, locale: string): string {
+    return new Intl.DateTimeFormat(locale, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    }).format(date);
+}
+
 export function parseDateTime(
     date: string,
     time: string,
@@ -58,11 +70,5 @@ export function parseDateTime(
         return new Date(NaN);
     }
 
-    return new Date(
-        year,
-        month - 1,
-        day,
-        hours,
-        minutes,
-    );
+    return new Date(year, month - 1, day, hours, minutes);
 }
